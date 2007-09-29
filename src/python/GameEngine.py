@@ -8,7 +8,7 @@ class GameEngine:
         self._units.append(unit)
 
     def get_units(self):
-        return self._units.__iter__()
+        return iter(self._units)
 
     units = property(get_units)
 
