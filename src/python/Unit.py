@@ -1,3 +1,4 @@
+from __future__ import division
 from Vector2 import Vector2
 
 def generate_num():
@@ -31,6 +32,9 @@ class Unit(object):
         return self._velocity
 
     def set_velocity(self, velocity):
+        max_velocity = self.max_velocity
+        if velocity.sqabs() > max_velocity * max_velocity:
+            velocity = velocity * max_velocity / abs(velocity)
         self._velocity = velocity
 
     velocity = property(get_velocity, set_velocity)

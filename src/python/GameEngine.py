@@ -32,5 +32,5 @@ class GameEngine:
             self._update_step(self._time_step)
             self._last_update = self._last_update + self._time_step
 
-    def find_units(self, center, radius):
-        return self._partitioner.find_units(center, radius)
+    def find_units(self, shape):
+        return self._partitioner.find_units(shape)

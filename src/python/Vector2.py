@@ -25,7 +25,7 @@ class Vector2(object):
         return Vector2(-self._x, -self._y)
 
     def __abs__(self):
-        return sqrt(self.sqabs())
+        return math.sqrt(self.sqabs())
 
     def get_x(self):
         return self._x

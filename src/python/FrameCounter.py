@@ -12,9 +12,9 @@ class FrameCounter(object):
             self._old_count = self._count
             self._count = 0
             self._old_time = time
+            print "Drawing %d frame(s) per second." % self._old_count
 
     def get_count(self):
         return self._old_count
 
     count = property(get_count)
-        

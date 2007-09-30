@@ -3,6 +3,7 @@ import pygame, sys, os
 from pygame.locals import *
 import math, random
 
+from Circle2 import Circle2
 from Vector2 import Vector2
 from FrameCounter import FrameCounter
 from Warrior import Warrior
@@ -34,7 +35,7 @@ game = GameEngine(get_time())
 for i in range(20):
     unit = Warrior()
     unit.pos = pick_pos()
-    unit.velocity = pick_direction()
+    unit.velocity = pick_direction() * unit.max_velocity
     game.add_unit(unit)
             
 def to_screen_pos(pos, screen_size):
@@ -54,7 +55,7 @@ def is_x_and_y_less_or_equal(p, q):
 def log_click(clicked_unit):
     if clicked_unit != None:
         message = "Clicked unit #%d" % clicked_unit.num
-        found_units = game.find_units(clicked_unit.pos, 5.0)
+        found_units = game.find_units(Circle2(clicked_unit.pos, 5.0))
         if len(found_units) > 1:
             found_units.remove(clicked_unit)
             message += (", which is close to unit(s) %s"
@@ -102,6 +103,4 @@ while True:
     handle_events(pygame.event.get())
     game.update(get_time())
     redraw_screen(screen, game)
-
     frame_counter.increment()
-    print "Drawing %d frame(s) per second." % frame_counter.count
