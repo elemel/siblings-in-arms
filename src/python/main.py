@@ -1,9 +1,10 @@
 from __future__ import division
 import pygame, sys, os
 from pygame.locals import *
-import random
-from Vector2 import Vector2
+import math, random
 
+from Vector2 import Vector2
+from FrameCounter import FrameCounter
 from Warrior import Warrior
 from GameEngine import GameEngine
  
@@ -22,18 +23,18 @@ def pick_pos():
     return Vector2(-12.0 + 24.0 * random.random(),
                    -8.0 + 16.0 * random.random())
 
-def pick_velocity():
-    return Vector2(-1.0 + 2.0 * random.random(),
-                   -1.0 + 2.0 * random.random())
+def pick_direction():
+    angle = random.random() * 2.0 * math.pi
+    return Vector2(math.cos(angle), math.sin(angle))
 
 def get_time():
     return float(pygame.time.get_ticks()) / 1000.0
 
 game = GameEngine(get_time())
-for i in range(50):
+for i in range(20):
     unit = Warrior()
     unit.pos = pick_pos()
-    unit.velocity = pick_velocity()
+    unit.velocity = pick_direction()
     game.add_unit(unit)
             
 def to_screen_pos(pos, screen_size):
@@ -50,6 +51,17 @@ def get_top_left(center, rect_size):
 def is_x_and_y_less_or_equal(p, q):
     return p[0] <= q[0] and p[1] <= q[1]
 
+def log_click(clicked_unit):
+    if clicked_unit != None:
+        message = "Clicked unit #%d" % clicked_unit.num
+        found_units = game.find_units(clicked_unit.pos, 5.0)
+        if len(found_units) > 1:
+            found_units.remove(clicked_unit)
+            message += (", which is close to unit(s) %s"
+                        % (", ".join(map(lambda unit: "#" + str(unit.num),
+                                         found_units))))
+        print message + "."
+
 def handle_click(event):
     screen_size = screen.get_size()
     surface_size = warrior_surface.get_size()
@@ -63,8 +75,7 @@ def handle_click(event):
             and is_x_and_y_less_or_equal(event.pos, lower_right)
             and (clicked_unit == None or unit.pos.y < clicked_unit.pos.y)):
             clicked_unit = unit
-    if clicked_unit != None:
-        print "Clicked unit #%d." % clicked_unit.num
+    log_click(clicked_unit)
 
 def handle_events(events):
     for event in events: 
@@ -80,23 +91,17 @@ def get_sorted_units(game):
 
 def redraw_screen(screen, game):
     screen.fill(pygame.color.Color('gold'))
-    
     for unit in get_sorted_units(game):
         screen_pos = to_screen_pos(unit.pos, screen.get_size())
         top_left = get_top_left(screen_pos, warrior_surface.get_size())
         screen.blit(warrior_surface, top_left)
     pygame.display.flip()
 
-old_ticks = pygame.time.get_ticks()
-frame_count = 0
+frame_counter = FrameCounter(lambda: float(pygame.time.get_ticks()) / 1000.0)
 while True:
     handle_events(pygame.event.get())
     game.update(get_time())
     redraw_screen(screen, game)
 
-    ticks = pygame.time.get_ticks()
-    frame_count = frame_count + 1
-    if ticks // 1000 != old_ticks // 1000:
-        print "Drawing %d frames per second." % frame_count
-        old_ticks = ticks
-        frame_count = 0
+    frame_counter.increment()
+    print "Drawing %d frame(s) per second." % frame_counter.count

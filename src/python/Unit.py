@@ -36,6 +36,6 @@ class Unit(object):
     velocity = property(get_velocity, set_velocity)
 
     def get_max_velocity(self):
-        return self._max_velocity
+        return 0.0
 
     max_velocity = property(get_max_velocity)

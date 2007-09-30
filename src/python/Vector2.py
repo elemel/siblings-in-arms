@@ -30,18 +30,12 @@ class Vector2(object):
     def get_x(self):
         return self._x
 
-    def set_x(self, x):
-        self._x = float(x)
-        
-    x = property(get_x, set_x)
+    x = property(get_x)
 
     def get_y(self):
         return self._y
-
-    def set_y(self, y):
-        self._y = float(y)
         
-    y = property(get_y, set_y)
+    y = property(get_y)
 
     def sqabs(self):
         return self._x * self._x + self._y * self._y
