@@ -1,4 +1,5 @@
 from Creature import Creature
 
 class Warrior(Creature):
-    pass
+    def get_max_velocity(self):
+        return 3.0
