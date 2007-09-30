@@ -24,4 +24,4 @@ class Circle2(object):
     bounding_box = property(get_bounding_box)
 
     def contains_point(self, point):
-        return point.sqdist(self.center) <= self._radius * self._radius
+        return point.squared_dist(self.center) <= self._radius * self._radius
