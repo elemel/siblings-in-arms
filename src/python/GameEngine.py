@@ -1,6 +1,9 @@
+from __future__ import division
 from AreaPartitioner import AreaPartitioner
+from Circle2 import Circle2
+from Vector2 import Vector2
 
-DEFAULT_TIME_STEP = 0.01
+DEFAULT_TIME_STEP = 0.02 # 50 FPS
 
 class GameEngine:
     def __init__(self, start_time, time_step = DEFAULT_TIME_STEP):
@@ -20,7 +23,24 @@ class GameEngine:
     units = property(get_units)
 
     def _update_unit(self, unit, dt):
-        unit.pos = unit.pos + unit.velocity * dt
+        found_units = self.find_units(Circle2(unit.pos, 5.0))
+        found_units.remove(unit)
+
+        if abs(unit.velocity) == 0.0:
+            acceleration = Vector2()
+        else:
+            acceleration = -3.0 * unit.velocity / abs(unit.velocity)
+
+        for other in found_units:
+            dist = abs(unit.pos - other.pos)
+            if dist <= 2.0:
+                acceleration += 10.0 * (unit.pos - other.pos) / (dist * dist)
+        if abs(acceleration) > unit.max_acceleration:
+            acceleration = (unit.max_acceleration
+                            * acceleration / abs(acceleration))
+
+        unit.velocity += acceleration * dt
+        unit.pos += unit.velocity * dt
         self._partitioner.update_unit(unit)
 
     def _update_step(self, dt):
@@ -30,7 +50,7 @@ class GameEngine:
     def update(self, time):
         while self._last_update + self._time_step < time:
             self._update_step(self._time_step)
-            self._last_update = self._last_update + self._time_step
+            self._last_update += self._time_step
 
     def find_units(self, shape):
         return self._partitioner.find_units(shape)

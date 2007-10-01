@@ -43,3 +43,8 @@ class Unit(object):
         return 0.0
 
     max_velocity = property(get_max_velocity)
+
+    def get_max_acceleration(self):
+        return 0.0
+
+    max_acceleration = property(get_max_acceleration)
