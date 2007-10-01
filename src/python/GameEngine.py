@@ -3,10 +3,12 @@ from AreaPartitioner import AreaPartitioner
 from Circle2 import Circle2
 from Vector2 import Vector2
 
-DEFAULT_TIME_STEP = 0.02 # 50 FPS
-
 class GameEngine:
-    def __init__(self, start_time, time_step = DEFAULT_TIME_STEP):
+    DEFAULT_TIME_STEP = 0.02 # 50 FPS
+
+    def __init__(self, start_time, time_step = None):
+        if time_step == None:
+            time_step = self.DEFAULT_TIME_STEP
         self._last_update = start_time
         self._time_step = time_step
         
@@ -48,9 +50,12 @@ class GameEngine:
             self._update_unit(unit, dt)
 
     def update(self, time):
-        while self._last_update + self._time_step < time:
+        if self._last_update + self._time_step < time:
             self._update_step(self._time_step)
             self._last_update += self._time_step
+            if self._last_update + self._time_step < time:
+                self._last_update = time
+                print "Skipped updates."
 
     def find_units(self, shape):
         return self._partitioner.find_units(shape)

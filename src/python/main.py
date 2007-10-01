@@ -15,7 +15,8 @@ window = pygame.display.set_mode((640, 480))
 pygame.display.set_caption('Siblings in Arms') 
 screen = pygame.display.get_surface() 
 
-PIXELS_PER_METER = 20.0
+PIXELS_PER_METER_X = 20.0
+PIXELS_PER_METER_Y = 15.0
 
 warrior_path = os.path.join('data', 'warrior.png')
 warrior_surface = pygame.image.load(warrior_path)
@@ -39,12 +40,12 @@ for i in range(20):
     game.add_unit(unit)
             
 def to_screen_pos(pos, screen_size):
-    return (screen_size[0] // 2 + int(pos.x * PIXELS_PER_METER),
-            screen_size[1] // 2 - int(pos.y * PIXELS_PER_METER))
+    return (screen_size[0] // 2 + int(pos.x * PIXELS_PER_METER_X),
+            screen_size[1] // 2 - int(pos.y * PIXELS_PER_METER_Y))
 
 def to_world_pos(pos, screen_size):
-    return Vector2(float((pos[0] - screen_size[0] // 2) / PIXELS_PER_METER),
-                   float((pos[1] - screen_size[1] // 2) / PIXELS_PER_METER))
+    return Vector2(float((pos[0] - screen_size[0] // 2) / PIXELS_PER_METER_X),
+                   float((pos[1] - screen_size[1] // 2) / PIXELS_PER_METER_Y))
 
 def get_top_left(center, rect_size):
     return center[0] - rect_size[0] // 2, center[1] - rect_size[1] // 2
