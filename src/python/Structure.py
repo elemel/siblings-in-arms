@@ -1,4 +1,4 @@
 from Thing import Thing
 
-class Unit(Thing):
+class Structure(Thing):
     pass

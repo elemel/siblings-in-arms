@@ -1,4 +1,4 @@
 from Unit import Unit
 
-class Creature(Unit):
+class Hero(Unit):
     pass

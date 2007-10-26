@@ -1,0 +1,5 @@
+using python ;
+
+use-project /boost : /usr/local/share/boost ;
+
+build-project src/cpp/siblings ;
