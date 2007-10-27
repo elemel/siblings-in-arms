@@ -6,9 +6,30 @@ using namespace siblings;
 using namespace boost::python;
 
 namespace {
-    std::string repr_vector_2(const vector_2& v) {
+    real get_vector_2_x(const vector_2& v)
+    {
+        return v.x();
+    }
+
+    void set_vector_2_x(vector_2& v, real x)
+    {
+        v.x() = x;
+    }
+
+    real get_vector_2_y(const vector_2& v)
+    {
+        return v.y();
+    }
+
+    void set_vector_2_y(vector_2& v, real y)
+    {
+        v.y() = y;
+    }
+
+    std::string repr_vector_2(const vector_2& v)
+    {
         std::ostringstream out;
-        out << "Vector2(" << v.x << ", " << v.y << ")";
+        out << "Vector2(" << v.x() << ", " << v.y() << ")";
         return out.str();
     }
 }
@@ -22,8 +43,8 @@ BOOST_PYTHON_MODULE(Vector2)
         .def(init<real, real>())
 
         // attributes
-        .def_readwrite("x", &vector_2::x)
-        .def_readwrite("y", &vector_2::y)
+        .add_property("x", &get_vector_2_x, &set_vector_2_x)
+        .add_property("y", &get_vector_2_y, &set_vector_2_y)
         .add_property("squared_length", &vector_2::squared_length)
         .add_property("length", &vector_2::length)
 

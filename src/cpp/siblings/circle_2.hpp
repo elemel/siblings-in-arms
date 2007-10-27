@@ -11,8 +11,8 @@ namespace siblings {
         circle_2();
         circle_2(const vector_2& center, real radius);
 
-        const vector_2& center() const;
-        real radius() const;
+        inline const vector_2& center() const { return center_; }
+        inline real radius() const { return radius_; }
 
     private:
         vector_2 center_;

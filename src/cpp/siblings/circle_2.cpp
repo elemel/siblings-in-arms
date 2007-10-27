@@ -10,12 +10,9 @@ namespace siblings {
           radius_(std::abs(radius))
     { }
 
-    const vector_2& circle_2::center() const { return center_; }
-    real circle_2::radius() const { return radius_; }
-
     std::ostream& operator<<(std::ostream& out, const circle_2& c)
     {
-        return out << "((" << c.center().x << ", " << c.center().y << "); "
+        return out << "((" << c.center().x() << ", " << c.center().y() << "); "
                    << c.radius() << ")";
     }
 }

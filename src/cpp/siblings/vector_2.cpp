@@ -4,46 +4,46 @@
 
 namespace siblings {
     vector_2::vector_2()
-        : x(),
-          y()
+        : x_(0),
+          y_(0)
     { }
 
     vector_2::vector_2(real x, real y)
-        : x(x),
-          y(y)
+        : x_(x),
+          y_(y)
     { }
 
     vector_2& vector_2::operator+=(const vector_2& other)
     {
-        x += other.x;
-        y += other.y;
+        x_ += other.x_;
+        y_ += other.y_;
         return *this;
     }
 
     vector_2& vector_2::operator-=(const vector_2& other)
     {
-        x -= other.x;
-        y -= other.y;
+        x_ -= other.x_;
+        y_ -= other.y_;
         return *this;
     }
 
     vector_2& vector_2::operator*=(real other)
     {
-        x *= other;
-        y *= other;
+        x_ *= other;
+        y_ *= other;
         return *this;
     }
     
     vector_2& vector_2::operator/=(real other)
     {
-        x /= other;
-        y /= other;
+        x_ /= other;
+        y_ /= other;
         return *this;
     }
 
     real vector_2::squared_length() const
     {
-        return x * x + y * y;
+        return x_ * x_ + y_ * y_;
     }
 
     real vector_2::length() const
@@ -53,7 +53,7 @@ namespace siblings {
 
     vector_2 operator-(const vector_2& v)
     {
-        return vector_2(-v.x, -v.y);
+        return vector_2(-v.x(), -v.y());
     }
 
     vector_2 operator+(const vector_2& left, const vector_2& right)
@@ -83,7 +83,7 @@ namespace siblings {
 
     std::ostream& operator<<(std::ostream& out, const vector_2& v)
     {
-        return out << '[' << v.x << ',' << ' ' << v.y << ']';
+        return out << '[' << v.x() << ',' << ' ' << v.y() << ']';
     }
 
     real abs(const vector_2& v)
@@ -93,11 +93,11 @@ namespace siblings {
 
     real dot(const vector_2& a, const vector_2& b)
     {
-        return a.x * b.x + a.y * b.y;
+        return a.x() * b.x() + a.y() * b.y();
     }
 
     real cross(const vector_2& a, const vector_2& b)
     {
-        return a.x * b.y - a.y * b.x;
+        return a.x() * b.y() - a.y() * b.x();
     }
 }

@@ -7,9 +7,6 @@
 namespace siblings {
     class vector_2 {
     public:
-        real x;
-        real y;
-
         vector_2();
         vector_2(real x, real y);
 
@@ -18,8 +15,16 @@ namespace siblings {
         vector_2& operator*=(real other);
         vector_2& operator/=(real other);
 
+        inline real& x() { return x_; }
+        inline real& y() { return y_; }
+        inline real x() const { return x_; }
+        inline real y() const { return y_; }
         real squared_length() const;
         real length() const;
+
+    private:
+        real x_;
+        real y_;
     };
 
     vector_2 operator-(const vector_2& v);

@@ -32,13 +32,13 @@ namespace siblings {
 
     real squared_distance(const rectangle_2& r, const vector_2& v)
     {
-        return square(max_3(r.min_x() - v.x, v.x - r.max_x(), real(0)))
-            + square(max_3(r.min_y() - v.y, v.y - r.max_y(), real(0)));
+        return square(max_3(r.min_x() - v.x(), v.x() - r.max_x(), real(0)))
+            + square(max_3(r.min_y() - v.y(), v.y() - r.max_y(), real(0)));
     }
 
     real squared_distance(const vector_2& a, const vector_2& b)
     {
-        return square(a.x - b.x) + square(a.y - b.y);
+        return square(a.x() - b.x()) + square(a.y() - b.y());
     }
 
     bool contains(const circle_2& outer, const vector_2& inner)
@@ -49,8 +49,8 @@ namespace siblings {
 
     bool contains(const rectangle_2& outer, const vector_2& inner)
     {
-        return outer.min_x() <= inner.x and inner.x <= outer.max_x()
-                and outer.min_y() <= inner.y and inner.y <= outer.max_y();
+        return outer.min_x() <= inner.x() and inner.x() <= outer.max_x()
+                and outer.min_y() <= inner.y() and inner.y() <= outer.max_y();
     }
 
     bool intersects(const circle_2& a, const circle_2& b)
