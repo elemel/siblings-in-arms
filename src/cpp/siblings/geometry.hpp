@@ -14,7 +14,11 @@ namespace siblings {
     real squared_distance(const rectangle_2&, const vector_2&);
     real squared_distance(const vector_2&, const vector_2&);
 
+    bool contains(const circle_2& outer, const circle_2& inner);
+    bool contains(const circle_2& outer, const rectangle_2& inner);
     bool contains(const circle_2& outer, const vector_2& inner);
+    bool contains(const rectangle_2& outer, const circle_2& inner);
+    bool contains(const rectangle_2& outer, const rectangle_2& inner);
     bool contains(const rectangle_2& outer, const vector_2& inner);
 
     bool intersects(const circle_2&, const circle_2&);

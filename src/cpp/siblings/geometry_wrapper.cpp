@@ -30,7 +30,11 @@ BOOST_PYTHON_MODULE(geometry)
     def("distance", distance<vector_2, rectangle_2>);
     def("distance", distance<vector_2, vector_2>);
 
+    def("contains", (bool (*)(c, c)) &contains);
+    def("contains", (bool (*)(c, r)) &contains);
     def("contains", (bool (*)(c, v)) &contains);
+    def("contains", (bool (*)(r, c)) &contains);
+    def("contains", (bool (*)(r, r)) &contains);
     def("contains", (bool (*)(r, v)) &contains);
 
     def("intersects", (bool (*)(c, c)) &intersects);
