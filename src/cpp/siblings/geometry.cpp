@@ -78,8 +78,8 @@ namespace siblings {
 
     bool contains(const rectangle_2& outer, const vector_2& inner)
     {
-        return outer.min_x() <= inner.x() and inner.x() <= outer.max_x()
-                and outer.min_y() <= inner.y() and inner.y() <= outer.max_y();
+        return outer.min_x() <= inner.x() && inner.x() <= outer.max_x()
+                && outer.min_y() <= inner.y() && inner.y() <= outer.max_y();
     }
 
     bool intersects(const circle_2& a, const circle_2& b)
