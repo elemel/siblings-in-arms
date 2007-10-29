@@ -1,5 +1,12 @@
+import os ;
 using python ;
 
-use-project /boost : /usr/local/share/boost ;
+local BOOST_ROOT = [ os.environ BOOST_ROOT ] ; 
+if $(BOOST_ROOT) = ""
+{
+    BOOST_ROOT = "/usr/local/share/boost" ;
+}
+
+use-project /boost : $(BOOST_ROOT) ;
 
 build-project src/cpp/siblings ;

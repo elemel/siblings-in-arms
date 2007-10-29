@@ -1,13 +1,15 @@
 python-extension Circle2
-        : circle_2.cpp circle_2_wrapper.cpp vector_2.cpp
-        : <library>/boost/python//boost_python ;
+    : circle_2.cpp circle_2_wrapper.cpp vector_2.cpp
+    : <library>/boost/python//boost_python ;
 
-python-extension geometry : geometry.cpp geometry_wrapper.cpp
-        : <library>/boost/python//boost_python ;
+python-extension geometry
+    : geometry.cpp geometry_wrapper.cpp circle_2.cpp rectangle_2.cpp
+      vector_2.cpp
+    : <library>/boost/python//boost_python ;
 
 python-extension Rectangle2
-        : rectangle_2.cpp rectangle_2_wrapper.cpp vector_2.cpp
-        : <library>/boost/python//boost_python ;
+    : rectangle_2.cpp rectangle_2_wrapper.cpp vector_2.cpp
+    : <library>/boost/python//boost_python ;
 
 python-extension Vector2 : vector_2.cpp vector_2_wrapper.cpp
-        : <library>/boost/python//boost_python ;
+    : <library>/boost/python//boost_python ;
