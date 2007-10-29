@@ -43,13 +43,15 @@ namespace siblings {
 
     bool contains(const circle_2& outer, const circle_2& inner)
     {
-        return outer.radius() <= inner.radius()
+        return inner.radius() <= outer.radius()
             && squared_distance(outer.center(), inner.center())
             <= square(outer.radius() - inner.radius());
     }
 
     bool contains(const circle_2& outer, const rectangle_2& inner)
     {
+        // circle C contains rectangle R if and only if C contains all four
+        // corners of R
         return contains(outer, inner.min()) && contains(outer, inner.max())
             && contains(outer, vector_2(inner.min_x(), inner.max_y()))
             && contains(outer, vector_2(inner.max_x(), inner.min_y()));
@@ -63,6 +65,8 @@ namespace siblings {
 
     bool contains(const rectangle_2& outer, const circle_2& inner)
     {
+        // rectangle R contains circle C if and only if R contains the bounding
+        // box of C
         return outer.min_x() <= inner.center().x() - inner.radius()
             && inner.center().x() + inner.radius() <= outer.max_x()
             && outer.min_y() <= inner.center().y() - inner.radius()
@@ -71,7 +75,8 @@ namespace siblings {
 
     bool contains(const rectangle_2& outer, const rectangle_2& inner)
     {
-        return outer.min_x() <= inner.min_x() && inner.max_x() <= outer.max_x()
+        return outer.min_x() <= inner.min_x()
+            && inner.max_x() <= outer.max_x()
             && outer.min_y() <= inner.min_y()
             && inner.max_y() <= outer.max_y();
     }

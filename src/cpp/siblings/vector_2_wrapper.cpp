@@ -6,27 +6,27 @@ using namespace siblings;
 using namespace boost::python;
 
 namespace {
-    real get_vector_2_x(const vector_2& v)
+    real get_x_wrapper(const vector_2& v)
     {
         return v.x();
     }
 
-    void set_vector_2_x(vector_2& v, real x)
+    void set_x_wrapper(vector_2& v, real x)
     {
         v.x() = x;
     }
 
-    real get_vector_2_y(const vector_2& v)
+    real get_y_wrapper(const vector_2& v)
     {
         return v.y();
     }
 
-    void set_vector_2_y(vector_2& v, real y)
+    void set_y_wrapper(vector_2& v, real y)
     {
         v.y() = y;
     }
 
-    std::string repr_vector_2(const vector_2& v)
+    std::string repr_wrapper(const vector_2& v)
     {
         std::ostringstream out;
         out << "Vector2(" << v.x() << ", " << v.y() << ")";
@@ -43,8 +43,8 @@ BOOST_PYTHON_MODULE(Vector2)
         .def(init<real, real>())
 
         // attributes
-        .add_property("x", &get_vector_2_x, &set_vector_2_x)
-        .add_property("y", &get_vector_2_y, &set_vector_2_y)
+        .add_property("x", &get_x_wrapper, &set_x_wrapper)
+        .add_property("y", &get_y_wrapper, &set_y_wrapper)
         .add_property("squared_length", &vector_2::squared_length)
         .add_property("length", &vector_2::length)
 
@@ -63,7 +63,7 @@ BOOST_PYTHON_MODULE(Vector2)
         // other special methods
         .def(abs(self))
         .def(self_ns::str(self)) // workaround for ADL problems
-        .def("__repr__", &repr_vector_2)
+        .def("__repr__", &repr_wrapper)
 
         // other methods
         .def("dot", &dot)

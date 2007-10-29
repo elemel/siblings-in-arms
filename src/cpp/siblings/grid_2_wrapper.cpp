@@ -26,8 +26,7 @@ BOOST_PYTHON_MODULE(Grid2)
         .def(init<real>())
 
         // methods
-        .def("add", &grid_2::add)
-        .def("update", &grid_2::update)
-        .def("remove", &grid_2::remove)
+        .def("insert", &grid_2::insert)
+        .def("erase", &grid_2::erase)
         .def("find", &find_wrapper);
 }

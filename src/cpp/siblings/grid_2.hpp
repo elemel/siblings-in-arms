@@ -14,9 +14,8 @@ namespace siblings {
     public:
         explicit grid_2(real tile_side = real(1));
 
-        void add(int key, const circle_2& bounds);
-        void update(int key, const circle_2& bounds);
-        void remove(int key);
+        bool insert(int key, const circle_2& bounds);
+        bool erase(int key);
 
         std::vector<int> find(const circle_2& bounds) const;
 
@@ -30,6 +29,9 @@ namespace siblings {
         real tile_side_;
         tile_map tiles_;
         grid_position_map grid_positions_;
+
+        void create_entry(int key, const circle_2& bounds);
+        void update_entry(int key, const circle_2& bounds);
 
         std::vector<grid_position> to_grid_positions(const circle_2& bounds)
             const;
