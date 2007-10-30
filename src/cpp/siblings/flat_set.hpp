@@ -9,7 +9,7 @@
 
 namespace siblings {
     /// The Sequence template argument models Random Access Container and
-    /// Back Insertion Sequence.
+    /// Back Insertion Sequence, as e.g. std::vector does.
     template <typename Key, typename Compare = std::less<Key>,
               typename Sequence = std::vector<Key> >
     class flat_set {
@@ -30,6 +30,7 @@ namespace siblings {
         typedef typename sequence_type::const_reverse_iterator
             const_reverse_iterator;
         typedef const_reverse_iterator reverse_iterator;
+        typedef typename sequence_type::iterator mutable_iterator;
 
         iterator begin() const { return storage_.begin(); }
         iterator end() const { return storage_.end(); }
@@ -47,61 +48,138 @@ namespace siblings {
         { }
 
         template <typename InputIterator>
-        flat_set(InputIterator from, InputIterator to,
+        flat_set(InputIterator first, InputIterator last,
                  const key_compare& comp = key_compare(),
                  const allocator_type& alloc = allocator_type())
             : less_(comp), storage_(alloc)
         {
-            insert(from, to);
+            insert(first, last);
         }
 
         flat_set(const flat_set& other)
-            : storage_(other.storage_), less_(other.less_)
+            : less_(other.less_), storage_(other.storage_)
         { }
 
         flat_set& operator=(const flat_set& other)
         {
-            storage_ = other.storage_;
-            less_ = other.less_;
+            flat_set(other).swap(*this);
         }
 
         void swap(flat_set& other)
         {
-            storage_.swap(other.storage_);
             std::swap(less_, other.less_);
+            storage_.swap(other.storage_);
         }
 
         std::pair<iterator, bool> insert(const value_type& value)
         {
-            if (!storage_.empty() && !less_(value, storage_.back())) {
-                if (less_(storage_.back(), value)) {
-                    storage_.push_back(value);
-                    return std::make_pair(boost::prior(storage_.end()), true);
-                } else {
-                    return std::make_pair(boost::prior(storage_.end()), false);
-                }
-            }
-            typename sequence_type::iterator i
-                = std::lower_bound(storage_.begin(), storage_.end(), value,
-                                   less_);
+            mutable_iterator i = mutable_lower_bound(value);
             if (i == storage_.end() || less_(value, *i)) {
-                return std::make_pair(storage_.insert(i, value), true);
+                i = storage_.insert(i, value);
+                return std::make_pair(i, true);
             } else {
+                // an equivalent key is already present
                 return std::make_pair(i, false);
             }
         }
 
-        template <typename InputIterator>
-        void insert(InputIterator from, InputIterator to)
+        iterator insert(iterator pos, const value_type& value)
         {
-            while (from != to) {
-                insert(*from++);
+            if (empty() || pos == end() && less_(storage_.back(), value)
+                || pos == begin() && less_(value, storage_.front()))
+            {
+                return storage_.insert(pos, value);
+            } else {
+                return insert(value).first;
             }
+        }
+
+        template <typename InputIterator>
+        void insert(InputIterator first, InputIterator last)
+        {
+            while (first != last) {
+                insert(*first++);
+            }
+        }
+
+        void erase(iterator pos)
+        {
+            storage_.erase(pos);
+        }
+
+        size_type erase(const key_type& key)
+        {
+            iterator i = lower_bound(key);
+            if (i == end() || less_(key, *i)) {
+                // nothing to erase
+                return 0;
+            } else {
+                storage_.erase(i);
+                return 1;
+            }
+        }
+
+        void erase(iterator first, iterator last)
+        {
+            storage_.erase(first, last);
+        }
+
+        void clear()
+        {
+            storage_.clear();
+        }
+
+        iterator find(const key_type& key) const
+        {
+            iterator i = lower_bound(key);
+            return (i == end() || less_(key, *i)) ? end() : i;
+        }
+
+        size_type count(const key_type& key)
+        {
+            iterator i = lower_bound(key);
+            return (i == end() || less_(key, *i)) ? 0 : 1;
+        }
+
+        iterator lower_bound(const key_type& key) const
+        {
+            return std::lower_bound(begin(), end(), key, less_);
+        }
+
+        iterator upper_bound(const key_type& key) const
+        {
+            return std::upper_bound(begin(), end(), key, less_);
+        }
+
+        std::pair<iterator, iterator> equal_range(const key_type& key)
+        {
+            iterator i = lower_bound(key);
+            return std::make_pair(i, (i == end()) ? i : boost::next(i));
+        }
+
+        friend bool operator==(const flat_set& left, const flat_set& right)
+        {
+            return left.size() == right.size()
+                && std::equal(left.begin(), left.end(), right.begin(),
+                              left.less_);
+        }
+
+        friend bool operator<(const flat_set& left, const flat_set& right)
+        {
+            return std::lexicographical_compare(left.begin(), left.end(),
+                                                right.begin(), right.end(),
+                                                left.less_);
         }
 
     private:
         key_compare less_;
         sequence_type storage_;
+
+        mutable_iterator mutable_lower_bound(const key_type& key)
+        {
+            return std::lower_bound(storage_.begin(), storage_.end(), key,
+                                    less_);
+        }
     };
 }
 
