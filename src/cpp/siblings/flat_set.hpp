@@ -94,8 +94,7 @@ namespace siblings {
         template <typename InputIterator>
         void insert(InputIterator from, InputIterator to)
         {
-            while (from != to)
-            {
+            while (from != to) {
                 insert(*from++);
             }
         }
