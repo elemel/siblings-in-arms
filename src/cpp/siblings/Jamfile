@@ -1,3 +1,5 @@
+unit-test flat_set_test : flat_set_test.cpp ;
+
 python-extension Circle2
     : circle_2.cpp circle_2_wrapper.cpp vector_2.cpp
     : <library>/boost/python//boost_python ;
