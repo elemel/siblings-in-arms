@@ -81,6 +81,16 @@ namespace siblings {
         return vector_2(left) /= right;
     }
 
+    bool operator==(const vector_2& a, const vector_2& b)
+    {
+        return a.x() == b.x() && a.y() == b.y();
+    }
+
+    bool operator!=(const vector_2& a, const vector_2& b)
+    {
+        return a.x() != b.x() || a.y() != b.y();
+    }
+
     std::ostream& operator<<(std::ostream& out, const vector_2& v)
     {
         return out << '[' << v.x() << ',' << ' ' << v.y() << ']';

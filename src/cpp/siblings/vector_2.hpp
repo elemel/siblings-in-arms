@@ -34,6 +34,9 @@ namespace siblings {
     vector_2 operator*(real left, const vector_2& right);
     vector_2 operator/(const vector_2& left, real right);
 
+    bool operator==(const vector_2& a, const vector_2& b);
+    bool operator!=(const vector_2& a, const vector_2& b);
+
     std::ostream& operator<<(std::ostream& out, const vector_2& v);
 
     real abs(const vector_2& v);
