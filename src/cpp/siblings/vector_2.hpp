@@ -20,6 +20,7 @@ namespace siblings {
         inline real& y() { return y_; }
         inline real x() const { return x_; }
         inline real y() const { return y_; }
+
         real squared_magnitude() const;
         real magnitude() const;
 

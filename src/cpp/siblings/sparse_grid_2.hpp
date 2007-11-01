@@ -8,8 +8,6 @@
 #include <vector>
 
 namespace siblings {
-    /// @todo Use Boost.MultiIndex for the key-position map.
-    /// @todo Optimize the update() member function.
     class sparse_grid_2 {
     public:
         explicit sparse_grid_2(real tile_side = real(1));

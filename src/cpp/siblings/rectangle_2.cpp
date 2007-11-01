@@ -3,8 +3,6 @@
 #include <ostream>
 
 namespace siblings {
-    rectangle_2::rectangle_2() { }
-
     rectangle_2::rectangle_2(const vector_2& min, const vector_2& max)
         : min_(std::min(min.x(), max.x()), std::min(min.y(), max.y())),
           max_(std::max(min.x(), max.x()), std::max(min.y(), max.y()))
