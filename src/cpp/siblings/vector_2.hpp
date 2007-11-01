@@ -7,8 +7,9 @@
 namespace siblings {
     class vector_2 {
     public:
-        vector_2();
-        vector_2(real x, real y);
+        inline vector_2() : x_(real(0)), y_(real(0)) { }
+        inline vector_2(real r) : x_(r), y_(r) { }
+        inline vector_2(real x, real y) : x_(x), y_(y) { }
 
         vector_2& operator+=(const vector_2& other);
         vector_2& operator-=(const vector_2& other);
@@ -35,7 +36,11 @@ namespace siblings {
     vector_2 operator/(const vector_2& left, real right);
 
     bool operator==(const vector_2& a, const vector_2& b);
-    bool operator!=(const vector_2& a, const vector_2& b);
+
+    inline bool operator!=(const vector_2& a, const vector_2& b)
+    {
+        return !(a == b);
+    }
 
     std::ostream& operator<<(std::ostream& out, const vector_2& v);
 

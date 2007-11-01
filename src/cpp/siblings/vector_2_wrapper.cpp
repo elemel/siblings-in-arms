@@ -40,6 +40,7 @@ BOOST_PYTHON_MODULE(Vector2)
         // initializers
         .def(init<>())
         .def(init<const vector_2&>())
+        .def(init<real>())
         .def(init<real, real>())
 
         // attributes
@@ -59,6 +60,8 @@ BOOST_PYTHON_MODULE(Vector2)
         .def(self * real())
         .def(real() * self)
         .def(self / real())
+        .def(self == self)
+        .def(self != self)
 
         // other special methods
         .def(abs(self))

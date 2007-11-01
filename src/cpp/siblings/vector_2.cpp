@@ -3,16 +3,6 @@
 #include <ostream>
 
 namespace siblings {
-    vector_2::vector_2()
-        : x_(0),
-          y_(0)
-    { }
-
-    vector_2::vector_2(real x, real y)
-        : x_(x),
-          y_(y)
-    { }
-
     vector_2& vector_2::operator+=(const vector_2& other)
     {
         x_ += other.x_;
@@ -84,11 +74,6 @@ namespace siblings {
     bool operator==(const vector_2& a, const vector_2& b)
     {
         return a.x() == b.x() && a.y() == b.y();
-    }
-
-    bool operator!=(const vector_2& a, const vector_2& b)
-    {
-        return a.x() != b.x() || a.y() != b.y();
     }
 
     std::ostream& operator<<(std::ostream& out, const vector_2& v)
