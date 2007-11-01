@@ -10,3 +10,9 @@ if $(BOOST_ROOT) = ""
 use-project /boost : $(BOOST_ROOT) ;
 
 build-project src/cpp/siblings ;
+
+alias install : install-python install-lib ;
+install install-python : [ glob src/python/siblings/*.py ]
+    : <location>dist/siblings ;
+install install-lib : src/cpp/siblings
+    : <location>dist/siblings <install-type>LIB ;
