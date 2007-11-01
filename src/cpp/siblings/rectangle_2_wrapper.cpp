@@ -18,8 +18,8 @@ namespace {
 
     std::string repr_wrapper(const rectangle_2& r) {
         std::ostringstream out;
-        out << "Rectangle2(" << r.min_x() << ", " << r.min_y() << ", "
-            << r.max_x() << ", " << r.max_y() << ")";
+        out << "Rectangle2(" << r.min().x() << ", " << r.min().y() << ", "
+            << r.max().x() << ", " << r.max().y() << ")";
         return out.str();
     }
 }
@@ -36,10 +36,6 @@ BOOST_PYTHON_MODULE(Rectangle2)
         // attributes
         .add_property("min", &min_wrapper)
         .add_property("max", &max_wrapper)
-        .add_property("min_x", &rectangle_2::min_x)
-        .add_property("min_y", &rectangle_2::min_y)
-        .add_property("max_x", &rectangle_2::max_x)
-        .add_property("max_y", &rectangle_2::max_y)
 
         // special methods
         .def(self_ns::str(self)) // workaround for ADL problems

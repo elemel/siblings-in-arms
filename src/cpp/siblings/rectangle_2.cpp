@@ -15,15 +15,9 @@ namespace siblings {
           max_(std::max(min_x, max_x), std::max(min_y, max_y))
     { }
 
-    vector_2 rectangle_2::center() const
-    {
-        return vector_2((min_x() + max_x()) / real(2),
-                        (min_y() + max_y()) / real(2));
-    }
-
     std::ostream& operator<<(std::ostream& out, const rectangle_2& r)
     {
-        return out << "[" << r.min_x() << ", " << r.min_y() << "; "
-                   << r.max_x() << ", " << r.max_y() << "]";
+        return out << "[" << r.min().x() << ", " << r.min().y() << "; "
+                   << r.max().x() << ", " << r.max().y() << "]";
     }
 }

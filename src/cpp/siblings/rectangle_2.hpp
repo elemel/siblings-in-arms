@@ -14,13 +14,6 @@ namespace siblings {
 
         inline const vector_2& min() const { return min_; }
         inline const vector_2& max() const { return max_; }
-        
-        inline real min_x() const { return min_.x(); }
-        inline real min_y() const { return min_.y(); }
-        inline real max_x() const { return max_.x(); }
-        inline real max_y() const { return max_.y(); }
-
-        vector_2 center() const;
 
     private:
         vector_2 min_;

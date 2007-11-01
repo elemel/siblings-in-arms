@@ -24,16 +24,16 @@ namespace siblings {
 
     real squared_distance(const rectangle_2& a, const rectangle_2& b)
     {
-        return square(max_3(a.min_x() - b.max_x(), b.min_x() - a.max_x(),
-                            real(0)))
-            + square(max_3(a.min_y() - b.max_y(), b.min_y() - a.max_y(),
-                           real(0)));
+        return square(max_3(a.min().x() - b.max().x(),
+                            b.min().x() - a.max().x(), real(0)))
+            + square(max_3(a.min().y() - b.max().y(),
+                           b.min().y() - a.max().y(), real(0)));
     }
 
     real squared_distance(const rectangle_2& r, const vector_2& v)
     {
-        return square(max_3(r.min_x() - v.x(), v.x() - r.max_x(), real(0)))
-            + square(max_3(r.min_y() - v.y(), v.y() - r.max_y(), real(0)));
+        return square(max_3(r.min().x() - v.x(), v.x() - r.max().x(), real(0)))
+            + square(max_3(r.min().y() - v.y(), v.y() - r.max().y(), real(0)));
     }
 
     real squared_distance(const vector_2& a, const vector_2& b)
@@ -51,8 +51,8 @@ namespace siblings {
     bool contains(const circle_2& outer, const rectangle_2& inner)
     {
         return contains(outer, inner.min()) && contains(outer, inner.max())
-            && contains(outer, vector_2(inner.min_x(), inner.max_y()))
-            && contains(outer, vector_2(inner.max_x(), inner.min_y()));
+            && contains(outer, vector_2(inner.min().x(), inner.max().y()))
+            && contains(outer, vector_2(inner.max().x(), inner.min().y()));
     }
 
     bool contains(const circle_2& outer, const vector_2& inner)
@@ -68,16 +68,18 @@ namespace siblings {
 
     bool contains(const rectangle_2& outer, const rectangle_2& inner)
     {
-        return outer.min_x() <= inner.min_x()
-            && inner.max_x() <= outer.max_x()
-            && outer.min_y() <= inner.min_y()
-            && inner.max_y() <= outer.max_y();
+        return outer.min().x() <= inner.min().x()
+            && inner.max().x() <= outer.max().x()
+            && outer.min().y() <= inner.min().y()
+            && inner.max().y() <= outer.max().y();
     }
 
     bool contains(const rectangle_2& outer, const vector_2& inner)
     {
-        return outer.min_x() <= inner.x() && inner.x() <= outer.max_x()
-                && outer.min_y() <= inner.y() && inner.y() <= outer.max_y();
+        return outer.min().x() <= inner.x()
+            && inner.x() <= outer.max().x()
+            && outer.min().y() <= inner.y()
+            && inner.y() <= outer.max().y();
     }
 
     bool intersects(const circle_2& a, const circle_2& b)
@@ -93,13 +95,14 @@ namespace siblings {
 
     bool intersects(const rectangle_2& a, const rectangle_2& b)
     {
-        return a.min_x() < b.max_x() && b.min_x() < a.max_x()
-            && a.min_y() < b.max_y() && b.min_y() < a.max_y();
+        return a.min().x() < b.max().x() && b.min().x() < a.max().x()
+            && a.min().y() < b.max().y() && b.min().y() < a.max().y();
     }
 
     circle_2 bounding_circle(const rectangle_2& r)
     {
-        return circle_2(r.center(), distance(r.center(), r.min()));
+        const vector_2 center = (r.min() + r.max()) / real(2);
+        return circle_2(center, distance(center, r.min()));
     }
 
     circle_2 bounding_circle(const vector_2& v)
