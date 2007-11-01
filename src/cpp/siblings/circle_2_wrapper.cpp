@@ -14,8 +14,8 @@ namespace {
     std::string repr_wrapper(const circle_2& c)
     {
         std::ostringstream out;
-        out << "Circle2(Vector2(" << c.center().x() << ", " << c.center().y()
-            << "), " << c.radius() << ")";
+        out << "Circle2(" << c.center().x() << ", " << c.center().y() << "; "
+            << c.radius() << ")";
         return out.str();
     }
 }

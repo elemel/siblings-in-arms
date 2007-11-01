@@ -23,7 +23,7 @@ namespace siblings {
 
     std::ostream& operator<<(std::ostream& out, const rectangle_2& r)
     {
-        return out << "[(" << r.min_x() << ", " << r.min_y() << "); ("
-                   << r.max_x() << ", " << r.max_y() << ")]";
+        return out << "[" << r.min_x() << ", " << r.min_y() << "; "
+                   << r.max_x() << ", " << r.max_y() << "]";
     }
 }

@@ -25,7 +25,7 @@ namespace {
     void test_output()
     {
         circle_2 c(vector_2(1, 2), 3);
-        assert(boost::lexical_cast<std::string>(c) == "((1, 2); 3)");
+        assert(boost::lexical_cast<std::string>(c) == "(1, 2; 3)");
     }
 }
 
