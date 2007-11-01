@@ -50,8 +50,6 @@ namespace siblings {
 
     bool contains(const circle_2& outer, const rectangle_2& inner)
     {
-        // circle C contains rectangle R if and only if C contains all four
-        // corners of R
         return contains(outer, inner.min()) && contains(outer, inner.max())
             && contains(outer, vector_2(inner.min_x(), inner.max_y()))
             && contains(outer, vector_2(inner.max_x(), inner.min_y()));
@@ -67,10 +65,10 @@ namespace siblings {
     {
         // rectangle R contains circle C if and only if R contains the bounding
         // box of C
-        return outer.min_x() <= inner.center().x() - inner.radius()
-            && inner.center().x() + inner.radius() <= outer.max_x()
-            && outer.min_y() <= inner.center().y() - inner.radius()
-            && inner.center().y() + inner.radius() <= outer.max_y();
+        return outer.min_x() <= inner.min_x()
+            && inner.max_x() <= outer.max_x()
+            && outer.min_y() <= inner.min_y()
+            && inner.max_y() <= outer.max_y();
     }
 
     bool contains(const rectangle_2& outer, const rectangle_2& inner)
@@ -116,10 +114,7 @@ namespace siblings {
 
     rectangle_2 bounding_rectangle(const circle_2& c)
     {
-        return rectangle_2(c.center().x() - c.radius(),
-                           c.center().y() - c.radius(),
-                           c.center().x() + c.radius(),
-                           c.center().y() + c.radius());
+        return rectangle_2(c.min_x(), c.min_y(), c.max_x(), c.max_y());
     }
 
     rectangle_2 bounding_rectangle(const vector_2& v)

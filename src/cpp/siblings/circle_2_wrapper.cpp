@@ -31,6 +31,10 @@ BOOST_PYTHON_MODULE(Circle2)
         // attributes
         .add_property("center", &center_wrapper)
         .add_property("radius", &circle_2::radius)
+        .add_property("min_x", &circle_2::min_x)
+        .add_property("min_y", &circle_2::min_y)
+        .add_property("max_x", &circle_2::max_x)
+        .add_property("max_y", &circle_2::max_y)
 
         // special methods
         .def(self_ns::str(self)) // workaround for ADL problems
