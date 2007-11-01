@@ -26,6 +26,11 @@ namespace {
         v.y() = y;
     }
 
+    vector_2 truediv_wrapper(const vector_2& v, real r)
+    {
+        return v / r;
+    }
+
     std::string repr_wrapper(const vector_2& v)
     {
         std::ostringstream out;
@@ -64,6 +69,7 @@ BOOST_PYTHON_MODULE(Vector2)
         .def(self != self)
 
         // other special methods
+        .def("__truediv__", &truediv_wrapper)
         .def(abs(self))
         .def(self_ns::str(self)) // workaround for ADL problems
         .def("__repr__", &repr_wrapper)

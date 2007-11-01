@@ -25,7 +25,7 @@ class Vector2(object):
         return Vector2(-self._x, -self._y)
 
     def __abs__(self):
-        return math.sqrt(self.squared_abs())
+        return math.sqrt(self.squared_magnitude)
 
     def get_x(self):
         return self._x
@@ -37,11 +37,13 @@ class Vector2(object):
         
     y = property(get_y)
 
-    def squared_abs(self):
+    def get_squared_magnitude(self):
         return self._x * self._x + self._y * self._y
 
+    squared_magnitude = property(get_squared_magnitude)
+
     def squared_dist(self, other):
-        return (self - other).squared_abs()
+        return (self - other).squared_magnitude
 
     def dist(self, other):
         return math.sqrt(self.squared_dist(other))

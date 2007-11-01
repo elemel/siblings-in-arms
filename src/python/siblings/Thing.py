@@ -33,7 +33,7 @@ class Thing(object):
 
     def set_velocity(self, velocity):
         max_velocity = self.max_velocity
-        if velocity.squared_abs() > max_velocity * max_velocity:
+        if velocity.squared_magnitude > max_velocity * max_velocity:
             velocity = velocity * max_velocity / abs(velocity)
         self._velocity = velocity
 
