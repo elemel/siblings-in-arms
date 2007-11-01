@@ -6,8 +6,13 @@
 #include <iosfwd>
 
 namespace siblings {
+    /// Geometric, axis-aligned rectangle in 2D.
+    ///
+    /// @invariant min().x() <= max().x()
+    /// @invariant min().y() <= max().y()
     class rectangle_2 {
     public:
+        /// Default constructor.
         inline rectangle_2() { }
 
         rectangle_2(const vector_2& min, const vector_2& max);
@@ -21,6 +26,7 @@ namespace siblings {
         vector_2 max_;
     };
 
+    /// Output rectangle in format "[min_x, min_y; max_x, max_y]".
     std::ostream& operator<<(std::ostream& out, const rectangle_2& r);
 }
 

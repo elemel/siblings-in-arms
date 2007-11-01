@@ -6,6 +6,9 @@
 #include <iosfwd>
 
 namespace siblings {
+    /// Geometric circle in 2D.
+    ///
+    /// @invariant radius() >= 0
     class circle_2 {
     public:
         inline circle_2() : radius_(real(0)) { }
@@ -26,6 +29,7 @@ namespace siblings {
         real radius_;
     };
 
+    /// Output circle in format "(center_x, center_y; radius)".
     std::ostream& operator<<(std::ostream& out, const circle_2& c);
 }
 

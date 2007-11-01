@@ -5,6 +5,7 @@
 #include <iosfwd>
 
 namespace siblings {
+    /// Spatial vector in 2D.
     class vector_2 {
     public:
         inline vector_2() : x_(real(0)), y_(real(0)) { }
@@ -43,6 +44,7 @@ namespace siblings {
         return !(a == b);
     }
 
+    /// Output vector in format "[x, y]".
     std::ostream& operator<<(std::ostream& out, const vector_2& v);
 
     inline real abs(const vector_2& v)
