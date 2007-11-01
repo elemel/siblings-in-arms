@@ -8,21 +8,32 @@ namespace siblings {
     /// Spatial vector in 2D.
     class vector_2 {
     public:
-        inline vector_2() : x_(real(0)), y_(real(0)) { }
-        inline vector_2(real r) : x_(r), y_(r) { }
-        inline vector_2(real x, real y) : x_(x), y_(y) { }
+        /// Construct vector having x = y = 0.
+        vector_2();
+
+        /// Construct vector having x = y = r.
+        vector_2(real r);
+
+        /// Construct vector having the specified x and y components.
+        vector_2(real x, real y);
 
         vector_2& operator+=(const vector_2& other);
         vector_2& operator-=(const vector_2& other);
         vector_2& operator*=(real other);
         vector_2& operator/=(real other);
 
-        inline real& x() { return x_; }
-        inline real& y() { return y_; }
-        inline real x() const { return x_; }
-        inline real y() const { return y_; }
+        real& x();
+        real& y();
+        real x() const;
+        real y() const;
 
+        /// Compute squared magnitude of vector.
         real squared_magnitude() const;
+
+        /// Compute magnitude of vector. Prefer squared_magnitude where
+        /// applicable; that operation is more efficient.
+        ///
+        /// @see squared_magnitude
         real magnitude() const;
 
     private:
@@ -37,22 +48,24 @@ namespace siblings {
     vector_2 operator*(real left, const vector_2& right);
     vector_2 operator/(const vector_2& left, real right);
 
+    /// Compare two vectors for equality.
     bool operator==(const vector_2& a, const vector_2& b);
 
-    inline bool operator!=(const vector_2& a, const vector_2& b)
-    {
-        return !(a == b);
-    }
+    /// Compare two vectors for inequality.
+    bool operator!=(const vector_2& a, const vector_2& b);
 
     /// Output vector in format "[x, y]".
     std::ostream& operator<<(std::ostream& out, const vector_2& v);
 
-    inline real abs(const vector_2& v)
-    {
-        return v.magnitude();
-    }
+    /// Compute magnitude of vector.
+    ///
+    /// @see vector_2::magnitude
+    real abs(const vector_2& v);
 
+    /// Compute dot product of two vectors.
     real dot(const vector_2& a, const vector_2& b);
+
+    /// Compute cross product of two vectors.
     real cross(const vector_2& a, const vector_2& b);
 }
 

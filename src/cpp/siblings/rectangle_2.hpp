@@ -13,13 +13,13 @@ namespace siblings {
     class rectangle_2 {
     public:
         /// Default constructor.
-        inline rectangle_2() { }
+        rectangle_2();
 
         rectangle_2(const vector_2& min, const vector_2& max);
         rectangle_2(real min_x, real min_y, real max_x, real max_y);
 
-        inline const vector_2& min() const { return min_; }
-        inline const vector_2& max() const { return max_; }
+        const vector_2& min() const;
+        const vector_2& max() const;
 
     private:
         vector_2 min_;

@@ -22,6 +22,11 @@ namespace siblings {
                         real(0));
     }
 
+    real squared_distance(const rectangle_2& r, const circle_2& c)
+    {
+        return squared_distance(c, r);
+    }
+
     real squared_distance(const rectangle_2& a, const rectangle_2& b)
     {
         return square(max_3(a.min().x() - b.max().x(),
@@ -34,6 +39,16 @@ namespace siblings {
     {
         return square(max_3(r.min().x() - v.x(), v.x() - r.max().x(), real(0)))
             + square(max_3(r.min().y() - v.y(), v.y() - r.max().y(), real(0)));
+    }
+
+    real squared_distance(const vector_2& v, const circle_2& c)
+    {
+        return squared_distance(c, v);
+    }
+
+    real squared_distance(const vector_2& v, const rectangle_2& r)
+    {
+        return squared_distance(r, v);
     }
 
     real squared_distance(const vector_2& a, const vector_2& b)
@@ -93,10 +108,20 @@ namespace siblings {
         return squared_distance(r, c.center()) < square(c.radius());
     }
 
+    bool intersects(const rectangle_2& r, const circle_2& c)
+    {
+        return intersects(c, r);
+    }
+
     bool intersects(const rectangle_2& a, const rectangle_2& b)
     {
         return a.min().x() < b.max().x() && b.min().x() < a.max().x()
             && a.min().y() < b.max().y() && b.min().y() < a.max().y();
+    }
+
+    const circle_2& bounding_circle(const circle_2& c)
+    {
+        return c;
     }
 
     circle_2 bounding_circle(const rectangle_2& r)
@@ -114,6 +139,11 @@ namespace siblings {
     {
         return rectangle_2(c.center() - vector_2(c.radius()),
                            c.center() + vector_2(c.radius()));
+    }
+
+    const rectangle_2& bounding_rectangle(const rectangle_2& r)
+    {
+        return r;
     }
 
     rectangle_2 bounding_rectangle(const vector_2& v)
