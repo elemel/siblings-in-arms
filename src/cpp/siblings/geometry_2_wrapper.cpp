@@ -1,4 +1,4 @@
-#include "geometry.hpp"
+#include "geometry_2.hpp"
 #include <boost/python.hpp>
 
 using namespace siblings;
@@ -8,7 +8,7 @@ typedef const circle_2& c;
 typedef const rectangle_2& r;
 typedef const vector_2& v;
 
-BOOST_PYTHON_MODULE(geometry)
+BOOST_PYTHON_MODULE(geometry_2)
 {
     def("squared_distance", (real (*)(c, c)) &squared_distance);
     def("squared_distance", (real (*)(c, r)) &squared_distance);
