@@ -1,5 +1,5 @@
-#ifndef SIBLINGS_GRID_2_HPP
-#define SIBLINGS_GRID_2_HPP
+#ifndef SIBLINGS_SPARSE_GRID_2_HPP
+#define SIBLINGS_SPARSE_GRID_2_HPP
 
 #include "circle_2.hpp"
 #include "config.hpp"
@@ -10,9 +10,9 @@
 namespace siblings {
     /// @todo Use Boost.MultiIndex for the key-position map.
     /// @todo Optimize the update() member function.
-    class grid_2 {
+    class sparse_grid_2 {
     public:
-        explicit grid_2(real tile_side = real(1));
+        explicit sparse_grid_2(real tile_side = real(1));
 
         bool insert(int key, const circle_2& bounds);
         bool erase(int key);

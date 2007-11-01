@@ -1,7 +1,7 @@
 obj circle_2_obj : circle_2.cpp ;
 obj geometry_obj : geometry.cpp ;
-obj grid_2_obj : grid_2.cpp ;
 obj rectangle_2_obj : rectangle_2.cpp ;
+obj sparse_grid_2_obj : sparse_grid_2.cpp ;
 obj vector_2_obj : vector_2.cpp ;
 
 unit-test circle_2_test : circle_2_test.cpp circle_2_obj vector_2_obj ;
@@ -16,13 +16,13 @@ python-extension geometry
       vector_2_obj
     : <library>/boost/python//boost_python ;
 
-python-extension Grid2
-    : grid_2_wrapper.cpp grid_2_obj circle_2_obj geometry_obj rectangle_2_obj
-      vector_2_obj
-    : <library>/boost/python//boost_python ;
-
 python-extension Rectangle2
     : rectangle_2_wrapper.cpp rectangle_2_obj vector_2_obj
+    : <library>/boost/python//boost_python ;
+
+python-extension SparseGrid2
+    : sparse_grid_2_wrapper.cpp circle_2_obj geometry_obj rectangle_2_obj
+      sparse_grid_2_obj vector_2_obj
     : <library>/boost/python//boost_python ;
 
 python-extension Vector2 :  vector_2_wrapper.cpp vector_2_obj

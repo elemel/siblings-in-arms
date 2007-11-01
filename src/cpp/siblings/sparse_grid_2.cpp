@@ -1,13 +1,15 @@
 #include "geometry.hpp"
-#include "grid_2.hpp"
+#include "sparse_grid_2.hpp"
 #include <cassert>
 #include <cmath>
 #include <boost/foreach.hpp>
 
 namespace siblings {
-    grid_2::grid_2(real tile_side) : tile_side_(std::abs(tile_side)) { }
+    sparse_grid_2::sparse_grid_2(real tile_side)
+        : tile_side_(std::abs(tile_side))
+    { }
 
-    bool grid_2::insert(int key, const circle_2& bounds)
+    bool sparse_grid_2::insert(int key, const circle_2& bounds)
     {
         const std::vector<grid_position> positions(to_grid_positions(bounds));
         if (grid_positions_.find(key) == grid_positions_.end()) {
@@ -19,7 +21,7 @@ namespace siblings {
         }
     }
 
-    bool grid_2::erase(int key)
+    bool sparse_grid_2::erase(int key)
     {
         grid_position_map::const_iterator i = grid_positions_.find(key);
         if (i == grid_positions_.end()) {
@@ -34,7 +36,7 @@ namespace siblings {
         }
     }
 
-    std::vector<int> grid_2::find(const circle_2& bounds) const
+    std::vector<int> sparse_grid_2::find(const circle_2& bounds) const
     {
         std::set<int> found;
         BOOST_FOREACH(const grid_position& p, to_grid_positions(bounds)) {
@@ -50,7 +52,7 @@ namespace siblings {
         return std::vector<int>(found.begin(), found.end());
     }
 
-    void grid_2::create_entry(int key, const circle_2& bounds)
+    void sparse_grid_2::create_entry(int key, const circle_2& bounds)
     {
         const std::vector<grid_position> positions = to_grid_positions(bounds);
         BOOST_FOREACH(const grid_position& p, positions) {
@@ -60,7 +62,7 @@ namespace siblings {
                                                  positions.end());
     }
 
-    void grid_2::update_entry(int key, const circle_2& bounds)
+    void sparse_grid_2::update_entry(int key, const circle_2& bounds)
     {
         const grid_position_set old_positions = grid_positions_[key];
         const std::vector<grid_position> new_positions
@@ -87,8 +89,8 @@ namespace siblings {
     }
 
     /// Returns a sorted vector.
-    std::vector<grid_2::grid_position>
-    grid_2::to_grid_positions(const circle_2& bounds) const
+    std::vector<sparse_grid_2::grid_position>
+    sparse_grid_2::to_grid_positions(const circle_2& bounds) const
     {
         std::vector<grid_position> result;
         const vector_2 radii = vector_2(bounds.radius(), bounds.radius());
@@ -102,19 +104,21 @@ namespace siblings {
         return result;
     }
     
-    grid_2::grid_position grid_2::to_grid_position(const vector_2& v) const
+    sparse_grid_2::grid_position
+    sparse_grid_2::to_grid_position(const vector_2& v) const
     {
         return grid_position(int(v.x() / tile_side_), int(v.y() / tile_side_));
     }
     
-    void grid_2::add_entry_at_position(int key, const circle_2& bounds,
+    void sparse_grid_2::add_entry_at_position(int key, const circle_2& bounds,
                                        const grid_position& p)
     {
         tiles_[p][key] = bounds;
         
     }
     
-    void grid_2::remove_entry_at_position(int key, const grid_position& p)
+    void sparse_grid_2::remove_entry_at_position(int key,
+                                                 const grid_position& p)
     {
         tile_map::iterator i = tiles_.find(p);
         assert(i != tiles_.end());
