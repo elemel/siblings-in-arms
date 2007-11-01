@@ -3,13 +3,6 @@
 #include <ostream>
 
 namespace siblings {
-    circle_2::circle_2() : radius_(0) { }
-
-    circle_2::circle_2(const vector_2& center, real radius)
-        : center_(center),
-          radius_(std::abs(radius))
-    { }
-
     real circle_2::min_x() const
     {
         return center_.x() - radius_;

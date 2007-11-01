@@ -27,6 +27,7 @@ BOOST_PYTHON_MODULE(Circle2)
         .def(init<>())
         .def(init<const circle_2&>())
         .def(init<const vector_2&, real>())
+        .def(init<real, real, real>())
 
         // attributes
         .add_property("center", &center_wrapper)
