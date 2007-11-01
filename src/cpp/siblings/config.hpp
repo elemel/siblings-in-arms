@@ -1,8 +1,12 @@
 #ifndef SIBLINGS_CONFIG_HPP
 #define SIBLINGS_CONFIG_HPP
 
+#ifndef SIBLINGS_REAL
+#define SIBLINGS_REAL double
+#endif
+
 namespace siblings {
-    typedef double real;
+    typedef SIBLINGS_REAL real;
 }
 
 #endif
