@@ -20,8 +20,8 @@ namespace siblings {
         inline real& y() { return y_; }
         inline real x() const { return x_; }
         inline real y() const { return y_; }
-        real squared_length() const;
-        real length() const;
+        real squared_magnitude() const;
+        real magnitude() const;
 
     private:
         real x_;
@@ -44,7 +44,11 @@ namespace siblings {
 
     std::ostream& operator<<(std::ostream& out, const vector_2& v);
 
-    real abs(const vector_2& v);
+    inline real abs(const vector_2& v)
+    {
+        return v.magnitude();
+    }
+
     real dot(const vector_2& a, const vector_2& b);
     real cross(const vector_2& a, const vector_2& b);
 }

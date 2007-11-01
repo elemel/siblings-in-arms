@@ -46,8 +46,8 @@ BOOST_PYTHON_MODULE(Vector2)
         // attributes
         .add_property("x", &get_x_wrapper, &set_x_wrapper)
         .add_property("y", &get_y_wrapper, &set_y_wrapper)
-        .add_property("squared_length", &vector_2::squared_length)
-        .add_property("length", &vector_2::length)
+        .add_property("squared_magnitude", &vector_2::squared_magnitude)
+        .add_property("magnitude", &vector_2::magnitude)
 
         // operators
         .def(self += self)

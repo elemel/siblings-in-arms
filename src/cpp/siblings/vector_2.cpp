@@ -1,3 +1,4 @@
+#include "math.hpp"
 #include "vector_2.hpp"
 #include <cmath>
 #include <ostream>
@@ -31,14 +32,14 @@ namespace siblings {
         return *this;
     }
 
-    real vector_2::squared_length() const
+    real vector_2::squared_magnitude() const
     {
-        return x_ * x_ + y_ * y_;
+        return square(x_) + square(y_);
     }
 
-    real vector_2::length() const
+    real vector_2::magnitude() const
     {
-        return std::sqrt(squared_length());
+        return std::sqrt(squared_magnitude());
     }
 
     vector_2 operator-(const vector_2& v)
@@ -79,11 +80,6 @@ namespace siblings {
     std::ostream& operator<<(std::ostream& out, const vector_2& v)
     {
         return out << '[' << v.x() << ',' << ' ' << v.y() << ']';
-    }
-
-    real abs(const vector_2& v)
-    {
-        return std::sqrt(v.squared_length());
     }
 
     real dot(const vector_2& a, const vector_2& b)
