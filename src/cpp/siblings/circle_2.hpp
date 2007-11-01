@@ -21,11 +21,6 @@ namespace siblings {
         inline const vector_2& center() const { return center_; }
         inline real radius() const { return radius_; }
 
-        real min_x() const;
-        real min_y() const;
-        real max_x() const;
-        real max_y() const;
-
     private:
         vector_2 center_;
         real radius_;

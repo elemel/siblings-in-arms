@@ -63,12 +63,7 @@ namespace siblings {
 
     bool contains(const rectangle_2& outer, const circle_2& inner)
     {
-        // rectangle R contains circle C if and only if R contains the bounding
-        // box of C
-        return outer.min_x() <= inner.min_x()
-            && inner.max_x() <= outer.max_x()
-            && outer.min_y() <= inner.min_y()
-            && inner.max_y() <= outer.max_y();
+        return contains(outer, bounding_rectangle(inner));
     }
 
     bool contains(const rectangle_2& outer, const rectangle_2& inner)
@@ -114,7 +109,8 @@ namespace siblings {
 
     rectangle_2 bounding_rectangle(const circle_2& c)
     {
-        return rectangle_2(c.min_x(), c.min_y(), c.max_x(), c.max_y());
+        return rectangle_2(c.center() - vector_2(c.radius()),
+                           c.center() + vector_2(c.radius()));
     }
 
     rectangle_2 bounding_rectangle(const vector_2& v)
