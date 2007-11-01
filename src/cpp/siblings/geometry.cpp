@@ -103,4 +103,27 @@ namespace siblings {
         return a.min_x() < b.max_x() && b.min_x() < a.max_x()
             && a.min_y() < b.max_y() && b.min_y() < a.max_y();
     }
+
+    circle_2 bounding_circle(const rectangle_2& r)
+    {
+        return circle_2(r.center(), distance(r.center(), r.min()));
+    }
+
+    circle_2 bounding_circle(const vector_2& v)
+    {
+        return circle_2(v, real(0));
+    }
+
+    rectangle_2 bounding_rectangle(const circle_2& c)
+    {
+        return rectangle_2(c.center().x() - c.radius(),
+                           c.center().y() - c.radius(),
+                           c.center().x() + c.radius(),
+                           c.center().y() + c.radius());
+    }
+
+    rectangle_2 bounding_rectangle(const vector_2& v)
+    {
+        return rectangle_2(v, v);
+    }
 }

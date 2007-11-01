@@ -17,7 +17,8 @@ python-extension geometry
     : <library>/boost/python//boost_python ;
 
 python-extension Grid2
-    : grid_2_wrapper.cpp grid_2_obj circle_2_obj geometry_obj vector_2_obj
+    : grid_2_wrapper.cpp grid_2_obj circle_2_obj geometry_obj rectangle_2_obj
+      vector_2_obj
     : <library>/boost/python//boost_python ;
 
 python-extension Rectangle2

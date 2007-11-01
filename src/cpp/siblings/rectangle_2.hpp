@@ -20,6 +20,8 @@ namespace siblings {
         inline real max_x() const { return max_.x(); }
         inline real max_y() const { return max_.y(); }
 
+        vector_2 center() const;
+
     private:
         vector_2 min_;
         vector_2 max_;

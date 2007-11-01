@@ -41,4 +41,14 @@ BOOST_PYTHON_MODULE(geometry)
     def("intersects", (bool (*)(c, r)) &intersects);
     def("intersects", (bool (*)(r, c)) &intersects);
     def("intersects", (bool (*)(r, r)) &intersects);
+
+    def("bounding_circle", (c (*)(c)) &bounding_circle,
+        return_value_policy<copy_const_reference>());
+    def("bounding_circle", (circle_2 (*)(r)) &bounding_circle);
+    def("bounding_circle", (circle_2 (*)(v)) &bounding_circle);
+
+    def("bounding_rectangle", (rectangle_2 (*)(c)) &bounding_rectangle);
+    def("bounding_rectangle", (r (*)(r)) &bounding_rectangle,
+        return_value_policy<copy_const_reference>());
+    def("bounding_rectangle", (rectangle_2 (*)(v)) &bounding_rectangle);
 }

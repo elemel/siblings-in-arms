@@ -20,4 +20,10 @@ namespace siblings {
         return out << "[(" << r.min_x() << ", " << r.min_y() << "); ("
                    << r.max_x() << ", " << r.max_y() << ")]";
     }
+
+    vector_2 rectangle_2::center() const
+    {
+        return vector_2((min_x() + max_x()) / real(2),
+                        (min_y() + max_y()) / real(2));
+    }
 }

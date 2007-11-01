@@ -25,6 +25,12 @@ namespace siblings {
     bool intersects(const circle_2&, const rectangle_2&);
     bool intersects(const rectangle_2&, const rectangle_2&);
 
+    circle_2 bounding_circle(const rectangle_2& r);
+    circle_2 bounding_circle(const vector_2& v);
+
+    rectangle_2 bounding_rectangle(const circle_2& c);
+    rectangle_2 bounding_rectangle(const vector_2& v);
+
     inline real squared_distance(const rectangle_2& r, const circle_2& c)
     {
         return squared_distance(c, r);
@@ -49,6 +55,16 @@ namespace siblings {
     inline bool intersects(const rectangle_2& r, const circle_2& c)
     {
         return intersects(c, r);
+    }
+
+    inline const circle_2& bounding_circle(const circle_2& c)
+    {
+        return c;
+    }
+
+    inline const rectangle_2& bounding_rectangle(const rectangle_2& r)
+    {
+        return r;
     }
 }
 
