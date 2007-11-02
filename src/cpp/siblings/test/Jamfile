@@ -1,5 +1,7 @@
 unit-test circle_2_test : circle_2_test.cpp ..//circle_2 ..//vector_2 ;
 unit-test flat_set_test : flat_set_test.cpp ;
+unit-test hash_map_test : hash_map_test.cpp ;
+
 unit-test sparse_grid_2_test
     : sparse_grid_2_test.cpp ..//circle_2 ..//geometry_2 ..//rectangle_2
       ..//sparse_grid_2 ..//vector_2 ;
