@@ -38,7 +38,7 @@ namespace siblings {
 
     std::vector<int> sparse_grid_2::find(const circle_2& bounds) const
     {
-        std::set<int> found;
+        flat_set<int> found;
         BOOST_FOREACH(const grid_position& p, to_grid_positions(bounds)) {
             tile_map::const_iterator i = tiles_.find(p);
             if (i != tiles_.end()) {

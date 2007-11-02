@@ -3,9 +3,9 @@
 
 #include "circle_2.hpp"
 #include "config.hpp"
+#include "flat_set.hpp"
 #include <cstddef>
 #include <map>
-#include <set>
 #include <vector>
 
 namespace siblings {
@@ -24,7 +24,7 @@ namespace siblings {
     private:
         typedef std::map<int, circle_2> entry_map;
         typedef std::pair<int, int> grid_position;
-        typedef std::set<grid_position> grid_position_set;
+        typedef flat_set<grid_position> grid_position_set;
         typedef std::map<grid_position, entry_map> tile_map;
         typedef std::map<int, grid_position_set> grid_position_map;
 

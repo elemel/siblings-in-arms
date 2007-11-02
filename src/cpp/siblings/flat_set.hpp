@@ -63,6 +63,7 @@ namespace siblings {
         flat_set& operator=(const flat_set& other)
         {
             flat_set(other).swap(*this);
+            return *this;
         }
 
         void swap(flat_set& other)
