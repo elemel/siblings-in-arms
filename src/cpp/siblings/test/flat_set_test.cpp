@@ -1,4 +1,4 @@
-#include "flat_set.hpp"
+#include "../flat_set.hpp"
 #include <cassert>
 #include <cstddef>
 #include <boost/array.hpp>

@@ -1,4 +1,4 @@
-#include "geometry_2.hpp"
+#include "../geometry_2.hpp"
 #include <boost/python.hpp>
 
 using namespace siblings;
