@@ -1,8 +1,8 @@
-obj circle_2_obj : circle_2.cpp ;
-obj geometry_2_obj : geometry_2.cpp ;
-obj rectangle_2_obj : rectangle_2.cpp ;
-obj sparse_grid_2_obj : sparse_grid_2.cpp ;
-obj vector_2_obj : vector_2.cpp ;
+obj circle_2 : circle_2.cpp ;
+obj geometry_2 : geometry_2.cpp ;
+obj rectangle_2 : rectangle_2.cpp ;
+obj sparse_grid_2 : sparse_grid_2.cpp ;
+obj vector_2 : vector_2.cpp ;
 
 build-project test ;
 build-project wrapper ;

@@ -1,20 +1,20 @@
 python-extension Circle2
-    : circle_2_wrapper.cpp ..//circle_2_obj ..//vector_2_obj
+    : circle_2_wrapper.cpp ..//circle_2 ..//vector_2
     : <library>/boost/python//boost_python ;
 
 python-extension geometry_2
-    : geometry_2_wrapper.cpp ..//circle_2_obj ..//geometry_2_obj
-      ..//rectangle_2_obj ..//vector_2_obj
+    : geometry_2_wrapper.cpp ..//circle_2 ..//geometry_2 ..//rectangle_2
+      ..//vector_2
     : <library>/boost/python//boost_python ;
 
 python-extension Rectangle2
-    : rectangle_2_wrapper.cpp ..//rectangle_2_obj ..//vector_2_obj
+    : rectangle_2_wrapper.cpp ..//rectangle_2 ..//vector_2
     : <library>/boost/python//boost_python ;
 
 python-extension SparseGrid2
-    : sparse_grid_2_wrapper.cpp ..//circle_2_obj ..//geometry_2_obj
-      ..//rectangle_2_obj ..//sparse_grid_2_obj ..//vector_2_obj
+    : sparse_grid_2_wrapper.cpp ..//circle_2 ..//geometry_2 ..//rectangle_2
+      ..//sparse_grid_2 ..//vector_2
     : <library>/boost/python//boost_python ;
 
-python-extension Vector2 :  vector_2_wrapper.cpp ..//vector_2_obj
+python-extension Vector2 :  vector_2_wrapper.cpp ..//vector_2
     : <library>/boost/python//boost_python ;
