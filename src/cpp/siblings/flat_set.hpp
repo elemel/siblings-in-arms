@@ -151,10 +151,14 @@ namespace siblings {
             return std::upper_bound(begin(), end(), key, less_);
         }
 
-        std::pair<iterator, iterator> equal_range(const key_type& key)
+        std::pair<iterator, iterator> equal_range(const key_type& key) const
         {
             iterator i = lower_bound(key);
-            return std::make_pair(i, (i == end()) ? i : boost::next(i));
+            if (i == end() || less_(key, *i)) {
+                return std::make_pair(i, i);
+            } else {
+                return std::make_pair(i, boost::next(i));
+            }
         }
 
         friend bool operator==(const flat_set& left, const flat_set& right)

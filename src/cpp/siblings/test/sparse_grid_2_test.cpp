@@ -28,8 +28,8 @@ namespace {
         assert(g.tile_count() == 0);
         g.insert(1, circle_2(0.5, 0.5, 0.25));
         assert(g.tile_count() == 1);
-        g.insert(2, circle_2(10, 10, 0.5));
-        assert(g.tile_count() == 5);
+        g.insert(2, circle_2(0, 0, 0.5));
+        assert(g.tile_count() == 4);
         g.erase(1);
         assert(g.tile_count() == 4);
         g.erase(2);
