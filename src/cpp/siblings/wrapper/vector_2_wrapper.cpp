@@ -26,6 +26,11 @@ namespace {
         v.y() = y;
     }
 
+    vector_2 itruediv_wrapper(vector_2& v, real r)
+    {
+        return v /= r;
+    }
+
     vector_2 truediv_wrapper(const vector_2& v, real r)
     {
         return v / r;
@@ -69,6 +74,7 @@ BOOST_PYTHON_MODULE(Vector2)
         .def(self != self)
 
         // other special methods
+        .def("__itruediv__", &itruediv_wrapper)
         .def("__truediv__", &truediv_wrapper)
         .def(abs(self))
         .def(self_ns::str(self)) // workaround for ADL problems
