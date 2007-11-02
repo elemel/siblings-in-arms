@@ -3,6 +3,7 @@
 
 #include "circle_2.hpp"
 #include "config.hpp"
+#include <cstddef>
 #include <map>
 #include <set>
 #include <vector>
@@ -16,6 +17,9 @@ namespace siblings {
         bool erase(int key);
 
         std::vector<int> find(const circle_2& bounds) const;
+
+        std::size_t entry_count() const;
+        std::size_t tile_count() const;
 
     private:
         typedef std::map<int, circle_2> entry_map;

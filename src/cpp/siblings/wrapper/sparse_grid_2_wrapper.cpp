@@ -25,6 +25,10 @@ BOOST_PYTHON_MODULE(SparseGrid2)
         .def(init<const sparse_grid_2&>())
         .def(init<real>())
 
+        // attributes
+        .add_property("entry_count", &sparse_grid_2::entry_count)
+        .add_property("tile_count", &sparse_grid_2::tile_count)
+
         // methods
         .def("insert", &sparse_grid_2::insert)
         .def("erase", &sparse_grid_2::erase)

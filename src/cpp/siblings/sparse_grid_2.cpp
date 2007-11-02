@@ -52,6 +52,16 @@ namespace siblings {
         return std::vector<int>(found.begin(), found.end());
     }
 
+    std::size_t sparse_grid_2::entry_count() const
+    {
+        return grid_positions_.size();
+    }
+
+    std::size_t sparse_grid_2::tile_count() const
+    {
+        return tiles_.size();
+    }
+
     void sparse_grid_2::create_entry(int key, const circle_2& bounds)
     {
         const std::vector<grid_position> positions = to_grid_positions(bounds);
