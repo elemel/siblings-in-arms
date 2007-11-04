@@ -1,6 +1,7 @@
 #ifndef SIBLINGS_HASH_MAP_HPP
 #define SIBLINGS_HASH_MAP_HPP
 
+#include <cassert>
 #include <cstddef>
 #include <utility>
 #include <vector>
@@ -49,9 +50,14 @@ namespace siblings {
         void decrement()
         {
             if (value_index_ == 0) {
-                --bucket_index_;
-                value_index_ = (*buckets_)[bucket_index_].size() - 1;
+                do {
+                    assert(bucket_index_);
+                    --bucket_index_;
+                } while ((*buckets_)[bucket_index_].empty());
+                value_index_ = (*buckets_)[bucket_index_].size();
             }
+            assert(value_index_);
+            --value_index_;
         }
         
         bool equal(const bucket_sequence_iterator& other) const
@@ -63,6 +69,9 @@ namespace siblings {
         
         value_type& dereference() const
         {
+            assert(buckets_);
+            assert(bucket_index_ < buckets_->size());
+            assert(value_index_ < (*buckets_)[bucket_index_].size());
             return (*buckets_)[bucket_index_][value_index_];
         }
     };
@@ -96,10 +105,18 @@ namespace siblings {
             : buckets_(new_bucket_count), hash_(h), size_(0)
         { }
 
-        const_iterator begin() const { return const_iterator(&buckets_); }
+        const_iterator begin() const {
+            // return index of first non-empty bucket
+            size_type i = 0;
+            while (buckets_[i].empty()) {
+                ++i;
+            }
+            return const_iterator(&buckets_, i);
+        }
 
         const_iterator end() const
         {
+            // return past-the-end index for buckets
             return const_iterator(&buckets_, bucket_count());
         }
 
