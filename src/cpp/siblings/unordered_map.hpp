@@ -108,7 +108,7 @@ namespace siblings {
         }
     };
     
-    /// @invariant m.size() <= m.bucket_count()
+    /// @invariant m.load_factor() <= m.max_load_factor()
     template <typename Key, typename T, typename Hash = boost::hash<Key>,
               typename Pred = std::equal_to<Key>,
               typename A = std::allocator<std::pair<const Key, T> > >
@@ -152,15 +152,14 @@ namespace siblings {
 
         // lifecycle //////////////////////////////////////////////////////////
 
-        /// @pre new_bucket_count >= 1
-        /// @post m.bucket_count() == new_bucket_count
+        /// @pre n >= 1
+        /// @post m.bucket_count() >= n
         /// @post m.empty()
-        explicit unordered_map(size_type new_bucket_count = 3,
-                               const hasher& h = hasher(),
+        explicit unordered_map(size_type n = 3, const hasher& h = hasher(),
                                const key_equal& eq = key_equal(),
                                const allocator_type& a = allocator_type())
-            : buckets_(new_bucket_count, bucket_type(allocator_)), hash_(h),
-              eq_(eq), allocator_(a), size_(0)
+            : buckets_(n, bucket_type(allocator_)), hash_(h), eq_(eq),
+              allocator_(a), size_(0), max_load_factor_(1)
         { }
 
         void swap(unordered_map& other)
@@ -170,6 +169,7 @@ namespace siblings {
             std::swap(eq_, other.eq_);
             std::swap(allocator_, other.allocator_);
             std::swap(size_, other.size_);
+            std::swap(max_load_factor_, other.max_load_factor_);
         }
 
         // iteration //////////////////////////////////////////////////////////
@@ -231,7 +231,7 @@ namespace siblings {
             if (i == b->end()) {
                 b->push_back(v);
                 ++size_;
-                if (size_ > bucket_count()) {
+                if (load_factor() > max_load_factor()) {
                     rehash(bucket_count() * 2 + 1);
                     return std::make_pair(find(v.first), true);
                 } else {
@@ -329,18 +329,29 @@ namespace siblings {
             return buckets_[bucket_index].size();
         }
 
-        /// @pre new_bucket_count >= 1
-        /// @post m.bucket_count() == new_bucket_count
-        void rehash(size_type new_bucket_count)
+        // @post result >= 0 && result <= m.max_load_factor()
+        float load_factor() const
         {
-            unordered_map h(new_bucket_count, hash_, eq_, allocator_);
-            BOOST_FOREACH(const bucket_type& b, buckets_) {
-                BOOST_FOREACH(const value_type& v, b) {
-                    h.buckets_[h.bucket(v.first)].push_back(v);
+            return load_factor(bucket_count());
+        }
+
+        // @post result >= 0
+        float max_load_factor() const { return max_load_factor_; }
+
+        /// @post m.bucket_count() >= n
+        void rehash(size_type n)
+        {
+            if (n >= 1 && load_factor(n) <= max_load_factor()) {
+                unordered_map h(n, hash_, eq_, allocator_);
+                BOOST_FOREACH(const bucket_type& b, buckets_) {
+                    BOOST_FOREACH(const value_type& v, b) {
+                        h.buckets_[h.bucket(v.first)].push_back(v);
+                    }
                 }
+                h.size_ = size_;
+                h.max_load_factor_ = max_load_factor_;
+                swap(h);
             }
-            h.size_ = size_;
-            swap(h);
         }
 
     private:
@@ -362,6 +373,12 @@ namespace siblings {
         key_equal eq_;
         allocator_type allocator_;
         size_type size_;
+        float max_load_factor_;
+
+        float load_factor(size_type n) const
+        {
+            return float(size()) / float(n);
+        }
     };
 }
 
