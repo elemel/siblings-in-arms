@@ -1,4 +1,4 @@
-#include "../hash_map.hpp"
+#include "../unordered_map.hpp"
 #include <cassert>
 #include <string>
 
@@ -7,14 +7,14 @@ using namespace siblings;
 namespace {
     void test_default_ctor()
     {
-        hash_map<int, std::string> m;
+        unordered_map<int, std::string> m;
         assert(m.size() == 0);
         assert(m.empty());
     }
 
     void test_insert_value()
     {
-        typedef hash_map<int, std::string> map_type;
+        typedef unordered_map<int, std::string> map_type;
         typedef std::pair<map_type::iterator, bool> status;
 
         map_type m;
@@ -35,7 +35,7 @@ namespace {
 
     void test_erase_key()
     {
-        typedef hash_map<int, std::string> map_type;
+        typedef unordered_map<int, std::string> map_type;
 
         map_type m;
         std::size_t count;
@@ -62,7 +62,7 @@ namespace {
 
     void test_index()
     {
-        typedef hash_map<int, std::string> map_type;
+        typedef unordered_map<int, std::string> map_type;
 
         map_type m;
         map_type::iterator i;
