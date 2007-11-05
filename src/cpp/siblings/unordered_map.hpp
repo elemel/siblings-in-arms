@@ -102,14 +102,15 @@ namespace siblings {
     public:
         typedef unordered_map_iterator<value_type, bucket_iterator,
                                        value_iterator>
-            iterator;
+        iterator;
+
         typedef unordered_map_iterator<const value_type, const_bucket_iterator,
                                        const_value_iterator>
-            const_iterator;
+        const_iterator;
 
         /// @pre new_bucket_count >= 1
-        /// @post bucket_count() == new_bucket_count
-        /// @post empty()
+        /// @post m.bucket_count() == new_bucket_count
+        /// @post m.empty()
         explicit unordered_map(size_type new_bucket_count = 11,
                                const hasher& h = hasher())
             : buckets_(new_bucket_count), hasher_(h), size_(0)
@@ -120,11 +121,11 @@ namespace siblings {
             // return iterator to first non-empty bucket
             for (bucket_iterator i = buckets_.begin();
                  i != buckets_.end(); ++i)
-                {
-                    if (!i->empty()) {
-                        return iterator(i, buckets_.end(), i->begin());
-                    }
+            {
+                if (!i->empty()) {
+                    return iterator(i, buckets_.end(), i->begin());
                 }
+            }
             return end();
         }
 
@@ -139,11 +140,11 @@ namespace siblings {
             // return iterator to first non-empty bucket
             for (const_bucket_iterator i = buckets_.begin();
                  i != buckets_.end(); ++i)
-                {
-                    if (!i->empty()) {
-                        return const_iterator(i, buckets_.end(), i->begin());
-                    }
+            {
+                if (!i->empty()) {
+                    return const_iterator(i, buckets_.end(), i->begin());
                 }
+            }
             return end();
         }
 
@@ -154,27 +155,29 @@ namespace siblings {
                                   const_value_iterator());
         }
 
+        // @post m.find(v.first) != m.end()
         std::pair<iterator, bool> insert(const value_type& v)
         {
             bucket_iterator b = buckets_.begin()
                 + hasher_(v.first) % buckets_.size();
             value_iterator i = std::find_if(b->begin(), b->end(),
                                             key_equal(v.first));
-            bool inserting = (i == b->end());
-            if (inserting) {
+            if (i == b->end()) {
                 b->push_back(v);
-                ++size_;
+                if (++size_ > bucket_count()) {
+                    rehash(bucket_count() * 2 + 1);
+                    return std::make_pair(find(v.first), true);
+                } else {
+                    return std::make_pair(iterator(b, buckets_.end(),
+                                                   boost::prior(b->end())),
+                                          true);
+                }
             } else {
-                b->erase(i);
-                b->push_back(v);
-            }
-            if (inserting && size_ > bucket_count()) {
-                rehash(bucket_count() * 2 + 1);
-                return std::make_pair(find(v.first), true);
-            } else {
-                return std::make_pair(iterator(b, buckets_.end(),
-                                               boost::prior(b->end())),
-                                      inserting);
+                // Update map element. If we use assignment, the data type must
+                // model Assignable. Use erase and insert instead.
+                b->erase(i++); // post-increment iterator to keep it valid
+                i = b->insert(i, v);
+                return std::make_pair(iterator(b, buckets_.end(), i), false);
             }
         }
 
@@ -191,7 +194,7 @@ namespace siblings {
             erase(i->first);
         }
 
-        /// @post find(k) == end()
+        /// @post m.find(k) == m.end()
         size_type erase(const key_type& k)
         {
             bucket_iterator b = buckets_.begin()
@@ -207,7 +210,7 @@ namespace siblings {
             }
         }
 
-        /// @post result == end() || result->first == k
+        /// @post result == m.end() || result->first == k
         iterator find(const key_type& k)
         {
             bucket_iterator b = buckets_.begin()
@@ -217,7 +220,7 @@ namespace siblings {
             return (i == b->end()) ? end() : iterator(b, buckets_.end(), i);
         }
 
-        /// @post result == end() || result->first == k
+        /// @post result == m.end() || result->first == k
         const_iterator find(const key_type& k) const
         {
             const_bucket_iterator b = buckets_.begin()
@@ -239,7 +242,7 @@ namespace siblings {
         size_type bucket_count() const { return buckets_.size(); }
 
         /// @pre new_bucket_count >= 1
-        /// @post bucket_count() == new_bucket_count
+        /// @post m.bucket_count() == new_bucket_count
         void rehash(size_type new_bucket_count)
         {
             unordered_map h(new_bucket_count, hasher_);
