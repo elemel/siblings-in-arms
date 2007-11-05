@@ -12,24 +12,24 @@
 #include <boost/utility.hpp>
 
 namespace siblings {
-    template <typename T, typename BucketIterator, typename ValueIterator>
+    template <typename T, typename BucketIterator, typename LocalIterator>
     class unordered_map_iterator
         : public boost::iterator_facade<unordered_map_iterator<T,
                                                                BucketIterator,
-                                                               ValueIterator>,
+                                                               LocalIterator>,
                                         T, boost::forward_traversal_tag>
     {
     public:
         typedef T value_type;
         typedef BucketIterator bucket_iterator;
-        typedef ValueIterator value_iterator;
+        typedef LocalIterator local_iterator;
 
         explicit unordered_map_iterator(bucket_iterator current_bucket
                                         = bucket_iterator(),
                                         bucket_iterator last_bucket
                                         = bucket_iterator(),
-                                        value_iterator current_value
-                                        = value_iterator())
+                                        local_iterator current_value
+                                        = local_iterator())
 
             : current_bucket_(current_bucket), last_bucket_(last_bucket),
               current_value_(current_value)
@@ -44,14 +44,14 @@ namespace siblings {
 
         bucket_iterator current_bucket() const { return current_bucket_; }
         bucket_iterator last_bucket() const { return last_bucket_; }
-        value_iterator current_value() const { return current_value_; }
+        local_iterator current_value() const { return current_value_; }
 
     private:
         friend class boost::iterator_core_access;
 
         bucket_iterator current_bucket_;
         bucket_iterator last_bucket_;
-        value_iterator current_value_;
+        local_iterator current_value_;
 
         void increment()
         {
@@ -81,7 +81,7 @@ namespace siblings {
         }
     };
     
-    /// @invariant size() <= bucket_count()
+    /// @invariant m.size() <= m.bucket_count()
     template <typename Key, typename Data, typename Hasher = boost::hash<Key> >
     class unordered_map {
     public:
@@ -92,20 +92,21 @@ namespace siblings {
         typedef std::size_t size_type;
 
     private:
-        typedef std::list<value_type> bucket;
-        typedef std::vector<bucket> bucket_vector;
+        typedef std::list<value_type> bucket_type;
+        typedef std::vector<bucket_type> bucket_vector;
         typedef typename bucket_vector::iterator bucket_iterator;
         typedef typename bucket_vector::const_iterator const_bucket_iterator;
-        typedef typename bucket::iterator value_iterator;
-        typedef typename bucket::const_iterator const_value_iterator;
 
     public:
+        typedef typename bucket_type::iterator local_iterator;
+        typedef typename bucket_type::const_iterator const_local_iterator;
+
         typedef unordered_map_iterator<value_type, bucket_iterator,
-                                       value_iterator>
+                                       local_iterator>
         iterator;
 
         typedef unordered_map_iterator<const value_type, const_bucket_iterator,
-                                       const_value_iterator>
+                                       const_local_iterator>
         const_iterator;
 
         /// @pre new_bucket_count >= 1
@@ -132,7 +133,7 @@ namespace siblings {
         iterator end()
         {
             // return past-the-end iterator for buckets
-            return iterator(buckets_.end(), buckets_.end(), value_iterator());
+            return iterator(buckets_.end(), buckets_.end(), local_iterator());
         }
 
         const_iterator begin() const
@@ -152,7 +153,7 @@ namespace siblings {
         {
             // return past-the-end iterator for buckets
             return const_iterator(buckets_.end(), buckets_.end(),
-                                  const_value_iterator());
+                                  const_local_iterator());
         }
 
         // @post m.find(v.first) != m.end()
@@ -160,7 +161,7 @@ namespace siblings {
         {
             bucket_iterator b = buckets_.begin()
                 + hasher_(v.first) % buckets_.size();
-            value_iterator i = std::find_if(b->begin(), b->end(),
+            local_iterator i = std::find_if(b->begin(), b->end(),
                                             key_equal(v.first));
             if (i == b->end()) {
                 b->push_back(v);
@@ -199,7 +200,7 @@ namespace siblings {
         {
             bucket_iterator b = buckets_.begin()
                 + hasher_(k) % buckets_.size();
-            value_iterator i = std::find_if(b->begin(), b->end(),
+            local_iterator i = std::find_if(b->begin(), b->end(),
                                             key_equal(k));
             if (i == b->end()) {
                 return 0;
@@ -215,7 +216,7 @@ namespace siblings {
         {
             bucket_iterator b = buckets_.begin()
                 + hasher_(k) % buckets_.size();
-            value_iterator i = std::find_if(b->begin(), b->end(),
+            local_iterator i = std::find_if(b->begin(), b->end(),
                                             key_equal(k));
             return (i == b->end()) ? end() : iterator(b, buckets_.end(), i);
         }
@@ -225,7 +226,7 @@ namespace siblings {
         {
             const_bucket_iterator b = buckets_.begin()
                 + hasher_(k) % buckets_.size();
-            const_value_iterator i = std::find_if(b->begin(), b->end(),
+            const_local_iterator i = std::find_if(b->begin(), b->end(),
                                                   key_equal(k));
             return (i == b->end()) ? end()
                 : const_iterator(b, buckets_.end(), i);
@@ -246,7 +247,7 @@ namespace siblings {
         void rehash(size_type new_bucket_count)
         {
             unordered_map h(new_bucket_count, hasher_);
-            BOOST_FOREACH(const bucket& b, buckets_) {
+            BOOST_FOREACH(const bucket_type& b, buckets_) {
                 BOOST_FOREACH(const value_type& v, b) {
                     h.buckets_[hasher_(v.first)
                                % new_bucket_count].push_back(v);
