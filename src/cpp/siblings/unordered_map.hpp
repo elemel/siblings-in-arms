@@ -306,16 +306,16 @@ namespace siblings {
 
         // size ///////////////////////////////////////////////////////////////
 
-        /// @return The number of key-value pairs in the hash map.
+        /// @return The number of key-value pairs in the map.
         size_type size() const { return size_; }
 
-        /// @return True if the hash map contains no key-value pairs; false
+        /// @return True if the map contains no key-value pairs; false
         ///         otherwise.
         bool empty() const { return size() == 0; }
 
         // partitioning ///////////////////////////////////////////////////////
 
-        /// @return The number of buckets in the hash map.
+        /// @return The number of buckets in the map.
         size_type bucket_count() const { return buckets_.size(); }
 
         size_type bucket(const key_type& k) const
