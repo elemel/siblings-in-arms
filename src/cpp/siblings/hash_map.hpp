@@ -36,12 +36,16 @@ namespace siblings {
 
         template <typename ConstIterator>
         hash_map_iterator(const ConstIterator& other)
-            : current_bucket_(other.current_bucket_),
-              last_bucket_(other.last_bucket_),
-              current_value_(other.current_value_)
+            : current_bucket_(other.current_bucket()),
+              last_bucket_(other.last_bucket()),
+              current_value_(other.current_value())
         { }
 
-    // private:
+        bucket_iterator current_bucket() const { return current_bucket_; }
+        bucket_iterator last_bucket() const { return last_bucket_; }
+        value_iterator current_value() const { return current_value_; }
+
+    private:
         friend class boost::iterator_core_access;
 
         bucket_iterator current_bucket_;
@@ -104,7 +108,7 @@ namespace siblings {
         /// @pre new_bucket_count >= 1
         /// @post bucket_count() == new_bucket_count
         /// @post empty()
-        hash_map(size_type new_bucket_count = 11,
+        explicit hash_map(size_type new_bucket_count = 11,
                  const hasher& h = hasher())
             : buckets_(new_bucket_count), hasher_(h), size_(0)
         { }
