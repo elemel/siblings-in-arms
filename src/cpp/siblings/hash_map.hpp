@@ -264,6 +264,11 @@ namespace siblings {
             std::swap(size_, other.size_);
         }
 
+        data_type& operator[](const key_type& k)
+        {
+            return insert(value_type(k, data_type())).first->second;
+        }
+
     private:
         struct key_equal {
             key_type key;

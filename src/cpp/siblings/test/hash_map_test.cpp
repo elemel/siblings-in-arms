@@ -12,7 +12,7 @@ namespace {
         assert(m.empty());
     }
 
-    void test_insert()
+    void test_insert_value()
     {
         typedef hash_map<int, std::string> map_type;
         typedef std::pair<map_type::iterator, bool> status;
@@ -33,7 +33,7 @@ namespace {
         assert(m.size() == 2);
     }
 
-    void test_erase()
+    void test_erase_key()
     {
         typedef hash_map<int, std::string> map_type;
 
@@ -59,12 +59,52 @@ namespace {
         assert(count == 1);
         assert(m.empty());
     }
+
+    void test_index()
+    {
+        typedef hash_map<int, std::string> map_type;
+
+        map_type m;
+        map_type::iterator i;
+
+        assert(m.find(13) == m.end());
+        m[13] = "black";
+        i = m.find(13);
+        assert(i != m.end());
+        assert(i->first == 13);
+        assert(i->second == "black");
+        assert(m.find(17) == m.end());
+    }
 }
 
 int main()
 {
+    // test_iteration();
+    // test_const_iteration();
+    // test_size();
+    // test_max_size();
+    // test_empty();
+    // test_bucket_count();
+    // test_resize();
+    // test_hash_funct();
+    // test_key_eq();
     test_default_ctor();
-    test_insert();
-    test_erase();
+    // test_range_ctor();
+    // test_copy_ctor();
+    // test_assign();
+    // test_swap();
+    test_insert_value();
+    // test_insert_range();
+    // test_erase_iterator();
+    test_erase_key();
+    // test_erase_range();
+    // test_clear();
+    // test_const_find();
+    // test_find();
+    // test_count();
+    // test_const_equal_range();
+    // test_equal_range();
+    test_index();
+    // test_equal();
     return 0;
 }
