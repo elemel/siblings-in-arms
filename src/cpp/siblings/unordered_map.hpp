@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <cstddef>
+#include <functional>
 #include <list>
 #include <utility>
 #include <vector>
@@ -24,27 +25,42 @@ namespace siblings {
         typedef BucketIterator bucket_iterator;
         typedef LocalIterator local_iterator;
 
-        explicit unordered_map_iterator(bucket_iterator current_bucket
-                                        = bucket_iterator(),
-                                        bucket_iterator last_bucket
-                                        = bucket_iterator(),
-                                        local_iterator current_value
-                                        = local_iterator())
+        unordered_map_iterator() : current_bucket_(), last_bucket_() { }
 
+        unordered_map_iterator(bucket_iterator current_bucket,
+                               bucket_iterator last_bucket)
+            : current_bucket_(current_bucket), last_bucket_(last_bucket)
+        {
+            skip_empty_buckets();
+        }
+
+        /// @pre current_bucket != last_bucket
+        unordered_map_iterator(bucket_iterator current_bucket,
+                               bucket_iterator last_bucket,
+                               local_iterator current_value)
             : current_bucket_(current_bucket), last_bucket_(last_bucket),
-              current_value_(current_value)
+              current_value_(current_value), last_value_(current_bucket->end())
         { }
 
         template <typename ConstIterator>
         unordered_map_iterator(const ConstIterator& other)
             : current_bucket_(other.current_bucket()),
               last_bucket_(other.last_bucket()),
-              current_value_(other.current_value())
+              current_value_(other.current_value()),
+              last_value_(other.last_value())
+        { }
+
+        unordered_map_iterator(const unordered_map_iterator& other)
+            : current_bucket_(other.current_bucket()),
+              last_bucket_(other.last_bucket()),
+              current_value_(other.current_value()),
+              last_value_(other.last_value())
         { }
 
         bucket_iterator current_bucket() const { return current_bucket_; }
         bucket_iterator last_bucket() const { return last_bucket_; }
         local_iterator current_value() const { return current_value_; }
+        local_iterator last_value() const { return last_value_; }
 
     private:
         friend class boost::iterator_core_access;
@@ -52,18 +68,16 @@ namespace siblings {
         bucket_iterator current_bucket_;
         bucket_iterator last_bucket_;
         local_iterator current_value_;
+        local_iterator last_value_;
 
         void increment()
         {
             assert(current_bucket_ != last_bucket_);
-            if (++current_value_ == current_bucket_->end()) {
-                do {
-                    ++current_bucket_;
-                } while (current_bucket_ != last_bucket_
-                         && current_bucket_->empty());
-                if (current_bucket_ != last_bucket_) {
-                    current_value_ = current_bucket_->begin();
-                }
+            assert(current_value_ != last_value_);
+            ++current_value_;
+            if (current_value_ == last_value_) {
+                ++current_bucket_;
+                skip_empty_buckets();
             }
         }
 
@@ -77,27 +91,54 @@ namespace siblings {
         value_type& dereference() const
         {
             assert(current_bucket_ != last_bucket_);
+            assert(current_value_ != last_value_);
             return *current_value_;
+        }
+
+        void skip_empty_buckets()
+        {
+            while (current_bucket_ != last_bucket_ && current_bucket_->empty())
+            {
+                ++current_bucket_;
+            }
+            if (current_bucket_ != last_bucket_) {
+                current_value_ = current_bucket_->begin();
+                last_value_ = current_bucket_->end();
+            }
         }
     };
     
     /// @invariant m.size() <= m.bucket_count()
-    template <typename Key, typename T, typename Hash = boost::hash<Key> >
+    template <typename Key, typename T, typename Hash = boost::hash<Key>,
+              typename Pred = std::equal_to<Key>,
+              typename A = std::allocator<std::pair<const Key, T> > >
     class unordered_map {
     public:
+        // nested types ///////////////////////////////////////////////////////
+
         typedef Key key_type;
+        typedef std::pair<const Key, T> value_type;
         typedef T mapped_type;
         typedef Hash hasher;
-        typedef std::pair<const key_type, mapped_type> value_type;
+        typedef Pred key_equal;
+        typedef A allocator_type;
+        typedef typename A::pointer pointer;
+        typedef typename A::const_pointer const_pointer;
+        typedef typename A::reference reference;
+        typedef typename A::const_reference const_reference;
         typedef std::size_t size_type;
 
     private:
-        typedef std::list<value_type> bucket_type;
+        // nested types ///////////////////////////////////////////////////////
+
+        typedef std::list<value_type, allocator_type> bucket_type;
         typedef std::vector<bucket_type> bucket_vector;
         typedef typename bucket_vector::iterator bucket_iterator;
         typedef typename bucket_vector::const_iterator const_bucket_iterator;
 
     public:
+        // nested types ///////////////////////////////////////////////////////
+
         typedef typename bucket_type::iterator local_iterator;
         typedef typename bucket_type::const_iterator const_local_iterator;
 
@@ -109,62 +150,88 @@ namespace siblings {
                                        const_local_iterator>
         const_iterator;
 
+        // lifecycle //////////////////////////////////////////////////////////
+
         /// @pre new_bucket_count >= 1
         /// @post m.bucket_count() == new_bucket_count
         /// @post m.empty()
-        explicit unordered_map(size_type new_bucket_count = 11,
-                               const hasher& h = hasher())
-            : buckets_(new_bucket_count), hash_(h), size_(0)
+        explicit unordered_map(size_type new_bucket_count = 3,
+                               const hasher& h = hasher(),
+                               const key_equal& eq = key_equal(),
+                               const allocator_type& a = allocator_type())
+            : buckets_(new_bucket_count, bucket_type(allocator_)), hash_(h),
+              eq_(eq), allocator_(a), size_(0)
         { }
 
-        iterator begin()
+        void swap(unordered_map& other)
         {
-            // return iterator to first non-empty bucket
-            for (bucket_iterator i = buckets_.begin();
-                 i != buckets_.end(); ++i)
-            {
-                if (!i->empty()) {
-                    return iterator(i, buckets_.end(), i->begin());
-                }
-            }
-            return end();
+            buckets_.swap(other.buckets_);
+            std::swap(hash_, other.hash_);
+            std::swap(eq_, other.eq_);
+            std::swap(allocator_, other.allocator_);
+            std::swap(size_, other.size_);
         }
 
-        iterator end()
+        // iteration //////////////////////////////////////////////////////////
+        
+        iterator begin()
         {
-            // return past-the-end iterator for buckets
-            return iterator(buckets_.end(), buckets_.end(), local_iterator());
+            return iterator(buckets_.begin(), buckets_.end());
         }
 
         const_iterator begin() const
         {
-            // return iterator to first non-empty bucket
-            for (const_bucket_iterator i = buckets_.begin();
-                 i != buckets_.end(); ++i)
-            {
-                if (!i->empty()) {
-                    return const_iterator(i, buckets_.end(), i->begin());
-                }
-            }
-            return end();
+            return const_iterator(buckets_.begin(), buckets_.end());
+        }
+
+        iterator end()
+        {
+            return iterator(buckets_.end(), buckets_.end());
         }
 
         const_iterator end() const
         {
-            // return past-the-end iterator for buckets
-            return const_iterator(buckets_.end(), buckets_.end(),
-                                  const_local_iterator());
+            return const_iterator(buckets_.end(), buckets_.end());
         }
+
+        // local iteration ////////////////////////////////////////////////////
+
+        local_iterator begin(size_type bucket_index)
+        {
+            assert(bucket_index <= bucket_count());
+            return buckets_[bucket_index].begin();
+        }
+
+        const_local_iterator begin(size_type bucket_index) const
+        {
+            assert(bucket_index <= bucket_count());
+            return buckets_[bucket_index].begin();
+        }
+
+        local_iterator end(size_type bucket_index)
+        {
+            assert(bucket_index <= bucket_count());
+            return buckets_[bucket_index].end();
+        }
+
+        const_local_iterator end(size_type bucket_index) const
+        {
+            assert(bucket_index <= bucket_count());
+            return buckets_[bucket_index].end();
+        }
+
+        // insertion and removal //////////////////////////////////////////////
 
         // @post m.find(v.first) != m.end()
         std::pair<iterator, bool> insert(const value_type& v)
         {
             bucket_iterator b = buckets_.begin() + bucket(v.first);
             local_iterator i = std::find_if(b->begin(), b->end(),
-                                            key_equal(v.first));
+                                            first_equal(v.first));
             if (i == b->end()) {
                 b->push_back(v);
-                if (++size_ > bucket_count()) {
+                ++size_;
+                if (size_ > bucket_count()) {
                     rehash(bucket_count() * 2 + 1);
                     return std::make_pair(find(v.first), true);
                 } else {
@@ -191,6 +258,8 @@ namespace siblings {
 
         void erase(iterator i)
         {
+            assert(i.current_bucket() != i.last_bucket());
+            assert(i.current_value() != i.last_value());
             i.current_bucket()->erase(i.current_value());
         }
 
@@ -198,35 +267,44 @@ namespace siblings {
         size_type erase(const key_type& k)
         {
             bucket_iterator b = buckets_.begin() + bucket(k);
-            local_iterator i = std::find_if(b->begin(), b->end(),
-                                            key_equal(k));
-            if (i == b->end()) {
+            local_iterator v = std::find_if(b->begin(), b->end(),
+                                            first_equal(k));
+            if (v == b->end()) {
                 return 0;
             } else {
-                b->erase(i);
+                b->erase(v);
                 --size_;
                 return 1;
             }
         }
 
+        mapped_type& operator[](const key_type& k)
+        {
+            return insert(value_type(k, mapped_type())).first->second;
+        }
+
+        // searching //////////////////////////////////////////////////////////
+
         /// @post result == m.end() || result->first == k
         iterator find(const key_type& k)
         {
             bucket_iterator b = buckets_.begin() + bucket(k);
-            local_iterator i = std::find_if(b->begin(), b->end(),
-                                            key_equal(k));
-            return (i == b->end()) ? end() : iterator(b, buckets_.end(), i);
+            local_iterator v = std::find_if(b->begin(), b->end(),
+                                            first_equal(k));
+            return (v == b->end()) ? end() : iterator(b, buckets_.end(), v);
         }
 
         /// @post result == m.end() || result->first == k
         const_iterator find(const key_type& k) const
         {
             const_bucket_iterator b = buckets_.begin() + bucket(k);
-            const_local_iterator i = std::find_if(b->begin(), b->end(),
-                                                  key_equal(k));
-            return (i == b->end()) ? end()
-                : const_iterator(b, buckets_.end(), i);
+            const_local_iterator v = std::find_if(b->begin(), b->end(),
+                                                  first_equal(k));
+            return (v == b->end()) ? end()
+                : const_iterator(b, buckets_.end(), v);
         }
+
+        // size ///////////////////////////////////////////////////////////////
 
         /// @return The number of key-value pairs in the hash map.
         size_type size() const { return size_; }
@@ -235,50 +313,54 @@ namespace siblings {
         ///         otherwise.
         bool empty() const { return size() == 0; }
 
+        // partitioning ///////////////////////////////////////////////////////
+
         /// @return The number of buckets in the hash map.
         size_type bucket_count() const { return buckets_.size(); }
-
-        /// @pre new_bucket_count >= 1
-        /// @post m.bucket_count() == new_bucket_count
-        void rehash(size_type new_bucket_count)
-        {
-            unordered_map h(new_bucket_count, hash_);
-            BOOST_FOREACH(const bucket_type& b, buckets_) {
-                BOOST_FOREACH(const value_type& v, b) {
-                    h.buckets_[h.bucket(v.first)].push_back(v);
-                }
-            }
-            swap(h);
-        }
-
-        void swap(unordered_map& other)
-        {
-            buckets_.swap(other.buckets_);
-            std::swap(hash_, other.hash_);
-            std::swap(size_, other.size_);
-        }
-
-        mapped_type& operator[](const key_type& k)
-        {
-            return insert(value_type(k, mapped_type())).first->second;
-        }
 
         size_type bucket(const key_type& k) const
         {
             return hash_(k) % bucket_count();
         }
 
+        size_type bucket_size(size_type bucket_index) const
+        {
+            assert(bucket_index <= bucket_count());
+            return buckets_[bucket_index].size();
+        }
+
+        /// @pre new_bucket_count >= 1
+        /// @post m.bucket_count() == new_bucket_count
+        void rehash(size_type new_bucket_count)
+        {
+            unordered_map h(new_bucket_count, hash_, eq_, allocator_);
+            BOOST_FOREACH(const bucket_type& b, buckets_) {
+                BOOST_FOREACH(const value_type& v, b) {
+                    h.buckets_[h.bucket(v.first)].push_back(v);
+                }
+            }
+            h.size_ = size_;
+            swap(h);
+        }
+
     private:
-        struct key_equal {
+        // nested types ///////////////////////////////////////////////////////
+
+        struct first_equal {
             key_type key;
+            key_equal eq;
 
-            explicit key_equal(const key_type& k) : key(k) { }
+            explicit first_equal(const key_type& k) : key(k) { }
 
-            bool operator()(const value_type& v) { return key == v.first; }
+            bool operator()(const value_type& v) { return eq(key, v.first); }
         };
+
+        // member variables ///////////////////////////////////////////////////
 
         bucket_vector buckets_;
         hasher hash_;
+        key_equal eq_;
+        allocator_type allocator_;
         size_type size_;
     };
 }

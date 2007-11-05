@@ -5,6 +5,11 @@
 using namespace siblings;
 
 namespace {
+    int int_data[] = { 1972, 1974, 2004, 2007, 1337, 1984, 2001, 1999, 1939,
+                       1945 };
+    std::string string_data[] = { "green", "yellow", "blue", "red", "orange",
+                                  "black", "white", "gray", "brown", "pink" };
+
     void test_default_ctor()
     {
         unordered_map<int, std::string> m;
@@ -15,22 +20,19 @@ namespace {
     void test_insert_value()
     {
         typedef unordered_map<int, std::string> map_type;
-        typedef std::pair<map_type::iterator, bool> status;
+        typedef map_type::value_type value_type;
+        typedef std::pair<map_type::iterator, bool> insert_result;
 
         map_type m;
-        status s;
-
-        s = m.insert(map_type::value_type(13, "Mikael"));
-        assert(s.second);
-        assert(m.size() == 1);
-
-        s = m.insert(map_type::value_type(12, "Lind"));
-        assert(s.second);
-        assert(m.size() == 2);
-        
-        s = m.insert(map_type::value_type(13, "Mike"));
-        assert(!s.second);
-        assert(m.size() == 2);
+        for (int i = 0; i < 10; ++i) {
+            assert(int(m.size()) == i);
+            assert(m.find(int_data[i]) == m.end());
+            insert_result r = m.insert(value_type(int_data[i],
+                                                  string_data[i]));
+            assert(r.second);
+            assert(int(m.size()) == i + 1);
+            assert(m.find(int_data[i]) != m.end());
+        }
     }
 
     void test_erase_key()

@@ -1,5 +1,6 @@
 #include "../sparse_grid_2.hpp"
 #include <cassert>
+#include <iostream>
 
 using namespace siblings;
 
