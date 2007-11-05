@@ -16,7 +16,7 @@ namespace siblings {
     class hash_map_iterator
         : public boost::iterator_facade<hash_map_iterator<T, BucketIterator,
                                                           ValueIterator>,
-                                        T, boost::bidirectional_traversal_tag>
+                                        T, boost::forward_traversal_tag>
     {
     public:
         typedef T value_type;
@@ -34,7 +34,14 @@ namespace siblings {
               current_value_(current_value)
         { }
 
-    private:
+        template <typename ConstIterator>
+        hash_map_iterator(const ConstIterator& other)
+            : current_bucket_(other.current_bucket_),
+              last_bucket_(other.last_bucket_),
+              current_value_(other.current_value_)
+        { }
+
+    // private:
         friend class boost::iterator_core_access;
 
         bucket_iterator current_bucket_;
@@ -50,24 +57,11 @@ namespace siblings {
                 } while (current_bucket_ != last_bucket_
                          && current_bucket_->empty());
                 if (current_bucket_ != last_bucket_) {
-                    current_value_ = current_bucket_->first();
+                    current_value_ = current_bucket_->begin();
                 }
             }
         }
 
-        void decrement()
-        {
-            if (current_bucket_ == last_bucket_
-                || current_value_ == current_bucket_->begin())
-            {
-                do {
-                    --current_bucket_;
-                } while (current_bucket_->empty());
-                current_value_ = current_bucket_->end();
-            }
-            --current_value_;
-        }
-        
         bool equal(const hash_map_iterator& other) const
         {
             return current_bucket_ == other.current_bucket_
@@ -158,19 +152,21 @@ namespace siblings {
                 + hasher_(v.first) % buckets_.size();
             value_iterator i = std::find_if(b->begin(), b->end(),
                                             key_equal(v.first));
-            if (i == b->end()) {
+            bool inserting = (i == b->end());
+            if (inserting) {
                 b->push_back(v);
-                if (++size_ > capacity()) {
-                    rehash(bucket_count() * 2 + 1);
-                    return std::make_pair(find(v.first), true);
-                } else {
-                    return std::make_pair(iterator(b, buckets_.end(),
-                                                   boost::prior(b->end())),
-                                          true);
-                }
+                ++size_;
             } else {
-                i->second = v.second;
-                return std::make_pair(iterator(b, buckets_.end(), i), false);
+                b->erase(i);
+                b->push_back(v);
+            }
+            if (inserting && size_ > capacity()) {
+                rehash(bucket_count() * 2 + 1);
+                return std::make_pair(find(v.first), true);
+            } else {
+                return std::make_pair(iterator(b, buckets_.end(),
+                                               boost::prior(b->end())),
+                                      inserting);
             }
         }
 
@@ -180,6 +176,11 @@ namespace siblings {
             while (first != last) {
                 insert(*first++);
             }
+        }
+
+        void erase(iterator i)
+        {
+            erase(i->first);
         }
 
         /// @post find(k) == end()

@@ -4,8 +4,8 @@
 #include "circle_2.hpp"
 #include "config.hpp"
 #include "flat_set.hpp"
+#include "hash_map.hpp"
 #include <cstddef>
-#include <map>
 #include <vector>
 
 namespace siblings {
@@ -22,11 +22,11 @@ namespace siblings {
         std::size_t tile_count() const;
 
     private:
-        typedef std::map<int, circle_2> entry_map;
+        typedef hash_map<int, circle_2> entry_map;
         typedef std::pair<int, int> grid_position;
         typedef flat_set<grid_position> grid_position_set;
-        typedef std::map<grid_position, entry_map> tile_map;
-        typedef std::map<int, grid_position_set> grid_position_map;
+        typedef hash_map<grid_position, entry_map> tile_map;
+        typedef hash_map<int, grid_position_set> grid_position_map;
 
         real tile_side_;
         tile_map tiles_;
