@@ -82,13 +82,13 @@ namespace siblings {
     };
     
     /// @invariant m.size() <= m.bucket_count()
-    template <typename Key, typename Data, typename Hasher = boost::hash<Key> >
+    template <typename Key, typename T, typename Hash = boost::hash<Key> >
     class unordered_map {
     public:
         typedef Key key_type;
-        typedef Data data_type;
-        typedef Hasher hasher;
-        typedef std::pair<const key_type, data_type> value_type;
+        typedef T mapped_type;
+        typedef Hash hasher;
+        typedef std::pair<const key_type, mapped_type> value_type;
         typedef std::size_t size_type;
 
     private:
@@ -114,7 +114,7 @@ namespace siblings {
         /// @post m.empty()
         explicit unordered_map(size_type new_bucket_count = 11,
                                const hasher& h = hasher())
-            : buckets_(new_bucket_count), hasher_(h), size_(0)
+            : buckets_(new_bucket_count), hash_(h), size_(0)
         { }
 
         iterator begin()
@@ -159,8 +159,7 @@ namespace siblings {
         // @post m.find(v.first) != m.end()
         std::pair<iterator, bool> insert(const value_type& v)
         {
-            bucket_iterator b = buckets_.begin()
-                + hasher_(v.first) % buckets_.size();
+            bucket_iterator b = buckets_.begin() + bucket(v.first);
             local_iterator i = std::find_if(b->begin(), b->end(),
                                             key_equal(v.first));
             if (i == b->end()) {
@@ -192,14 +191,13 @@ namespace siblings {
 
         void erase(iterator i)
         {
-            erase(i->first);
+            i.current_bucket()->erase(i.current_value());
         }
 
         /// @post m.find(k) == m.end()
         size_type erase(const key_type& k)
         {
-            bucket_iterator b = buckets_.begin()
-                + hasher_(k) % buckets_.size();
+            bucket_iterator b = buckets_.begin() + bucket(k);
             local_iterator i = std::find_if(b->begin(), b->end(),
                                             key_equal(k));
             if (i == b->end()) {
@@ -214,8 +212,7 @@ namespace siblings {
         /// @post result == m.end() || result->first == k
         iterator find(const key_type& k)
         {
-            bucket_iterator b = buckets_.begin()
-                + hasher_(k) % buckets_.size();
+            bucket_iterator b = buckets_.begin() + bucket(k);
             local_iterator i = std::find_if(b->begin(), b->end(),
                                             key_equal(k));
             return (i == b->end()) ? end() : iterator(b, buckets_.end(), i);
@@ -224,8 +221,7 @@ namespace siblings {
         /// @post result == m.end() || result->first == k
         const_iterator find(const key_type& k) const
         {
-            const_bucket_iterator b = buckets_.begin()
-                + hasher_(k) % buckets_.size();
+            const_bucket_iterator b = buckets_.begin() + bucket(k);
             const_local_iterator i = std::find_if(b->begin(), b->end(),
                                                   key_equal(k));
             return (i == b->end()) ? end()
@@ -246,11 +242,10 @@ namespace siblings {
         /// @post m.bucket_count() == new_bucket_count
         void rehash(size_type new_bucket_count)
         {
-            unordered_map h(new_bucket_count, hasher_);
+            unordered_map h(new_bucket_count, hash_);
             BOOST_FOREACH(const bucket_type& b, buckets_) {
                 BOOST_FOREACH(const value_type& v, b) {
-                    h.buckets_[hasher_(v.first)
-                               % new_bucket_count].push_back(v);
+                    h.buckets_[h.bucket(v.first)].push_back(v);
                 }
             }
             swap(h);
@@ -259,13 +254,18 @@ namespace siblings {
         void swap(unordered_map& other)
         {
             buckets_.swap(other.buckets_);
-            std::swap(hasher_, other.hasher_);
+            std::swap(hash_, other.hash_);
             std::swap(size_, other.size_);
         }
 
-        data_type& operator[](const key_type& k)
+        mapped_type& operator[](const key_type& k)
         {
-            return insert(value_type(k, data_type())).first->second;
+            return insert(value_type(k, mapped_type())).first->second;
+        }
+
+        size_type bucket(const key_type& k) const
+        {
+            return hash_(k) % bucket_count();
         }
 
     private:
@@ -278,7 +278,7 @@ namespace siblings {
         };
 
         bucket_vector buckets_;
-        hasher hasher_;
+        hasher hash_;
         size_type size_;
     };
 }
