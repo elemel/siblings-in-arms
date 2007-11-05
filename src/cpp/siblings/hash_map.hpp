@@ -76,7 +76,7 @@ namespace siblings {
         }
     };
     
-    /// @invariant size() <= capacity()
+    /// @invariant size() <= bucket_count()
     template <typename Key, typename Data, typename Hasher = boost::hash<Key> >
     class hash_map {
     public:
@@ -109,7 +109,8 @@ namespace siblings {
             : buckets_(new_bucket_count), hasher_(h), size_(0)
         { }
 
-        iterator begin() {
+        iterator begin()
+        {
             // return iterator to first non-empty bucket
             for (bucket_iterator i = buckets_.begin();
                  i != buckets_.end(); ++i)
@@ -127,7 +128,8 @@ namespace siblings {
             return iterator(buckets_.end(), buckets_.end(), value_iterator());
         }
 
-        const_iterator begin() const {
+        const_iterator begin() const
+        {
             // return iterator to first non-empty bucket
             for (const_bucket_iterator i = buckets_.begin();
                  i != buckets_.end(); ++i)
@@ -160,7 +162,7 @@ namespace siblings {
                 b->erase(i);
                 b->push_back(v);
             }
-            if (inserting && size_ > capacity()) {
+            if (inserting && size_ > bucket_count()) {
                 rehash(bucket_count() * 2 + 1);
                 return std::make_pair(find(v.first), true);
             } else {
@@ -221,28 +223,14 @@ namespace siblings {
         }
 
         /// @return The number of key-value pairs in the hash map.
-        size_type size() const
-        {
-            return size_;
-        }
+        size_type size() const { return size_; }
 
         /// @return True if the hash map contains no key-value pairs; false
         ///         otherwise.
-        bool empty() const
-        {
-            return size() == 0;
-        }
+        bool empty() const { return size() == 0; }
 
         /// @return The number of buckets in the hash map.
-        size_type bucket_count() const {
-            return buckets_.size();
-        }
-
-        /// @return The maximum number of key-value pairs that the hash map can
-        ///         contain before it is rehashed.
-        size_type capacity() const {
-            return bucket_count();
-        }
+        size_type bucket_count() const { return buckets_.size(); }
 
         /// @pre new_bucket_count >= 1
         /// @post bucket_count() == new_bucket_count
