@@ -60,7 +60,8 @@ namespace siblings {
             }
         }
 
-        std::vector<key_type> find(const shape_type& s) const
+        template <typename OutputIterator>
+        void find(const shape_type& s, OutputIterator o) const
         {
             flat_set<key_type> found;
             BOOST_FOREACH(const grid_position& p, to_grid_positions(s)) {
@@ -75,7 +76,7 @@ namespace siblings {
                     }
                 }
             }
-            return std::vector<key_type>(found.begin(), found.end());
+            std::copy(found.begin(), found.end(), o);
         }
 
         size_type size() const { return grid_positions_.size(); }

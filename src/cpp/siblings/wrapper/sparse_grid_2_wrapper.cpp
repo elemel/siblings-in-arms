@@ -1,4 +1,5 @@
 #include "../config.hpp"
+#include "../sink_iterator.hpp"
 #include "../sparse_grid_2.hpp"
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
@@ -11,18 +12,17 @@ namespace {
     typedef circle_2<real> circle_type;
     typedef sparse_grid_2<int, circle_type> grid_type;
 
+    void append(list& l, int i) { l.append(i); }
+    
     list find_wrapper(const grid_type& g, const circle_type& c)
     {
         list result;
-        BOOST_FOREACH(int key, g.find(c)) {
-            result.append(key);
-        }
+        g.find(c, sinker(boost::bind(&append, result, _1)));
         return result;
     }
 }
 
-BOOST_PYTHON_MODULE(SparseGrid2)
-{
+BOOST_PYTHON_MODULE(SparseGrid2) {
     class_<grid_type>("SparseGrid2")
         // initializers
         .def(init<>())
