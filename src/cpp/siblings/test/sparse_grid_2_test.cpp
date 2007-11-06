@@ -10,7 +10,7 @@ namespace {
         sparse_grid_2 g;
         assert(g.entry_count() == 0);
         for (int i = 1; i <= 10; ++i) {
-            g.insert(i, circle_2(i, i, i));
+            g.insert(i, circle_2<real>(i, i, i));
         }
         assert(g.entry_count() == 10);
         for (int i = 1; i <= 5; ++i) {
@@ -27,9 +27,9 @@ namespace {
     {
         sparse_grid_2 g;
         assert(g.tile_count() == 0);
-        g.insert(1, circle_2(0.5, 0.5, 0.25));
+        g.insert(1, circle_2<real>(0.5, 0.5, 0.25));
         assert(g.tile_count() == 1);
-        g.insert(2, circle_2(0, 0, 0.5));
+        g.insert(2, circle_2<real>(0, 0, 0.5));
         assert(g.tile_count() == 4);
         g.erase(1);
         assert(g.tile_count() == 4);

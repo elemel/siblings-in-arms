@@ -7,7 +7,7 @@ using namespace siblings;
 using namespace boost::python;
 
 namespace {
-    list find_wrapper(const sparse_grid_2& g, const circle_2& c)
+    list find_wrapper(const sparse_grid_2& g, const circle_2<real>& c)
     {
         list result;
         BOOST_FOREACH(int key, g.find(c)) {

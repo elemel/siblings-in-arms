@@ -1,30 +1,41 @@
 #ifndef SIBLINGS_CIRCLE_2_HPP
 #define SIBLINGS_CIRCLE_2_HPP
 
-#include "config.hpp"
 #include "vector_2.hpp"
-#include <iosfwd>
+#include <ostream>
 
 namespace siblings {
     /// Geometric circle in 2D.
     ///
     /// @invariant radius() >= 0
+    template <typename T>
     class circle_2 {
     public:
-        circle_2();
-        circle_2(const vector_2<real>& center, real radius);
-        circle_2(real center_x, real center_y, real radius);
+        circle_2() : radius_(T(0)) { }
 
-        const vector_2<real>& center() const;
-        real radius() const;
+        circle_2(const vector_2<T>& center, T radius)
+            : center_(center), radius_(radius)
+        { }
+
+        circle_2(T center_x, T center_y, T radius)
+            : center_(center_x, center_y), radius_(radius)
+        { }
+
+        const vector_2<T>& center() const { return center_; }
+        T radius() const { return radius_; }
 
     private:
-        vector_2<real> center_;
-        real radius_;
+        vector_2<T> center_;
+        T radius_;
     };
 
     /// Output circle in format "(center_x, center_y; radius)".
-    std::ostream& operator<<(std::ostream& out, const circle_2& c);
+    template <typename T>
+    std::ostream& operator<<(std::ostream& out, const circle_2<T>& c)
+    {
+        return out << "(" << c.center().x() << ", " << c.center().y() << "; "
+                   << c.radius() << ")";
+    }
 }
 
 #endif

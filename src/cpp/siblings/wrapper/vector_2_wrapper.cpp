@@ -7,39 +7,37 @@ using namespace siblings;
 using namespace boost::python;
 
 namespace {
-    typedef vector_2<real> vector_type;
-
-    real get_x_wrapper(const vector_type& v)
+    real get_x_wrapper(const vector_2<real>& v)
     {
         return v.x();
     }
 
-    void set_x_wrapper(vector_type& v, real x)
+    void set_x_wrapper(vector_2<real>& v, real x)
     {
         v.x() = x;
     }
 
-    real get_y_wrapper(const vector_type& v)
+    real get_y_wrapper(const vector_2<real>& v)
     {
         return v.y();
     }
 
-    void set_y_wrapper(vector_type& v, real y)
+    void set_y_wrapper(vector_2<real>& v, real y)
     {
         v.y() = y;
     }
 
-    vector_type itruediv_wrapper(vector_type& v, real r)
+    vector_2<real> itruediv_wrapper(vector_2<real>& v, real r)
     {
         return v /= r;
     }
 
-    vector_type truediv_wrapper(const vector_type& v, real r)
+    vector_2<real> truediv_wrapper(const vector_2<real>& v, real r)
     {
         return v / r;
     }
 
-    std::string repr_wrapper(const vector_type& v)
+    std::string repr_wrapper(const vector_2<real>& v)
     {
         std::ostringstream out;
         out << "Vector2(" << v.x() << ", " << v.y() << ")";
@@ -49,18 +47,18 @@ namespace {
 
 BOOST_PYTHON_MODULE(Vector2)
 {
-    class_<vector_type>("Vector2")
+    class_<vector_2<real> >("Vector2")
         // initializers
         .def(init<>())
-        .def(init<const vector_type&>())
+        .def(init<const vector_2<real>&>())
         .def(init<real>())
         .def(init<real, real>())
 
         // attributes
         .add_property("x", &get_x_wrapper, &set_x_wrapper)
         .add_property("y", &get_y_wrapper, &set_y_wrapper)
-        .add_property("squared_magnitude", &vector_type::squared_magnitude)
-        .add_property("magnitude", &vector_type::magnitude)
+        .add_property("squared_magnitude", &vector_2<real>::squared_magnitude)
+        .add_property("magnitude", &vector_2<real>::magnitude)
 
         // operators
         .def(self += self)

@@ -9,7 +9,7 @@ namespace siblings {
         : tile_side_(std::abs(tile_side))
     { }
 
-    bool sparse_grid_2::insert(int key, const circle_2& bounds)
+    bool sparse_grid_2::insert(int key, const circle_2<real>& bounds)
     {
         const std::vector<grid_position> positions(to_grid_positions(bounds));
         if (grid_positions_.find(key) == grid_positions_.end()) {
@@ -36,7 +36,7 @@ namespace siblings {
         }
     }
 
-    std::vector<int> sparse_grid_2::find(const circle_2& bounds) const
+    std::vector<int> sparse_grid_2::find(const circle_2<real>& bounds) const
     {
         flat_set<int> found;
         BOOST_FOREACH(const grid_position& p, to_grid_positions(bounds)) {
@@ -62,7 +62,7 @@ namespace siblings {
         return tiles_.size();
     }
 
-    void sparse_grid_2::create_entry(int key, const circle_2& bounds)
+    void sparse_grid_2::create_entry(int key, const circle_2<real>& bounds)
     {
         const std::vector<grid_position> positions = to_grid_positions(bounds);
         BOOST_FOREACH(const grid_position& p, positions) {
@@ -72,7 +72,7 @@ namespace siblings {
                                                  positions.end());
     }
 
-    void sparse_grid_2::update_entry(int key, const circle_2& bounds)
+    void sparse_grid_2::update_entry(int key, const circle_2<real>& bounds)
     {
         const grid_position_set old_positions = grid_positions_[key];
         const std::vector<grid_position> new_positions
@@ -100,7 +100,7 @@ namespace siblings {
 
     /// Returns a sorted vector.
     std::vector<sparse_grid_2::grid_position>
-    sparse_grid_2::to_grid_positions(const circle_2& bounds) const
+    sparse_grid_2::to_grid_positions(const circle_2<real>& bounds) const
     {
         std::vector<grid_position> result;
         const vector_2<real> radii = vector_2<real>(bounds.radius(),
@@ -121,8 +121,9 @@ namespace siblings {
         return grid_position(int(v.x() / tile_side_), int(v.y() / tile_side_));
     }
     
-    void sparse_grid_2::add_entry_at_position(int key, const circle_2& bounds,
-                                       const grid_position& p)
+    void sparse_grid_2::add_entry_at_position(int key,
+                                              const circle_2<real>& bounds,
+                                              const grid_position& p)
     {
         tiles_[p][key] = bounds;
         

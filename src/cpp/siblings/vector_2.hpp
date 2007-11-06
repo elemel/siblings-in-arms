@@ -66,8 +66,8 @@ namespace siblings {
         T magnitude() const { return std::sqrt(squared_magnitude()); }
 
     private:
-        real x_;
-        real y_;
+        T x_;
+        T y_;
     };
 
     template <typename T>
