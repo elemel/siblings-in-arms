@@ -5,7 +5,7 @@ using namespace siblings;
 using namespace boost::python;
 
 typedef const circle_2<real>& c;
-typedef const rectangle_2& r;
+typedef const rectangle_2<real>& r;
 typedef const vector_2<real>& v;
 
 BOOST_PYTHON_MODULE(geometry_2)
@@ -21,13 +21,13 @@ BOOST_PYTHON_MODULE(geometry_2)
     def("squared_distance", (real (*)(v, v)) &squared_distance);
 
     def("distance", distance<circle_2<real>, circle_2<real> >);
-    def("distance", distance<circle_2<real>, rectangle_2>);
+    def("distance", distance<circle_2<real>, rectangle_2<real> >);
     def("distance", distance<circle_2<real>, vector_2<real> >);
-    def("distance", distance<rectangle_2, circle_2<real> >);
-    def("distance", distance<rectangle_2, rectangle_2>);
-    def("distance", distance<rectangle_2, vector_2<real> >);
+    def("distance", distance<rectangle_2<real>, circle_2<real> >);
+    def("distance", distance<rectangle_2<real>, rectangle_2<real> >);
+    def("distance", distance<rectangle_2<real>, vector_2<real> >);
     def("distance", distance<vector_2<real>, circle_2<real> >);
-    def("distance", distance<vector_2<real>, rectangle_2>);
+    def("distance", distance<vector_2<real>, rectangle_2<real> >);
     def("distance", distance<vector_2<real>, vector_2<real> >);
 
     def("contains", (bool (*)(c, c)) &contains);
@@ -47,8 +47,8 @@ BOOST_PYTHON_MODULE(geometry_2)
     def("bounding_circle", (circle_2<real> (*)(r)) &bounding_circle);
     def("bounding_circle", (circle_2<real> (*)(v)) &bounding_circle);
 
-    def("bounding_rectangle", (rectangle_2 (*)(c)) &bounding_rectangle);
+    def("bounding_rectangle", (rectangle_2<real> (*)(c)) &bounding_rectangle);
     def("bounding_rectangle", (r (*)(r)) &bounding_rectangle,
         return_value_policy<copy_const_reference>());
-    def("bounding_rectangle", (rectangle_2 (*)(v)) &bounding_rectangle);
+    def("bounding_rectangle", (rectangle_2<real> (*)(v)) &bounding_rectangle);
 }
