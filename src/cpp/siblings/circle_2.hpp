@@ -12,14 +12,14 @@ namespace siblings {
     class circle_2 {
     public:
         circle_2();
-        circle_2(const vector_2& center, real radius);
+        circle_2(const vector_2<real>& center, real radius);
         circle_2(real center_x, real center_y, real radius);
 
-        const vector_2& center() const;
+        const vector_2<real>& center() const;
         real radius() const;
 
     private:
-        vector_2 center_;
+        vector_2<real> center_;
         real radius_;
     };
 

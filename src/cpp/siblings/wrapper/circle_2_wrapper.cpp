@@ -6,7 +6,7 @@ using namespace siblings;
 using namespace boost::python;
 
 namespace {
-    vector_2 center_wrapper(const circle_2& c)
+    vector_2<real> center_wrapper(const circle_2& c)
     {
         return c.center();
     }
@@ -26,7 +26,7 @@ BOOST_PYTHON_MODULE(Circle2)
         // initializers
         .def(init<>())
         .def(init<const circle_2&>())
-        .def(init<const vector_2&, real>())
+        .def(init<const vector_2<real>&, real>())
         .def(init<real, real, real>())
 
         // attributes

@@ -9,13 +9,13 @@
 namespace siblings {
     real squared_distance(const circle_2&, const circle_2&);
     real squared_distance(const circle_2&, const rectangle_2&);
-    real squared_distance(const circle_2&, const vector_2&);
+    real squared_distance(const circle_2&, const vector_2<real>&);
     real squared_distance(const rectangle_2&, const circle_2&);
     real squared_distance(const rectangle_2&, const rectangle_2&);
-    real squared_distance(const rectangle_2&, const vector_2&);
-    real squared_distance(const vector_2&, const circle_2&);
-    real squared_distance(const vector_2&, const rectangle_2&);
-    real squared_distance(const vector_2&, const vector_2&);
+    real squared_distance(const rectangle_2&, const vector_2<real>&);
+    real squared_distance(const vector_2<real>&, const circle_2&);
+    real squared_distance(const vector_2<real>&, const rectangle_2&);
+    real squared_distance(const vector_2<real>&, const vector_2<real>&);
 
     template <typename T, typename U>
     real distance(const T& a, const U& b)
@@ -25,10 +25,10 @@ namespace siblings {
 
     bool contains(const circle_2& outer, const circle_2& inner);
     bool contains(const circle_2& outer, const rectangle_2& inner);
-    bool contains(const circle_2& outer, const vector_2& inner);
+    bool contains(const circle_2& outer, const vector_2<real>& inner);
     bool contains(const rectangle_2& outer, const circle_2& inner);
     bool contains(const rectangle_2& outer, const rectangle_2& inner);
-    bool contains(const rectangle_2& outer, const vector_2& inner);
+    bool contains(const rectangle_2& outer, const vector_2<real>& inner);
 
     bool intersects(const circle_2&, const circle_2&);
     bool intersects(const circle_2&, const rectangle_2&);
@@ -37,11 +37,11 @@ namespace siblings {
 
     const circle_2& bounding_circle(const circle_2&);
     circle_2 bounding_circle(const rectangle_2&);
-    circle_2 bounding_circle(const vector_2&);
+    circle_2 bounding_circle(const vector_2<real>&);
 
     rectangle_2 bounding_rectangle(const circle_2&);
     const rectangle_2& bounding_rectangle(const rectangle_2&);
-    rectangle_2 bounding_rectangle(const vector_2&);
+    rectangle_2 bounding_rectangle(const vector_2<real>&);
 }
 
 #endif

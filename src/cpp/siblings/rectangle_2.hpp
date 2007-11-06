@@ -15,15 +15,15 @@ namespace siblings {
         /// Default constructor.
         rectangle_2();
 
-        rectangle_2(const vector_2& min, const vector_2& max);
+        rectangle_2(const vector_2<real>& min, const vector_2<real>& max);
         rectangle_2(real min_x, real min_y, real max_x, real max_y);
 
-        const vector_2& min() const;
-        const vector_2& max() const;
+        const vector_2<real>& min() const;
+        const vector_2<real>& max() const;
 
     private:
-        vector_2 min_;
-        vector_2 max_;
+        vector_2<real> min_;
+        vector_2<real> max_;
     };
 
     /// Output rectangle in format "[min_x, min_y; max_x, max_y]".

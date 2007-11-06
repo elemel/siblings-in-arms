@@ -6,7 +6,7 @@ using namespace boost::python;
 
 typedef const circle_2& c;
 typedef const rectangle_2& r;
-typedef const vector_2& v;
+typedef const vector_2<real>& v;
 
 BOOST_PYTHON_MODULE(geometry_2)
 {
@@ -22,13 +22,13 @@ BOOST_PYTHON_MODULE(geometry_2)
 
     def("distance", distance<circle_2, circle_2>);
     def("distance", distance<circle_2, rectangle_2>);
-    def("distance", distance<circle_2, vector_2>);
+    def("distance", distance<circle_2, vector_2<real> >);
     def("distance", distance<rectangle_2, circle_2>);
     def("distance", distance<rectangle_2, rectangle_2>);
-    def("distance", distance<rectangle_2, vector_2>);
-    def("distance", distance<vector_2, circle_2>);
-    def("distance", distance<vector_2, rectangle_2>);
-    def("distance", distance<vector_2, vector_2>);
+    def("distance", distance<rectangle_2, vector_2<real> >);
+    def("distance", distance<vector_2<real>, circle_2>);
+    def("distance", distance<vector_2<real>, rectangle_2>);
+    def("distance", distance<vector_2<real>, vector_2<real> >);
 
     def("contains", (bool (*)(c, c)) &contains);
     def("contains", (bool (*)(c, r)) &contains);

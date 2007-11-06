@@ -6,12 +6,12 @@ using namespace siblings;
 using namespace boost::python;
 
 namespace {
-    vector_2 min_wrapper(const rectangle_2& r)
+    vector_2<real> min_wrapper(const rectangle_2& r)
     {
         return r.min();
     }
 
-    vector_2 max_wrapper(const rectangle_2& r)
+    vector_2<real> max_wrapper(const rectangle_2& r)
     {
         return r.max();
     }
@@ -30,7 +30,7 @@ BOOST_PYTHON_MODULE(Rectangle2)
         // initializers
         .def(init<>())
         .def(init<const rectangle_2&>())
-        .def(init<const vector_2&, const vector_2&>())
+        .def(init<const vector_2<real>&, const vector_2<real>&>())
         .def(init<real, real, real, real>())
 
         // attributes

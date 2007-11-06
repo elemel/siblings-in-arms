@@ -103,7 +103,8 @@ namespace siblings {
     sparse_grid_2::to_grid_positions(const circle_2& bounds) const
     {
         std::vector<grid_position> result;
-        const vector_2 radii = vector_2(bounds.radius(), bounds.radius());
+        const vector_2<real> radii = vector_2<real>(bounds.radius(),
+                                                    bounds.radius());
         grid_position min = to_grid_position(bounds.center() - radii);
         grid_position max = to_grid_position(bounds.center() + radii);
         for (int x = min.first; x <= max.second; ++x) {
@@ -115,7 +116,7 @@ namespace siblings {
     }
     
     sparse_grid_2::grid_position
-    sparse_grid_2::to_grid_position(const vector_2& v) const
+    sparse_grid_2::to_grid_position(const vector_2<real>& v) const
     {
         return grid_position(int(v.x() / tile_side_), int(v.y() / tile_side_));
     }

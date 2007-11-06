@@ -5,7 +5,7 @@
 namespace siblings {
     circle_2::circle_2() : radius_(real(0)) { }
 
-    circle_2::circle_2(const vector_2& center, real radius)
+    circle_2::circle_2(const vector_2<real>& center, real radius)
         : center_(center), radius_(radius)
     { }
 
@@ -13,7 +13,7 @@ namespace siblings {
         : center_(center_x, center_y), radius_(radius)
     { }
 
-    const vector_2& circle_2::center() const { return center_; }
+    const vector_2<real>& circle_2::center() const { return center_; }
     real circle_2::radius() const { return radius_; }
 
     std::ostream& operator<<(std::ostream& out, const circle_2& c)

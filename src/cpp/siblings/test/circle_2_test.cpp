@@ -10,21 +10,21 @@ namespace {
     void test_default_ctor()
     {
         circle_2 c;
-        assert(c.center() == vector_2());
+        assert(c.center() == vector_2<real>());
         assert(c.radius() == real(0));
     }
 
     /// This test also handles the center and radius properties.
     void test_center_radius_ctor()
     {
-        circle_2 c(vector_2(1, 2), 3);
-        assert(c.center() == vector_2(1, 2));
+        circle_2 c(vector_2<real>(1, 2), 3);
+        assert(c.center() == vector_2<real>(1, 2));
         assert(c.radius() == real(3));
     }
 
     void test_output()
     {
-        circle_2 c(vector_2(1, 2), 3);
+        circle_2 c(vector_2<real>(1, 2), 3);
         assert(boost::lexical_cast<std::string>(c) == "(1, 2; 3)");
     }
 }

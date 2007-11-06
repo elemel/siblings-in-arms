@@ -38,7 +38,7 @@ namespace siblings {
         std::vector<grid_position> to_grid_positions(const circle_2& bounds)
             const;
 
-        grid_position to_grid_position(const vector_2& v) const;
+        grid_position to_grid_position(const vector_2<real>& v) const;
 
         void add_entry_at_position(int key, const circle_2& bounds,
                                    const grid_position&);

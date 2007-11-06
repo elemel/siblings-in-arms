@@ -5,7 +5,8 @@
 namespace siblings {
     rectangle_2::rectangle_2() { }
 
-    rectangle_2::rectangle_2(const vector_2& min, const vector_2& max)
+    rectangle_2::rectangle_2(const vector_2<real>& min,
+                             const vector_2<real>& max)
         : min_(std::min(min.x(), max.x()), std::min(min.y(), max.y())),
           max_(std::max(min.x(), max.x()), std::max(min.y(), max.y()))
     { }
@@ -15,8 +16,8 @@ namespace siblings {
           max_(std::max(min_x, max_x), std::max(min_y, max_y))
     { }
 
-    const vector_2& rectangle_2::min() const { return min_; }
-    const vector_2& rectangle_2::max() const { return max_; }
+    const vector_2<real>& rectangle_2::min() const { return min_; }
+    const vector_2<real>& rectangle_2::max() const { return max_; }
 
     std::ostream& operator<<(std::ostream& out, const rectangle_2& r)
     {
