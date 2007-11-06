@@ -126,7 +126,6 @@ namespace siblings {
                                               const grid_position& p)
     {
         tiles_[p][key] = bounds;
-        
     }
     
     void sparse_grid_2::remove_entry_at_position(int key,
