@@ -10,35 +10,35 @@ namespace siblings {
     ///
     /// @invariant min().x() <= max().x()
     /// @invariant min().y() <= max().y()
-    template <typename T>
+    template <typename R>
     class rectangle_2 {
     public: 
-        typedef T value_type;
+        typedef R real_type;
 
         /// Construct rectangle with min and max at origin.
         rectangle_2() { }
 
-        rectangle_2(const vector_2<T>& min, const vector_2<T>& max)
+        rectangle_2(const vector_2<R>& min, const vector_2<R>& max)
             : min_(std::min(min.x(), max.x()), std::min(min.y(), max.y())),
               max_(std::max(min.x(), max.x()), std::max(min.y(), max.y()))
         { }
 
-        rectangle_2(T min_x, T min_y, T max_x, T max_y)
+        rectangle_2(R min_x, R min_y, R max_x, R max_y)
             : min_(std::min(min_x, max_x), std::min(min_y, max_y)),
               max_(std::max(min_x, max_x), std::max(min_y, max_y))
         { }
 
-        const vector_2<T>& min() const { return min_; }
-        const vector_2<T>& max() const { return max_; }
+        const vector_2<R>& min() const { return min_; }
+        const vector_2<R>& max() const { return max_; }
 
     private:
-        vector_2<T> min_;
-        vector_2<T> max_;
+        vector_2<R> min_;
+        vector_2<R> max_;
     };
 
     /// Output rectangle in format "[min_x, min_y; max_x, max_y]".
-    template <typename T>
-    std::ostream& operator<<(std::ostream& out, const rectangle_2<T>& r)
+    template <typename R>
+    std::ostream& operator<<(std::ostream& out, const rectangle_2<R>& r)
     {
         return out << "[" << r.min().x() << ", " << r.min().y() << "; "
                    << r.max().x() << ", " << r.max().y() << "]";

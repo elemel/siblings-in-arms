@@ -1,7 +1,6 @@
 #ifndef SIBLINGS_SPARSE_GRID_2_HPP
 #define SIBLINGS_SPARSE_GRID_2_HPP
 
-#include "circle_2.hpp"
 #include "flat_set.hpp"
 #include "geometry_2.hpp"
 #include "unordered_map.hpp"
@@ -16,7 +15,7 @@ namespace siblings {
     public:
         typedef K key_type;
         typedef S shape_type;
-        typedef typename S::value_type real_type;
+        typedef typename S::real_type real_type;
         typedef vector_2<real_type> vector_type;
         typedef std::size_t size_type;
 

@@ -1,3 +1,4 @@
+#include "../config.hpp"
 #include "../sparse_grid_2.hpp"
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
