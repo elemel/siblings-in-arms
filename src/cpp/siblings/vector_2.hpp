@@ -9,6 +9,8 @@ namespace siblings {
     template <typename T>
     class vector_2 {
     public:
+        typedef T value_type;
+
         /// Construct vector having x = y = 0.
         vector_2() : x_(T(0)), y_(T(0)) { }
 

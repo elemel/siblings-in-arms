@@ -11,6 +11,8 @@ namespace siblings {
     template <typename T>
     class circle_2 {
     public:
+        typedef T value_type;
+
         circle_2() : radius_(T(0)) { }
 
         circle_2(const vector_2<T>& center, T radius)

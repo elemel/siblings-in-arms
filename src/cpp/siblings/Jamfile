@@ -1,4 +1,3 @@
-obj geometry_2 : geometry_2.cpp ;
 obj sparse_grid_2 : sparse_grid_2.cpp ;
 
 build-project test ;

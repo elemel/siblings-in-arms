@@ -12,7 +12,9 @@ namespace siblings {
     /// @invariant min().y() <= max().y()
     template <typename T>
     class rectangle_2 {
-    public:
+    public: 
+        typedef T value_type;
+
         /// Construct rectangle with min and max at origin.
         rectangle_2() { }
 
