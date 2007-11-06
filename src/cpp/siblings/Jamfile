@@ -1,4 +1,2 @@
-obj sparse_grid_2 : sparse_grid_2.cpp ;
-
 build-project test ;
 build-project wrapper ;

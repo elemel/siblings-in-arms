@@ -1,4 +1,6 @@
-unit-test circle_2_test : circle_2_test.cpp ;
 unit-test flat_set_test : flat_set_test.cpp ;
 unit-test unordered_map_test : unordered_map_test.cpp ;
-unit-test sparse_grid_2_test : sparse_grid_2_test.cpp ..//sparse_grid_2 ;
+
+unit-test circle_2_test : circle_2_test.cpp ;
+
+unit-test sparse_grid_2_test : sparse_grid_2_test.cpp ;

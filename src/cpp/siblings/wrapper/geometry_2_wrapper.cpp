@@ -1,3 +1,4 @@
+#include "../config.hpp"
 #include "../geometry_2.hpp"
 #include <boost/python.hpp>
 

@@ -2,7 +2,6 @@
 #define SIBLINGS_GEOMETRY_HPP
 
 #include "circle_2.hpp"
-#include "config.hpp"
 #include "math.hpp"
 #include "rectangle_2.hpp"
 #include "vector_2.hpp"

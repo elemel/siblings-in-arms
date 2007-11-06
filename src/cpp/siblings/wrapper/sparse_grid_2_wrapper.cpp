@@ -7,7 +7,10 @@ using namespace siblings;
 using namespace boost::python;
 
 namespace {
-    list find_wrapper(const sparse_grid_2& g, const circle_2<real>& c)
+    typedef circle_2<real> circle_type;
+    typedef sparse_grid_2<int, circle_type> grid_type;
+
+    list find_wrapper(const grid_type& g, const circle_type& c)
     {
         list result;
         BOOST_FOREACH(int key, g.find(c)) {
@@ -19,18 +22,18 @@ namespace {
 
 BOOST_PYTHON_MODULE(SparseGrid2)
 {
-    class_<sparse_grid_2>("SparseGrid2")
+    class_<grid_type>("SparseGrid2")
         // initializers
         .def(init<>())
-        .def(init<const sparse_grid_2&>())
+        .def(init<const grid_type&>())
         .def(init<real>())
 
         // attributes
-        .add_property("entry_count", &sparse_grid_2::entry_count)
-        .add_property("tile_count", &sparse_grid_2::tile_count)
+        .add_property("__len__", &grid_type::size)
+        .add_property("tile_count", &grid_type::tile_count)
 
         // methods
-        .def("insert", &sparse_grid_2::insert)
-        .def("erase", &sparse_grid_2::erase)
+        .def("insert", &grid_type::insert)
+        .def("erase", &grid_type::erase)
         .def("find", &find_wrapper);
 }
