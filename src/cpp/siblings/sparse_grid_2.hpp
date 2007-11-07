@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <utility>
 #include <vector>
+#include <boost/foreach.hpp>
 
 namespace siblings {
     template <typename K, typename S>
