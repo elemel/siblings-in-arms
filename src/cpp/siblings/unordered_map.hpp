@@ -210,28 +210,32 @@ namespace siblings {
 
         // local iteration ////////////////////////////////////////////////////
 
-        local_iterator begin(size_type bucket_index)
+        /// @pre i < m.bucket_count()
+        local_iterator begin(size_type i)
         {
-            assert(bucket_index <= bucket_count());
-            return buckets_[bucket_index].begin();
+            assert(i < bucket_count());
+            return buckets_[i].begin();
         }
 
-        const_local_iterator begin(size_type bucket_index) const
+        /// @pre i < m.bucket_count()
+        const_local_iterator begin(size_type i) const
         {
-            assert(bucket_index <= bucket_count());
-            return buckets_[bucket_index].begin();
+            assert(i < bucket_count());
+            return buckets_[i].begin();
         }
 
-        local_iterator end(size_type bucket_index)
+        /// @pre i < m.bucket_count()
+        local_iterator end(size_type i)
         {
-            assert(bucket_index <= bucket_count());
-            return buckets_[bucket_index].end();
+            assert(i < bucket_count());
+            return buckets_[i].end();
         }
 
-        const_local_iterator end(size_type bucket_index) const
+        /// @pre i < m.bucket_count()
+        const_local_iterator end(size_type i) const
         {
-            assert(bucket_index <= bucket_count());
-            return buckets_[bucket_index].end();
+            assert(i < bucket_count());
+            return buckets_[i].end();
         }
 
         // insertion and removal //////////////////////////////////////////////
@@ -239,6 +243,7 @@ namespace siblings {
         // @post m.find(v.first) != m.end()
         std::pair<iterator, bool> insert(const value_type& v)
         {
+            std::pair<iterator, bool> result;
             bucket_iterator b = buckets_.begin() + bucket(v.first);
             local_iterator i = std::find_if(b->begin(), b->end(),
                                             first_equal(v.first, eq_));
@@ -247,19 +252,21 @@ namespace siblings {
                 ++size_;
                 if (load_factor() > max_load_factor()) {
                     rehash(bucket_count() * 2 + 1);
-                    return std::make_pair(find(v.first), true);
+                    result = std::make_pair(find(v.first), true);
                 } else {
-                    return std::make_pair(iterator(b, buckets_.end(),
-                                                   boost::prior(b->end())),
-                                          true);
+                    result = std::make_pair(iterator(b, buckets_.end(),
+                                                     boost::prior(b->end())),
+                                            true);
                 }
             } else {
                 // Update map element. If we use assignment, the data type must
                 // model Assignable. Use erase and insert instead.
                 b->erase(i++); // post-increment iterator to keep it valid
                 i = b->insert(i, v);
-                return std::make_pair(iterator(b, buckets_.end(), i), false);
+                result = std::make_pair(iterator(b, buckets_.end(), i), false);
             }
+            assert(find(v.first) != end());
+            return result;
         }
 
         template <typename InputIterator>
@@ -281,16 +288,17 @@ namespace siblings {
         /// @post m.find(k) == m.end()
         size_type erase(const key_type& k)
         {
+            size_type result = 0;
             bucket_type& b = buckets_[bucket(k)];
             local_iterator i = std::find_if(b.begin(), b.end(),
                                             first_equal(k, eq_));
-            if (i == b.end()) {
-                return 0;
-            } else {
+            if (i != b.end()) {
                 b.erase(i);
                 --size_;
-                return 1;
+                result = 1;
             }
+            assert(find(k) == end());
+            return result;
         }
 
         void clear()
