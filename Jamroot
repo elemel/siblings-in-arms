@@ -7,6 +7,10 @@ if $(BOOST_ROOT) = ""
     BOOST_ROOT = "/usr/local/share/boost" ;
 }
 
+project siblings
+    : requirements
+        <variant>release:<warnings>off ;
+
 use-project /boost : $(BOOST_ROOT) ;
 
 build-project src/cpp/siblings ;
