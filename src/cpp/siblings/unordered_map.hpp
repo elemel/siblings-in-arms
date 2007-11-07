@@ -158,7 +158,7 @@ namespace siblings {
         explicit unordered_map(size_type n = 3, const hasher& h = hasher(),
                                const key_equal& eq = key_equal(),
                                const allocator_type& a = allocator_type())
-            : buckets_(n, bucket_type(allocator_)), hash_(h), eq_(eq),
+            : buckets_(n, bucket_type(a)), hash_(h), eq_(eq),
               allocator_(a), size_(0), max_load_factor_(1)
         { }
 
@@ -351,19 +351,14 @@ namespace siblings {
         void rehash(size_type n)
         {
             if (n >= 1 && load_factor(n) <= max_load_factor()) {
-                unordered_map h(n, hash_, eq_, allocator_);
-                h.size_ = size_;
-                h.max_load_factor_ = max_load_factor_;
+                bucket_vector v(n, bucket_type(allocator_));
                 BOOST_FOREACH(bucket_type& b, buckets_) {
-                    local_iterator i = b.begin();
-                    while (i != b.end()) {
-                        bucket_type& hb = h.buckets_[h.bucket(i->first)];
-                        local_iterator next = boost::next(i);
-                        hb.splice(hb.end(), b, i);
-                        i = next;
+                    while (b.begin() != b.end()) {
+                        bucket_type& vb = v[hash_(b.front().first) % n];
+                        vb.splice(vb.end(), b, b.begin());
                     }
                 }
-                swap(h);
+                buckets_.swap(v);
             }
         }
 
