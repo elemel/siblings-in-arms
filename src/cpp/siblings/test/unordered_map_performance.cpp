@@ -3,21 +3,27 @@
 #include <map>
 #include <string>
 #include <boost/progress.hpp>
+#include <boost/lexical_cast.hpp>
 
 namespace {
-    void rehash(std::map<int, int>& m, int count) { }
+    typedef std::map<int, int> ordered_map_type;
+    typedef siblings::unordered_map<int, int> unordered_map_type;
 
-    void rehash(siblings::unordered_map<int, int>& m, int count)
+    void rehash(ordered_map_type& m, int count) { }
+
+    void rehash(unordered_map_type& m, int count)
     {
         m.rehash(count);
     }
 
     template <typename T>
-    void measure_insert(const std::string& type, int count,
-                        bool prealloc = false)
+    void measure_insert(int count, bool prealloc = false)
     {
-        std::cout << "Measuring " << count << (prealloc ? " preallocated" : "")
-                  << " insertions into " << type << "... ";
+        if (prealloc) {
+            std::cout << "insert (preallocated)... ";
+        } else {
+            std::cout << "insert... ";
+        }
         std::cout.flush();
 
         T m;
@@ -31,10 +37,9 @@ namespace {
     }
 
     template <typename T>
-    void measure_erase(const std::string& type, int count)
+    void measure_erase(int count)
     {
-        std::cout << "Measuring " << count << " removals from " << type
-                  << "... ";
+        std::cout << "erase... ";
         std::cout.flush();
 
         T m;
@@ -50,9 +55,9 @@ namespace {
     }
 
     template <typename T>
-    void measure_find(const std::string& type, int count)
+    void measure_find(int count)
     {
-        std::cout << "Measuring " << count << " lookups in " << type << "... ";
+        std::cout << "find... ";
         std::cout.flush();
 
         T m;
@@ -68,22 +73,36 @@ namespace {
     }
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-    typedef std::map<int, int> ordered_map_type;
-    typedef siblings::unordered_map<int, int> unordered_map_type;
-
     int count = 1000000;
 
-    measure_insert<ordered_map_type>("std::map", count);
-    measure_erase<ordered_map_type>("std::map", count);
-    measure_find<ordered_map_type>("std::map", count);
+    if (argc == 2) {
+        count = -1;
+        try {
+            count = boost::lexical_cast<int>(argv[1]);
+        } catch (boost::bad_lexical_cast&) { }
+        if (count < 0) {
+            std::cerr << "Bad repeat count: " << argv[1] << std::endl;
+            std::cerr << "The repeat count must be a positive integer."
+                      << std::endl;
+            std::cerr << "Usage: " << argv[0] << " [<repeats>]" << std::endl;
+            return 2;
+        }
+    }
 
-    measure_insert<unordered_map_type>("siblings::unordered_map", count);
-    measure_insert<unordered_map_type>("siblings::unordered_map", count,
-                                       true);
-    measure_erase<unordered_map_type>("siblings::unordered_map", count);
-    measure_find<unordered_map_type>("siblings::unordered_map", count);
+    std::cout << "\nmeasuring std::map with " << count << " repeats\n"
+              << std::endl;
+    measure_insert<ordered_map_type>(count);
+    measure_erase<ordered_map_type>(count);
+    measure_find<ordered_map_type>(count);
+
+    std::cout << "\nmeasuring siblings::unordered_map with " << count
+              << " repeats\n" << std::endl;
+    measure_insert<unordered_map_type>(count);
+    measure_insert<unordered_map_type>(count, true);
+    measure_erase<unordered_map_type>(count);
+    measure_find<unordered_map_type>(count);
 
     return 0;
 }
