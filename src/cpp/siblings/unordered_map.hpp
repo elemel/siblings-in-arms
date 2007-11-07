@@ -261,6 +261,7 @@ namespace siblings {
             assert(i.current_bucket() != i.last_bucket());
             assert(i.current_value() != i.last_value());
             i.current_bucket()->erase(i.current_value());
+            --size_;
         }
 
         /// @post m.find(k) == m.end()
@@ -276,6 +277,14 @@ namespace siblings {
                 --size_;
                 return 1;
             }
+        }
+
+        void clear()
+        {
+            BOOST_FOREACH(bucket_type& b, buckets_) {
+                b.clear();
+            }
+            size_ = 0;
         }
 
         mapped_type& operator[](const key_type& k)
@@ -343,13 +352,17 @@ namespace siblings {
         {
             if (n >= 1 && load_factor(n) <= max_load_factor()) {
                 unordered_map h(n, hash_, eq_, allocator_);
-                BOOST_FOREACH(const bucket_type& b, buckets_) {
-                    BOOST_FOREACH(const value_type& v, b) {
-                        h.buckets_[h.bucket(v.first)].push_back(v);
-                    }
-                }
                 h.size_ = size_;
                 h.max_load_factor_ = max_load_factor_;
+                BOOST_FOREACH(bucket_type& b, buckets_) {
+                    local_iterator i = b.begin();
+                    while (i != b.end()) {
+                        bucket_type& hb = h.buckets_[h.bucket(i->first)];
+                        local_iterator next = boost::next(i);
+                        hb.splice(hb.end(), b, i);
+                        i = next;
+                    }
+                }
                 swap(h);
             }
         }
