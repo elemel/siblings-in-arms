@@ -6,7 +6,7 @@
 #include <boost/iterator/iterator_facade.hpp>
 
 namespace siblings {
-    /// Nested iterator suited for traversal of bucket containers.
+    /// Iterator suited for traversal of nested containers.
     template <typename T, typename OuterIterator, typename InnerIterator>
     class nested_iterator
         : public boost::iterator_facade<nested_iterator<T, OuterIterator,
@@ -68,6 +68,25 @@ namespace siblings {
         inner_iterator current_inner_;
         inner_iterator last_inner_;
 
+        void skip()
+        {
+            while (current_outer_ != last_outer_
+                   && current_outer_->begin() == current_outer_->end())
+            {
+                ++current_outer_;
+            }
+
+            if (current_outer_ == last_outer_) {
+                current_inner_ = inner_iterator();
+                last_inner_ = inner_iterator();
+            } else {
+                current_inner_ = current_outer_->begin();
+                last_inner_ = current_outer_->end();
+            }
+        }
+
+        // callbacks for boost::iterator_facade ///////////////////////////////
+
         /// @pre i.current_outer() != i.last_outer()
         /// @pre i.current_inner() != i.last_inner()
         void increment()
@@ -97,23 +116,6 @@ namespace siblings {
             assert(current_outer() != last_outer());
             assert(current_inner() != last_inner());
             return *current_inner_;
-        }
-
-        void skip()
-        {
-            while (current_outer_ != last_outer_
-                   && current_outer_->begin() == current_outer_->end())
-            {
-                ++current_outer_;
-            }
-
-            if (current_outer_ != last_outer_) {
-                current_inner_ = current_outer_->begin();
-                last_inner_ = current_outer_->end();
-            } else {
-                current_inner_ = inner_iterator();
-                last_inner_ = inner_iterator();
-            }
         }
     };
 }
