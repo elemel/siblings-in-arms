@@ -291,7 +291,7 @@ namespace siblings {
         ///
         size_type bucket_size(size_type i) const
         {
-            assert(i <= bucket_count());
+            assert(i < bucket_count());
             return buckets_[i].size();
         }
 
