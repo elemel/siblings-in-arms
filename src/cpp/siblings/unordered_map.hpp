@@ -15,6 +15,7 @@
 #include <boost/utility.hpp>
 
 namespace siblings {
+    /// @invariant m.bucket_count() >= 1
     /// @invariant m.load_factor() <= m.max_load_factor()
     template <typename K, typename T, typename H = boost::hash<K>,
               typename P = std::equal_to<K>,
