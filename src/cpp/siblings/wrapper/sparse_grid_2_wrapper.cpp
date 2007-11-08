@@ -12,14 +12,14 @@ namespace {
     typedef circle_2<real> circle_type;
     typedef sparse_grid_2<int, circle_type> grid_type;
 
-    void append(list& l, int i) { l.append(i); }
-    
     list find_wrapper(const grid_type& g, const circle_type& c)
     {
+        using boost::bind;
+        using boost::make_function_output_iterator;
+
         list result;
-        g.find(c, boost::make_function_output_iterator(boost::bind(&append,
-                                                                   result,
-                                                                   _1)));
+        g.find(c, make_function_output_iterator(bind(&list::append<int>,
+                                                     result, _1)));
         return result;
     }
 }
