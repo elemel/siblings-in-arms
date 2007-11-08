@@ -1,8 +1,8 @@
 #include "../config.hpp"
-#include "../sink_iterator.hpp"
 #include "../sparse_grid_2.hpp"
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
+#include <boost/function_output_iterator.hpp>
 #include <boost/python.hpp>
 
 using namespace siblings;
@@ -17,7 +17,9 @@ namespace {
     list find_wrapper(const grid_type& g, const circle_type& c)
     {
         list result;
-        g.find(c, sinker(boost::bind(&append, result, _1)));
+        g.find(c, boost::make_function_output_iterator(boost::bind(&append,
+                                                                   result,
+                                                                   _1)));
         return result;
     }
 }
