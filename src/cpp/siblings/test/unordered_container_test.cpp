@@ -6,10 +6,14 @@
 using namespace siblings;
 
 namespace {
-    int int_data[] = { 1972, 1974, 2004, 2007, 1337, 1984, 2001, 1999, 1939,
-                       1945 };
-    std::string string_data[] = { "green", "yellow", "blue", "red", "orange",
-                                  "black", "white", "gray", "brown", "pink" };
+    const int int_data[] = { 1972, 1974, 2004, 2007, 1337, 1984, 2001, 1999,
+                             1939, 1945 };
+    const std::size_t int_data_size = sizeof(int_data) / sizeof(int_data[0]);
+
+    const std::string string_data[] = { "green", "yellow", "blue", "red",
+                                        "orange", "black", "white", "gray",
+                                        "brown", "pink" };
+    int string_data_size = sizeof(string_data) / sizeof(string_data[0]);
 
     void test_default_ctor()
     {
@@ -36,31 +40,24 @@ namespace {
         }
     }
 
-    void test_erase_key()
+    void test_erase_absent_key()
     {
-        typedef unordered_map<int, std::string> map_type;
-
-        map_type m;
-        std::size_t count;
-
-        m.insert(map_type::value_type(13, "Mikael"));
-        m.insert(map_type::value_type(12, "Lind"));
-
-        count = m.erase(11);
+        typedef unordered_set<int> set_type;
+        set_type s(&int_data[0], int_data + int_data_size);
+        set_type::size_type old_size = s.size();
+        set_type::size_type count = s.erase(1000);
         assert(count == 0);
-        assert(m.size() == 2);
+        assert(s.size() == old_size);
+    }
 
-        count = m.erase(12);
+    void test_erase_present_key()
+    {
+        typedef unordered_set<int> set_type;
+        set_type s(&int_data[0], int_data + int_data_size);
+        set_type::size_type old_size = s.size();
+        set_type::size_type count = s.erase(1337);
         assert(count == 1);
-        assert(m.size() == 1);
-
-        count = m.erase(12);
-        assert(count == 0);
-        assert(m.size() == 1);
-
-        count = m.erase(13);
-        assert(count == 1);
-        assert(m.empty());
+        assert(s.size() == old_size - count);
     }
 
     void test_index()
@@ -99,7 +96,8 @@ int main()
     test_insert_value();
     // test_insert_range();
     // test_erase_iterator();
-    test_erase_key();
+    test_erase_absent_key();
+    test_erase_present_key();
     // test_erase_range();
     // test_clear();
     // test_const_find();
