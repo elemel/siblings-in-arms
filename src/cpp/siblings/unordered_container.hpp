@@ -21,11 +21,9 @@ namespace siblings {
     struct unique_tag { };
     struct non_unique_tag { };
 
-    template <typename T, typename C>
+    template <typename T, typename Cont>
     struct unordered_key_traits {
         typedef T key_type;
-        typedef boost::hash<key_type> hasher;
-        typedef std::equal_to<key_type> key_equal;
 
         static const key_type& key(const key_type& k) { return k; }
     };
@@ -33,14 +31,12 @@ namespace siblings {
     template <typename T>
     struct unordered_key_traits<T, map_tag> {
         typedef typename T::first_type key_type;
-        typedef boost::hash<key_type> hasher;
-        typedef std::equal_to<key_type> key_equal;
 
         template <typename U>
         static const key_type& key(const U& v) { return v.first; }
     };
 
-    template <typename U>
+    template <typename Uniq>
     struct unordered_uniqueness_traits
     {
         static const bool unique = true;
@@ -52,35 +48,41 @@ namespace siblings {
         static const bool unique = false;
     };
 
-    template <typename T, typename C, typename U>
+    template <typename T, typename Cont, typename Uniq>
     struct unordered_traits
-        : unordered_key_traits<T, C>, unordered_uniqueness_traits<U>
+        : unordered_key_traits<T, Cont>, unordered_uniqueness_traits<Uniq>
     { };
 
     /// @invariant m.bucket_count() >= 1
     /// @invariant m.load_factor() <= m.max_load_factor()
-    template <typename T, typename C, typename U,
-              typename H = typename unordered_traits<T, C, U>::hasher,
-              typename P = typename unordered_traits<T, C, U>::key_equal,
-              typename A = std::allocator<T> >
+    template <typename T,
+              typename Cont,
+              typename Uniq,
+              typename Hash = boost::hash<
+                  typename unordered_traits<T, Cont, Uniq>::key_type
+              >,
+              typename Pred = std::equal_to<
+                  typename unordered_traits<T, Cont, Uniq>::key_type
+              >,
+              typename Alloc = std::allocator<T> >
     class unordered_container {
     private:
         // nested types ///////////////////////////////////////////////////////
 
-        typedef unordered_traits<T, C, U> traits;
+        typedef unordered_traits<T, Cont, Uniq> traits;
 
     public:
         // nested types ///////////////////////////////////////////////////////
 
         typedef T value_type;
-        typedef H hasher;
-        typedef P key_equal;
-        typedef A allocator_type;
+        typedef Hash hasher;
+        typedef Pred key_equal;
+        typedef Alloc allocator_type;
         typedef typename traits::key_type key_type;
-        typedef typename A::pointer pointer;
-        typedef typename A::const_pointer const_pointer;
-        typedef typename A::reference reference;
-        typedef typename A::const_reference const_reference;
+        typedef typename Alloc::pointer pointer;
+        typedef typename Alloc::const_pointer const_pointer;
+        typedef typename Alloc::reference reference;
+        typedef typename Alloc::const_reference const_reference;
         typedef std::size_t size_type;
 
     private:
