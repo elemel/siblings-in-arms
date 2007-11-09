@@ -15,10 +15,15 @@
 #include <boost/utility.hpp>
 
 namespace siblings {
-    template <typename T, bool K>
-    struct unordered_traits {
+    struct set_tag { };
+    struct map_tag { };
+
+    struct unique_tag { };
+    struct non_unique_tag { };
+
+    template <typename T, typename C>
+    struct unordered_key_traits {
         typedef T key_type;
-        typedef T value_type;
         typedef boost::hash<key_type> hasher;
         typedef std::equal_to<key_type> key_equal;
 
@@ -26,32 +31,52 @@ namespace siblings {
     };
 
     template <typename T>
-    struct unordered_traits<T, true> {
+    struct unordered_key_traits<T, map_tag> {
         typedef typename T::first_type key_type;
-        typedef T value_type;
         typedef boost::hash<key_type> hasher;
         typedef std::equal_to<key_type> key_equal;
 
-        static const key_type& key(const value_type& v) { return v.first; }
+        template <typename U>
+        static const key_type& key(const U& v) { return v.first; }
     };
+
+    template <typename U>
+    struct unordered_uniqueness_traits
+    {
+        static const bool unique = true;
+    };
+
+    template <>
+    struct unordered_uniqueness_traits<non_unique_tag>
+    {
+        static const bool unique = false;
+    };
+
+    template <typename T, typename C, typename U>
+    struct unordered_traits
+        : unordered_key_traits<T, C>, unordered_uniqueness_traits<U>
+    { };
 
     /// @invariant m.bucket_count() >= 1
     /// @invariant m.load_factor() <= m.max_load_factor()
-    template <typename T, bool K = false, bool M = false,
-              typename H = typename unordered_traits<T, K>::hasher,
-              typename P = typename unordered_traits<T, K>::key_equal,
+    template <typename T, typename C, typename U,
+              typename H = typename unordered_traits<T, C, U>::hasher,
+              typename P = typename unordered_traits<T, C, U>::key_equal,
               typename A = std::allocator<T> >
     class unordered_container {
+    private:
+        // nested types ///////////////////////////////////////////////////////
+
+        typedef unordered_traits<T, C, U> traits;
+
     public:
         // nested types ///////////////////////////////////////////////////////
 
-        typedef unordered_traits<T, K> traits;
-        typedef typename traits::key_type key_type;
-        typedef typename traits::value_type value_type;
-        enum { unique = !M, multi = M };
+        typedef T value_type;
         typedef H hasher;
         typedef P key_equal;
         typedef A allocator_type;
+        typedef typename traits::key_type key_type;
         typedef typename A::pointer pointer;
         typedef typename A::const_pointer const_pointer;
         typedef typename A::reference reference;
@@ -72,8 +97,7 @@ namespace siblings {
         typedef typename bucket_type::iterator local_iterator;
         typedef typename bucket_type::const_iterator const_local_iterator;
 
-        typedef nested_iterator<value_type, bucket_iterator,
-                                local_iterator>
+        typedef nested_iterator<value_type, bucket_iterator, local_iterator>
         iterator;
 
         typedef nested_iterator<const value_type, const_bucket_iterator,
@@ -171,34 +195,31 @@ namespace siblings {
 
         // insertion and removal //////////////////////////////////////////////
 
+        /// Complexity: Constant on average. Worst case is linear in size.
+        ///
         /// Exception safety: Basic guarantee.
         ///
-        // @post m.find(v.first) != m.end()
-        std::pair<iterator, bool> insert(const value_type& v)
+        /// @post m.find(v.first) != m.end()
+        std::pair<iterator, bool> insert(const_reference t)
         {
             std::pair<iterator, bool> result;
-            bucket_iterator b = buckets_.begin() + bucket(v.first);
+            bucket_iterator b = buckets_.begin() + bucket(t.first);
             local_iterator i = std::find_if(b->begin(), b->end(),
-                                            first_equal(v.first, eq_));
-            if (i == b->end()) {
-                b->push_back(v);
+                                            first_equal(traits::key(t), eq_));
+            if (!traits::unique || i == b->end()) {
+                i = b->insert(i, t);
                 ++size_;
                 if (load_factor() > max_load_factor()) {
                     rehash(bucket_count() * 2 + 1);
-                    result = std::make_pair(find(v.first), true);
+                    result = std::make_pair(find(traits::key(t)), true);
                 } else {
-                    result = std::make_pair(iterator(b, buckets_.end(),
-                                                     boost::prior(b->end())),
+                    result = std::make_pair(iterator(b, buckets_.end(), i),
                                             true);
                 }
             } else {
-                // Update map element. If we use assignment, the data type must
-                // model Assignable. Use erase and insert instead.
-                b->erase(i++); // post-increment iterator to keep it valid
-                i = b->insert(i, v);
                 result = std::make_pair(iterator(b, buckets_.end(), i), false);
             }
-            assert(find(v.first) != end());
+            assert(find(traits::key(t)) != end());
             return result;
         }
 
@@ -247,15 +268,6 @@ namespace siblings {
             }
             size_ = 0;
         }
-
-#if 0
-        /// Exception safety: Basic guarantee. This operation is implemented as
-        /// an insert operation, which only offers the basic guarantee.
-        mapped_type& operator[](const key_type& k)
-        {
-            return insert(value_type(k, mapped_type())).first->second;
-        }
-#endif
 
         // searching //////////////////////////////////////////////////////////
 
@@ -348,7 +360,7 @@ namespace siblings {
                 bucket_vector v(n, bucket_type(allocator_));
                 BOOST_FOREACH(bucket_type& b, buckets_) {
                     while (b.begin() != b.end()) {
-                        bucket_type& r = v[hash_(b.front().first) % n];
+                        bucket_type& r = v[hash_(traits::key(b.front())) % n];
                         r.splice(r.end(), b, b.begin());
                     }
                 }
