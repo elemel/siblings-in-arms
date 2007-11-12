@@ -24,20 +24,26 @@ namespace siblings {
     template <typename T, typename Cont>
     struct unordered_key_traits {
         typedef T key_type;
+        typedef T value_type;
         typedef T mapped_type;
 
         static const key_type& key(const key_type& k) { return k; }
+        static const value_type& value(const key_type& k) { return k; }
     };
 
     template <typename T>
     struct unordered_key_traits<T, map_tag> {
         typedef typename T::first_type key_type;
+        typedef T value_type;
         typedef typename T::second_type mapped_type;
 
         static const key_type& key(const key_type& k) { return k; }
 
         template <typename U>
         static const key_type& key(const U& v) { return v.first; }
+
+        static value_type
+        value(const key_type& k) { return value_type(k, mapped_type()); }
     };
 
     template <typename Uniq>
@@ -320,14 +326,11 @@ namespace siblings {
 
         const_iterator find(const key_type& k) const
         {
-            const_bucket_iterator b = buckets_.begin() + bucket(k);
-            const_local_iterator v = std::find_if(b->begin(), b->end(),
-                                                  key_equal_to(k, eq_));
-            return (v == b->end()) ? end()
-                : const_iterator(b, buckets_.end(), v);
+            return const_cast<unordered_container&>(*this).find(k);
         }
 
         size_type count(const key_type& k) const;
+
         std::pair<iterator, iterator> equal_range(const key_type& k)
         {
             bucket_iterator b = buckets_.begin() + bucket(k);
@@ -349,9 +352,15 @@ namespace siblings {
         }
 
         std::pair<const_iterator, const_iterator>
-        equal_range(const key_type& k) const;
+        equal_range(const key_type& k) const
+        {
+            return const_cast<unordered_container&>(*this).equal_range(k);
+        }
 
-        mapped_type& operator[](const key_type& k);
+        mapped_type& operator[](const key_type& k)
+        {
+            return insert(traits::value(k)).first->second;
+        }
 
         // bucket interface ///////////////////////////////////////////////////
 
