@@ -14,8 +14,7 @@ namespace siblings {
     class unordered_set
     {
     private:
-        typedef unordered_container<Value, set_tag, unique_tag,
-                                    Hash, Pred, Alloc>
+        typedef unordered_container<Value, Value, Hash, Pred, Alloc>
         impl_type;
 
         impl_type impl_;
@@ -56,8 +55,10 @@ namespace siblings {
                       const hasher& hf = hasher(),
                       const key_equal& eql = key_equal(),
                       const allocator_type& a = allocator_type())
-            : impl_(f, l, n, hf, eql, a)
-        { }
+            : impl_(n, hf, eql, a)
+        {
+            impl_.insert_unique(f, l);
+        }
 
         // unordered_set(const unordered_set&);
         // ~unordered_set();
@@ -146,8 +147,6 @@ namespace siblings {
               class Pred = std::equal_to<Value>,
               class Alloc = std::allocator<Value> >
     class unordered_multiset
-        : public unordered_container<Value, set_tag, non_unique_tag,
-                                     Hash, Pred, Alloc>
     { };
 
     template <class Value, class Hash, class Pred, class Alloc>

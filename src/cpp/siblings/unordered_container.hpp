@@ -10,76 +10,19 @@
 #include <list>
 #include <utility>
 #include <vector>
+#include <boost/bind.hpp>
 #include <boost/foreach.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/utility.hpp>
 
 namespace siblings {
-    struct set_tag { };
-    struct map_tag { };
-
-    struct unique_tag { };
-    struct non_unique_tag { };
-
-    template <typename T, typename Cont>
-    struct unordered_key_traits {
-        typedef T key_type;
-        typedef T value_type;
-        typedef T mapped_type;
-
-        static const key_type& key(const key_type& k) { return k; }
-        static const value_type& value(const key_type& k) { return k; }
-    };
-
-    template <typename T>
-    struct unordered_key_traits<T, map_tag> {
-        typedef typename T::first_type key_type;
-        typedef T value_type;
-        typedef typename T::second_type mapped_type;
-
-        static const key_type& key(const key_type& k) { return k; }
-
-        template <typename U>
-        static const key_type& key(const U& v) { return v.first; }
-
-        static value_type
-        value(const key_type& k) { return value_type(k, mapped_type()); }
-    };
-
-    template <typename Uniq>
-    struct unordered_uniqueness_traits
-    {
-        static const bool unique = true;
-    };
-
-    template <>
-    struct unordered_uniqueness_traits<non_unique_tag>
-    {
-        static const bool unique = false;
-    };
-
-    template <typename T, typename Cont, typename Uniq>
-    struct unordered_traits
-        : unordered_key_traits<T, Cont>, unordered_uniqueness_traits<Uniq>
-    { };
-
     /// @invariant size() <= max_size()
     /// @invariant bucket_count() <= max_bucket_count()
     /// @invariant load_factor() <= max_load_factor()
-    template <class T,
-              class Cont,
-              class Uniq,
-              class Hash = boost::hash<
-                  typename unordered_traits<T, Cont, Uniq>::key_type
-              >,
-              class Pred = std::equal_to<
-                  typename unordered_traits<T, Cont, Uniq>::key_type
-              >,
-              class Alloc = std::allocator<T> >
+    template <class Key, class Value, class Hash, class Pred, class Alloc>
     class unordered_container {
     private:
-        typedef unordered_traits<T, Cont, Uniq> traits;
-        typedef std::list<T, Alloc> bucket_type;
+        typedef std::list<Value, Alloc> bucket_type;
         typedef std::vector<bucket_type> bucket_vector;
         typedef typename bucket_vector::iterator bucket_iterator;
         typedef typename bucket_vector::const_iterator const_bucket_iterator;
@@ -87,9 +30,8 @@ namespace siblings {
     public:
         // types //////////////////////////////////////////////////////////////
 
-        typedef typename traits::key_type key_type;
-        typedef T value_type;
-        typedef typename traits::mapped_type mapped_type;
+        typedef Key key_type;
+        typedef Value value_type;
         typedef Hash hasher;
         typedef Pred key_equal;
         typedef Alloc allocator_type;
@@ -103,30 +45,19 @@ namespace siblings {
 
         typedef typename bucket_type::iterator local_iterator;
         typedef typename bucket_type::const_iterator const_local_iterator;
-        typedef nested_iterator<T, bucket_iterator, local_iterator> iterator;
-        typedef nested_iterator<const T, const_bucket_iterator,
-                                const_local_iterator> const_iterator;
+
+        typedef nested_iterator<value_type, bucket_iterator, local_iterator>
+        iterator;
+
+        typedef nested_iterator<const value_type, const_bucket_iterator,
+                                const_local_iterator>
+        const_iterator;
 
         // constants //////////////////////////////////////////////////////////
 
         static const size_type default_bucket_count = 3;
 
     private:
-        struct key_equal_to {
-            const key_type k;
-            key_equal eq;
-
-            template <typename U>
-            key_equal_to(const U& u, const key_equal& eq)
-                : k(traits::key(u)), eq(eq)
-            { }
-
-            bool operator()(const value_type& v) const
-            {
-                return eq(k, traits::key(v));
-            }
-        };
-        
         bucket_vector buckets_;
         hasher hash_;
         key_equal eq_;
@@ -151,18 +82,6 @@ namespace siblings {
             : buckets_(n, bucket_type(a)), hash_(hf), eq_(eql),
               alloc_(a), size_(0), max_load_factor_(1)
         { }
-
-        template <class InputIterator>
-        unordered_container(InputIterator f, InputIterator l,
-                            size_type n = 3,
-                            const hasher& hf = hasher(),
-                            const key_equal& eql = key_equal(),
-                            const allocator_type& a = allocator_type())
-            : buckets_(n, bucket_type(a)), hash_(hf), eq_(eql),
-              alloc_(a), size_(0), max_load_factor_(1)
-        {
-            insert(f, l);
-        }
 
         // unordered_map(const unordered_map&);
         // ~unordered_map();
@@ -203,18 +122,17 @@ namespace siblings {
 
         // modifiers //////////////////////////////////////////////////////////
 
-        std::pair<iterator, bool> insert(const value_type& obj)
+        std::pair<iterator, bool> insert_unique(const value_type& obj)
         {
             std::pair<iterator, bool> result;
-            bucket_iterator b = buckets_.begin() + bucket(traits::key(obj));
-            local_iterator i = std::find_if(b->begin(), b->end(),
-                                            key_equal_to(obj, eq_));
-            if (!traits::unique || i == b->end()) {
+            bucket_iterator b = buckets_.begin() + bucket(key(obj));
+            local_iterator i = find(*b, key(obj));
+            if (i == b->end()) {
                 i = b->insert(i, obj);
                 ++size_;
                 if (load_factor() > max_load_factor()) {
                     rehash(bucket_count() * 2 + 1);
-                    result = std::make_pair(find(traits::key(obj)), true);
+                    result = std::make_pair(find(key(obj)), true);
                 } else {
                     result = std::make_pair(iterator(b, buckets_.end(), i),
                                             true);
@@ -222,25 +140,26 @@ namespace siblings {
             } else {
                 result = std::make_pair(iterator(b, buckets_.end(), i), false);
             }
-            assert(find(traits::key(obj)) != end());
+            assert(find(key(obj)) != end());
             return result;
         }
 
-        iterator insert(iterator hint, const value_type& obj)
+        iterator insert_unique(iterator hint, const value_type& obj)
         {
-            return insert(obj).first;
+            return insert_unique(obj).first;
         }
 
-        const_iterator insert(const_iterator hint, const value_type& obj)
+        const_iterator insert_unique(const_iterator hint,
+                                     const value_type& obj)
         {
             return insert(obj).first;
         }
 
         template <class InputIterator>
-        void insert(InputIterator first, InputIterator last)
+        void insert_unique(InputIterator first, InputIterator last)
         {
             while (first != last) {
-                insert(*first++);
+                insert_unique(*first++);
             }
         }
 
@@ -323,8 +242,7 @@ namespace siblings {
         iterator find(const key_type& k)
         {
             bucket_iterator b = buckets_.begin() + bucket(k);
-            local_iterator v = std::find_if(b->begin(), b->end(),
-                                            key_equal_to(k, eq_));
+            local_iterator v = find(*b, k);
             return (v == b->end()) ? end() : iterator(b, buckets_.end(), v);
         }
 
@@ -338,18 +256,14 @@ namespace siblings {
         std::pair<iterator, iterator> equal_range(const key_type& k)
         {
             bucket_iterator b = buckets_.begin() + bucket(k);
-            local_iterator i = std::find_if(b->begin(), b->end(),
-                                            key_equal_to(k, eq_));
+            local_iterator i = find(*b, k);
             if (i == b->end()) {
                 return std::make_pair(end(), end());
             } else {
                 iterator first = iterator(b, buckets_.end(), i);
                 iterator last = boost::next(first);
-                if (!traits::unique) {
-                    key_equal_to eq(*first, eq_);
-                    while (last != end() && eq(*last)) {
-                        ++last;
-                    }
+                while (last != end() && eq_(key(*first), key(*last))) {
+                    ++last;
                 }
                 return std::make_pair(first, last);
             }
@@ -359,11 +273,6 @@ namespace siblings {
         equal_range(const key_type& k) const
         {
             return const_cast<unordered_container&>(*this).equal_range(k);
-        }
-
-        mapped_type& operator[](const key_type& k)
-        {
-            return insert(traits::value(k)).first->second;
         }
 
         // bucket interface ///////////////////////////////////////////////////
@@ -472,7 +381,7 @@ namespace siblings {
                 bucket_vector v(n, bucket_type(alloc_));
                 BOOST_FOREACH(bucket_type& b, buckets_) {
                     while (b.begin() != b.end()) {
-                        bucket_type& r = v[hash_(traits::key(b.front())) % n];
+                        bucket_type& r = v[hash_(key(b.front())) % n];
                         r.splice(r.end(), b, b.begin());
                     }
                 }
@@ -481,6 +390,27 @@ namespace siblings {
         }
 
     private:
+        const key_type& key(const key_type& k) const { return k; }
+
+        template <typename T> const key_type
+        key(const std::pair<const key_type, T> p) const { return p.first; }
+
+        local_iterator find(bucket_type& b, const key_type& k) const
+        {
+            local_iterator i = b.begin();
+            local_iterator last = b.end();
+            while (i != last && !eq_(k, key(*i))) {
+                ++i;
+            }
+            return i;
+        }
+
+        const_local_iterator
+        find(const bucket_type& b, const key_type& k) const
+        {
+            return find(const_cast<bucket_type&>(b), k);
+        }
+
     };
 }
 

@@ -15,8 +15,8 @@ namespace siblings {
     class unordered_map
     {
     private:
-        typedef unordered_container<std::pair<const Key, T>, map_tag,
-                                    unique_tag, Hash, Pred, Alloc>
+        typedef unordered_container<Key, std::pair<const Key, T>,
+                                    Hash, Pred, Alloc>
         impl_type;
 
         impl_type impl_;
@@ -26,7 +26,7 @@ namespace siblings {
 
         typedef typename impl_type::key_type key_type;
         typedef typename impl_type::value_type value_type;
-        typedef typename impl_type::mapped_type mapped_type;
+        typedef T mapped_type;
         typedef typename impl_type::hasher hasher;
         typedef typename impl_type::key_equal key_equal;
         typedef typename impl_type::allocator_type allocator_type;
@@ -58,8 +58,10 @@ namespace siblings {
                       const hasher& hf = hasher(),
                       const key_equal& eql = key_equal(),
                       const allocator_type& a = allocator_type())
-            : impl_(f, l, n, hf, eql, a)
-        { }
+            : impl_(n, hf, eql, a)
+        {
+            impl_.insert_unique(f, l);
+        }
 
         // unordered_map(const unordered_map&);
         // ~unordered_map();
@@ -86,23 +88,23 @@ namespace siblings {
 
         std::pair<iterator, bool> insert(const value_type& obj)
         {
-            return impl_.insert(obj);
+            return impl_.insert_unique(obj);
         }
 
         iterator insert(iterator hint, const value_type& obj)
         {
-            return impl_.insert(hint, obj);
+            return impl_.insert_unique(hint, obj);
         }
 
         const_iterator insert(const_iterator hint, const value_type& obj)
         {
-            return impl_.insert(hint, obj);
+            return impl_.insert_unique(hint, obj);
         }
 
         template <class InputIterator>
         void insert(InputIterator first, InputIterator last)
         {
-            return impl_.insert(first, last);
+            return impl_.insert_unique(first, last);
         }
 
         iterator erase(iterator i) { return impl_.erase(i); }
@@ -139,7 +141,10 @@ namespace siblings {
         std::pair<const_iterator, const_iterator>
         equal_range(const key_type& k) const { return impl_.equal_range(k); }
 
-        mapped_type& operator[](const key_type& k) { return impl_[k]; }
+        mapped_type& operator[](const key_type& k)
+        {
+            return impl_.insert_unique(value_type(k, T())).first->second;
+        }
 
         // bucket interface ///////////////////////////////////////////////////
 
@@ -173,9 +178,6 @@ namespace siblings {
               class Pred = std::equal_to<Key>,
               class Alloc = std::allocator<std::pair<const Key, T> > >
     class unordered_multimap
-        : public unordered_container<std::pair<const Key, T>,
-                                     map_tag, non_unique_tag,
-                                     Hash, Pred, Alloc>
     { };
 
     template <class Key, class T, class Hash, class Pred, class Alloc>
