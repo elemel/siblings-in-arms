@@ -3,6 +3,7 @@
 #ifndef SIBLINGS_NESTED_ITERATOR_HPP
 #define SIBLINGS_NESTED_ITERATOR_HPP
 
+#include <cassert>
 #include <boost/iterator/iterator_facade.hpp>
 
 namespace siblings {
