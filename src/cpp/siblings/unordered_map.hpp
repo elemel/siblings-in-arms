@@ -45,7 +45,7 @@ namespace siblings {
 
         // construct/destroy/copy /////////////////////////////////////////////
 
-        explicit unordered_map(size_type n = 3,
+        explicit unordered_map(size_type n = impl_type::default_bucket_count,
                                const hasher& hf = hasher(),
                                const key_equal& eql = key_equal(),
                                const allocator_type& a = allocator_type())
@@ -54,7 +54,7 @@ namespace siblings {
 
         template <class InputIterator>
         unordered_map(InputIterator f, InputIterator l,
-                      size_type n = 3,
+                      size_type n = impl_type::default_bucket_count,
                       const hasher& hf = hasher(),
                       const key_equal& eql = key_equal(),
                       const allocator_type& a = allocator_type())

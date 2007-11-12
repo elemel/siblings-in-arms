@@ -107,6 +107,8 @@ namespace siblings {
         typedef nested_iterator<const T, const_bucket_iterator,
                                 const_local_iterator> const_iterator;
 
+        static const size_type default_bucket_count = 3;
+
     private:
         struct key_equal_to {
             const key_type k;
