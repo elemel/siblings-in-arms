@@ -107,6 +107,8 @@ namespace siblings {
         typedef nested_iterator<const T, const_bucket_iterator,
                                 const_local_iterator> const_iterator;
 
+        // constants //////////////////////////////////////////////////////////
+
         static const size_type default_bucket_count = 3;
 
     private:
