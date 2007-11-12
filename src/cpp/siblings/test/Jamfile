@@ -1,5 +1,6 @@
 unit-test flat_set_test : flat_set_test.cpp ;
-unit-test unordered_container_test : unordered_container_test.cpp ;
+unit-test unordered_map_test : unordered_map_test.cpp ;
+unit-test unordered_set_test : unordered_set_test.cpp ;
 
 unit-test circle_2_test : circle_2_test.cpp ;
 
