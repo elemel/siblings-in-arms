@@ -274,18 +274,26 @@ namespace siblings {
 
         /// Erases all elements with key equal to @c k.
         ///
-        /// Exception safety: No-throw if the hash and comparison functions do
-        /// not throw; strong otherwise.
+        /// Exception safety: No-throw if the hash and comparison functions are
+        /// no-throw; strong if only the comparison function is no-throw; and
+        /// basic otherwise.
         ///
         /// @post find(k) == end()
         /// @post result == old(size()) - size()
         size_type erase(const key_type& k)
         {
-            size_type old_size = size_;
-            std::pair<iterator, iterator> r = equal_range(k);
-            erase(r.first, r.second);
-            assert(size_ <= old_size);
-            return old_size - size_;
+            bucket_type& b = buckets_[bucket(k)];
+            local_iterator v = find_local(b, k);
+            if (v == b.end()) {
+                return 0;
+            } else {
+                size_type old_size = size();
+                do {
+                    v = b.erase(v);
+                    --size_;
+                } while (v != b.end() && eq_(k, key(*v)));
+                return old_size - size();
+            }
         }
 
         /// Erases all elements in the range [first, last).
