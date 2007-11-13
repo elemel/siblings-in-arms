@@ -138,10 +138,13 @@ namespace siblings {
         count(const key_type& k) const { return impl_.count_unique(k); }
 
         std::pair<iterator, iterator>
-        equal_range(const key_type& k) { return impl_.equal_range(k); }
+        equal_range(const key_type& k) { return impl_.equal_range_unique(k); }
 
         std::pair<const_iterator, const_iterator>
-        equal_range(const key_type& k) const { return impl_.equal_range(k); }
+        equal_range(const key_type& k) const
+        {
+            return impl_.equal_range_unique(k);
+        }
 
         mapped_type& operator[](const key_type& k)
         {

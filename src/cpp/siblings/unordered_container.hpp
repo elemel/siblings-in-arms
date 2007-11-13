@@ -11,7 +11,6 @@
 #include <utility>
 #include <vector>
 #include <boost/bind.hpp>
-#include <boost/foreach.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/utility.hpp>
 
@@ -74,11 +73,10 @@ namespace siblings {
     public:
         // construct/destroy/copy /////////////////////////////////////////////
 
-        explicit unordered_container(size_type n = 3,
-                                     const hasher& hf = hasher(),
-                                     const key_equal& eql = key_equal(),
-                                     const allocator_type& a
-                                     = allocator_type())
+        /// Default constructor.
+        explicit unordered_container(size_type n, const hasher& hf,
+                                     const key_equal& eql,
+                                     const allocator_type& a)
             : buckets_(n, bucket_type(a)), hash_(hf), eq_(eql),
               alloc_(a), size_(0), max_load_factor_(1)
         { }
@@ -87,67 +85,128 @@ namespace siblings {
         // ~unordered_map();
         // unordered_map& operator=(const unordered_map&);
 
+        /// Returns the allocator.
+        ///
+        /// Complexity: Constant.
+        ///
+        /// Exception safety: No-throw if the allocator's copy constructor is
+        /// no-throw; strong otherwise.
         allocator_type get_allocator() const { return alloc_; }
 
         // size and capacity //////////////////////////////////////////////////
 
+        /// Returns true if there are no elements in the container; false
+        /// otherwise.
+        ///
+        /// Complexity: Constant.
+        ///
+        /// Exception safety: No-throw.
         bool empty() const { return size_ == 0; }
+
+        /// Returns the number of elements in the container.
+        ///
+        /// Complexity: Constant.
+        ///
+        /// Exception safety: No-throw.
         size_type size() const { return size_; }
+
+        /// Returns the maximum number of elements that the container can hold.
+        ///
+        /// Complexity: Constant.
+        ///
+        /// Exception safety: No-throw.
         size_type max_size() const { return buckets_.max_size(); }
 
         // iterators //////////////////////////////////////////////////////////
 
+        /// Returns an iterator to the first element.
+        ///
+        /// Complexity: Constant.
+        ///
+        /// Exception safety: No-throw.
         iterator begin()
         {
             return iterator(buckets_.begin(), buckets_.end());
         }
 
+        /// Returns an iterator to the first element.
+        ///
+        /// Complexity: Constant.
+        ///
+        /// Exception safety: No-throw.
         const_iterator begin() const
         {
             return const_iterator(buckets_.begin(), buckets_.end());
         }
 
+        /// Returns an iterator just beyond the last element.
+        ///
+        /// Complexity: Constant.
+        ///
+        /// Exception safety: No-throw.
         iterator end()
         {
             return iterator(buckets_.end(), buckets_.end());
         }
 
+        /// Returns an iterator just beyond the last element.
+        ///
+        /// Complexity: Constant.
+        ///
+        /// Exception safety: No-throw.
         const_iterator end() const
         {
             return const_iterator(buckets_.end(), buckets_.end());
         }
 
+        /// Returns an iterator to the first element.
+        ///
+        /// Complexity: Constant.
+        ///
+        /// Exception safety: No-throw.
         const_iterator cbegin() const { return begin(); }
+
+        /// Returns an iterator just beyond the last element.
+        ///
+        /// Complexity: Constant.
+        ///
+        /// Exception safety: No-throw.
         const_iterator cend() const { return end(); }
 
         // modifiers //////////////////////////////////////////////////////////
 
+        /// Complexity. Average case 
+        ///
+        /// Exception safety: Strong if the hash function is no-throw; basic
+        /// otherwise.
+        ///
+        /// @post result.second
         std::pair<iterator, bool> insert(const value_type& obj)
         {
-            std::pair<iterator, bool> result;
             bucket_iterator b = buckets_.begin() + bucket(key(obj));
-            local_iterator i = find_local(*b, key(obj));
-            i = b->insert(i, obj);
-            ++size_;
-            if (load_factor() > max_load_factor()) {
-                rehash(bucket_count() * 2 + 1);
-                result = std::make_pair(find(key(obj)), true);
-            } else {
-                result = std::make_pair(iterator(b, buckets_.end(), i),
-                                        true);
-            }
-            assert(find(key(obj)) != end());
-            return result;
+            local_iterator v = find_local(*b, key(obj));
+            iterator i = insert_at(b, v, obj);
+            return std::make_pair(i, true);
         }
 
         iterator insert(iterator hint, const value_type& obj)
         {
-            return insert(obj).first;
+            if (hint != end() && eq_(key(*hint), key(obj))) {
+                return insert_at(hint.current_outer(), hint.current_inner(),
+                                 obj);
+            } else {
+                return insert_unique(obj).first;
+            }
         }
 
         const_iterator insert(const_iterator hint, const value_type& obj)
         {
-            return insert(obj).first;
+            if (hint != end() && eq_(key(*hint), key(obj))) {
+                return insert_at(hint.current_outer(), hint.current_inner(),
+                                 obj);
+            } else {
+                return insert_unique(obj).first;
+            }
         }
 
         template <class InputIterator>
@@ -179,16 +238,24 @@ namespace siblings {
             assert(find(key(obj)) != end());
             return result;
         }
-
+        
         iterator insert_unique(iterator hint, const value_type& obj)
         {
-            return insert_unique(obj).first;
+            if (hint != end() && eq_(key(*hint), key(obj))) {
+                return hint;
+            } else {
+                return insert_unique(obj).first;
+            }
         }
-
+            
         const_iterator insert_unique(const_iterator hint,
                                      const value_type& obj)
         {
-            return insert_unique(obj).first;
+            if (hint != end() && eq_(key(*hint), key(obj))) {
+                return hint;
+            } else {
+                return insert_unique(obj).first;
+            }
         }
 
         template <class InputIterator>
@@ -217,6 +284,13 @@ namespace siblings {
             return result;
         }
 
+        /// Erases all elements with key equal to @c k.
+        ///
+        /// Exception safety: No-throw if the hash and comparison functions do
+        /// not throw; strong otherwise.
+        ///
+        /// @post find(k) == end()
+        /// @post result == old(size()) - size()
         size_type erase(const key_type& k)
         {
             size_type old_size = size_;
@@ -226,7 +300,11 @@ namespace siblings {
             return old_size - size_;
         }
 
-        /// @todo Optimize.
+        /// Erases all elements in the range [first, last).
+        ///
+        /// Complexity: Linear in the size of the range.
+        ///
+        /// Exception safety: No-throw.
         iterator erase(iterator first, iterator last)
         {
             while (first != last) {
@@ -235,7 +313,11 @@ namespace siblings {
             return first;
         }
 
-        /// @todo Optimize.
+        /// Erases all elements in the range [first, last).
+        ///
+        /// Complexity: Linear in the size of the range.
+        ///
+        /// Exception safety: No-throw.
         const_iterator erase(const_iterator first, const_iterator last)
         {
             while (first != last) {
@@ -244,18 +326,22 @@ namespace siblings {
             return first;
         }
 
-        /// @todo Simplify this function if vector::clear is no-throw.
+        /// Erases all elements in the container.
+        ///
+        /// Complexity: Linear in the number of elements plus the number of
+        /// buckets.
+        ///
+        /// Exception safety: No-throw.
+        ///
+        /// @post empty()
         void clear()
         {
-            BOOST_FOREACH(bucket_type& b, buckets_) {
-                size_ -= b.size();
-                try {
-                    b.clear();
-                } catch (...) {
-                    size_ += b.size();
-                    throw;
-                }
+            for (bucket_iterator i = buckets_.begin(); i != buckets_.end();
+                 ++i)
+            {
+                i->clear(); // no-throw operation
             }
+            size_ = 0;
         }
 
         void swap(unordered_container& other)
@@ -310,20 +396,20 @@ namespace siblings {
             return (v == b.end()) ? 0 : 1;
         }
 
-        // @todo Optimization: use local iterators for searching.
         std::pair<iterator, iterator> equal_range(const key_type& k)
         {
             bucket_iterator b = buckets_.begin() + bucket(k);
-            local_iterator v = find_local(*b, k);
-            if (v == b->end()) {
+            std::pair<local_iterator, local_iterator> r
+                = equal_range_local(*b, k);
+            if (r.first == b->end()) {
                 return std::make_pair(end(), end());
+            } else if (r.second == b->end()) {
+                return std::make_pair(iterator(b, buckets_.end(), r.first),
+                                      iterator(boost::next(b),
+                                               buckets_.end()));
             } else {
-                iterator first = iterator(b, buckets_.end(), v);
-                iterator last = boost::next(first);
-                while (last != end() && eq_(key(*first), key(*last))) {
-                    ++last;
-                }
-                return std::make_pair(first, last);
+                return std::make_pair(iterator(b, buckets_.end(), r.first),
+                                      iterator(b, buckets_.end(), r.second));
             }
         }
 
@@ -333,15 +419,35 @@ namespace siblings {
             return const_cast<unordered_container&>(*this).equal_range(k);
         }
 
+        std::pair<iterator, iterator> equal_range_unique(const key_type& k)
+        {
+            bucket_iterator b = buckets_.begin() + bucket(k);
+            local_iterator v = find_local(*b, k);
+            if (v == b->end()) {
+                return std::make_pair(end(), end());
+            } else {
+                return std::make_pair(iterator(b, buckets_.end(), v),
+                                      iterator(b, buckets_.end(),
+                                               boost::next(v)));
+            }
+        }
+
+        std::pair<const_iterator, const_iterator>
+        equal_range_unique(const key_type& k) const
+        {
+            return const_cast<unordered_container&>(*this)
+                .equal_range_unique(k);
+        }
+
         // bucket interface ///////////////////////////////////////////////////
 
-        /// Exception safety: No-throw guarantee.
+        /// Exception safety: No-throw.
         size_type bucket_count() const { return buckets_.size(); }
 
-        /// Exception safety: No-throw guarantee.
+        /// Exception safety: No-throw.
         size_type max_bucket_count() const { return buckets_.max_size(); }
 
-        /// Exception safety: No-throw guarantee.
+        /// Exception safety: No-throw.
         ///
         /// @pre i < bucket_count()
         /// @post result <= size()
@@ -351,14 +457,14 @@ namespace siblings {
             return buckets_[i].size();
         }
 
-        /// Exception safety: No-throw guarantee if the hash function is
-        /// no-throw; strong guarantee otherwise.
+        /// Exception safety: No-throw if the hash function is no-throw; strong
+        /// otherwise.
         size_type bucket(const key_type& k) const
         {
             return hash_(k) % bucket_count();
         }
 
-        /// Exception safety: No-throw guarantee.
+        /// Exception safety: No-throw.
         ///
         /// @pre i < bucket_count()
         local_iterator begin(size_type i)
@@ -367,7 +473,7 @@ namespace siblings {
             return buckets_[i].begin();
         }
 
-        /// Exception safety: No-throw guarantee.
+        /// Exception safety: No-throw.
         ///
         /// @pre i < bucket_count()
         const_local_iterator begin(size_type i) const
@@ -376,7 +482,7 @@ namespace siblings {
             return buckets_[i].begin();
         }
 
-        /// Exception safety: No-throw guarantee.
+        /// Exception safety: No-throw.
         ///
         /// @pre i < bucket_count()
         local_iterator end(size_type i)
@@ -385,7 +491,7 @@ namespace siblings {
             return buckets_[i].end();
         }
 
-        /// Exception safety: No-throw guarantee.
+        /// Exception safety: No-throw.
         ///
         /// @pre i < bucket_count()
         const_local_iterator end(size_type i) const
@@ -396,7 +502,7 @@ namespace siblings {
 
         // hash policy ////////////////////////////////////////////////////////
 
-        /// Exception safety: No-throw guarantee.
+        /// Exception safety: No-throw.
         ///
         // @post result >= 0 && result <= max_load_factor()
         float load_factor() const
@@ -404,12 +510,16 @@ namespace siblings {
             return load_factor(bucket_count());
         }
 
-        /// Exception safety: No-throw guarantee.
+        /// Exception safety: No-throw.
         ///
         /// @post result >= 0
         float max_load_factor() const { return max_load_factor_; }
 
-        /// Exception safety: Strong guarantee.
+        /// Complexity: Constant unless the new maximum load factor triggers a
+        /// rehash, in which case it is linear in the number of elements plus
+        /// the number of buckets.
+        ///
+        /// Exception safety: Strong.
         ///
         /// @pre z > 0
         void max_load_factor(float z)
@@ -423,52 +533,102 @@ namespace siblings {
                 }
             } catch (...) {
                 max_load_factor_ = saved_max_load_factor;
+                throw;
             }
         }
 
-        /// Exception safety: Strong guarantee. Exceptions can only be thrown
-        /// when constructing the new bucket vector. The container has not been
-        /// modified at this point. Once the new bucket vector has been
-        /// constructed, the rest of the rehashing is carried out using list
-        /// splicing and vector swapping, which are no-throw operations.
+        /// Complexity: Linear in the number of elements plus the number of
+        /// buckets.
         ///
+        /// Exception safety: Strong if the hash function is no-throw; basic
+        /// otherwise.
+        ///
+        /// @pre n >= 1
         /// @post bucket_count() >= n
+        /// @post size() <= old(size())
         void rehash(size_type n)
         {
-            if (n >= 1 && load_factor(n) <= max_load_factor()) {
+            assert(n >= 1);
+            if (load_factor(n) <= max_load_factor()) {
                 bucket_vector v(n, bucket_type(alloc_));
-                BOOST_FOREACH(bucket_type& b, buckets_) {
-                    while (b.begin() != b.end()) {
-                        bucket_type& r = v[hash_(key(b.front())) % n];
-                        r.splice(r.end(), b, b.begin());
+                size_type old_size = size();
+                for (bucket_iterator i = buckets_.begin(); i != buckets_.end();
+                     ++i)
+                {
+                    while (!i->empty()) {
+                        bucket_type& b = v[hash_(key(i->front())) % n];
+                        b.splice(b.end(), *i, i->begin());
+                        --size_;
                     }
                 }
                 buckets_.swap(v);
+                size_ = old_size;
             }
         }
 
     private:
+        /// Complexity: Constant.
+        ///
+        /// Exception safety: No-throw.
         const key_type& key(const key_type& k) const { return k; }
 
+        /// Complexity: Constant.
+        ///
+        /// Exception safety: No-throw.
         template <typename T> const key_type
         key(const std::pair<const key_type, T> p) const { return p.first; }
 
+        /// Complexity: Constant unless a rehash is triggered, in which case it
+        /// is linear in the number of elements plus the number of buckets.
+        ///
+        /// Exception safety: Strong if the hash function is no-throw; basic
+        /// otherwise.
+        ///
+        /// @param b Iterator to bucket.
+        /// @param v Insertion point in bucket. Points to an element in the
+        ///          bucket or to its end.
+        iterator insert_at(bucket_iterator b, local_iterator v,
+                           const value_type& obj)
+        {
+            v = b->insert(v, obj);
+            ++size_;
+            if (load_factor() <= max_load_factor()) {
+                return iterator(b, buckets_.end(), v);
+            } else {
+                rehash(bucket_count() * 2 + 1);
+                return find(key(obj));
+            }
+        }
+
+        /// Exception safety: No-throw if the comparison function is no-throw;
+        /// strong otherwise.
+        ///
+        /// Complexity: Average case constant, worst case linear in bucket
+        /// size.
         local_iterator find_local(bucket_type& b, const key_type& k) const
         {
-            local_iterator i = b.begin();
+            local_iterator first = b.begin();
             local_iterator last = b.end();
-            while (i != last && !eq_(k, key(*i))) {
-                ++i;
+            while (first != last && !eq_(k, key(*first))) {
+                ++first;
             }
-            return i;
+            return first;
         }
 
-        const_local_iterator
-        find_local(const bucket_type& b, const key_type& k) const
+        /// Exception safety: No-throw if the comparison function is no-throw;
+        /// strong otherwise.
+        ///
+        /// Complexity: Linear in bucket size.
+        std::pair<local_iterator, local_iterator>
+        equal_range_local(bucket_type& b, const key_type& k) const
         {
-            return find(const_cast<bucket_type&>(b), k);
+            local_iterator first = find_local(b, k);
+            local_iterator last = first;
+            while (last != b.end() && eq_(k, key(*last))) {
+                ++last;
+            }
+            return std::make_pair(first, last);
         }
-
     };
 }
 
