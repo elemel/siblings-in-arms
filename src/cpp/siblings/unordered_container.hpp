@@ -126,7 +126,7 @@ namespace siblings {
         {
             std::pair<iterator, bool> result;
             bucket_iterator b = buckets_.begin() + bucket(key(obj));
-            local_iterator i = find(*b, key(obj));
+            local_iterator i = find_local(*b, key(obj));
             i = b->insert(i, obj);
             ++size_;
             if (load_factor() > max_load_factor()) {
@@ -162,7 +162,7 @@ namespace siblings {
         {
             std::pair<iterator, bool> result;
             bucket_iterator b = buckets_.begin() + bucket(key(obj));
-            local_iterator i = find(*b, key(obj));
+            local_iterator i = find_local(*b, key(obj));
             if (i == b->end()) {
                 i = b->insert(i, obj);
                 ++size_;
@@ -278,7 +278,7 @@ namespace siblings {
         iterator find(const key_type& k)
         {
             bucket_iterator b = buckets_.begin() + bucket(k);
-            local_iterator v = find(*b, k);
+            local_iterator v = find_local(*b, k);
             return (v == b->end()) ? end() : iterator(b, buckets_.end(), v);
         }
 
@@ -287,16 +287,38 @@ namespace siblings {
             return const_cast<unordered_container&>(*this).find(k);
         }
 
-        size_type count(const key_type& k) const;
+        size_type count(const key_type& k) const
+        {
+            const bucket_type& b = buckets_[bucket(k)];
+            const_local_iterator v = find_local(b, k);
+            if (v == b.end()) {
+                return 0;
+            }
 
+            size_type result = 0;
+            do {
+                ++v;
+                ++result;
+            } while (v != b.end() && eq_(k, key(*v)));
+            return result;
+        }
+
+        size_type count_unique(const key_type& k) const
+        {
+            const bucket_type& b = buckets_[bucket(k)];
+            const_local_iterator v = find_local(b, k);
+            return (v == b.end()) ? 0 : 1;
+        }
+
+        // @todo Optimization: use local iterators for searching.
         std::pair<iterator, iterator> equal_range(const key_type& k)
         {
             bucket_iterator b = buckets_.begin() + bucket(k);
-            local_iterator i = find(*b, k);
-            if (i == b->end()) {
+            local_iterator v = find_local(*b, k);
+            if (v == b->end()) {
                 return std::make_pair(end(), end());
             } else {
-                iterator first = iterator(b, buckets_.end(), i);
+                iterator first = iterator(b, buckets_.end(), v);
                 iterator last = boost::next(first);
                 while (last != end() && eq_(key(*first), key(*last))) {
                     ++last;
@@ -431,7 +453,7 @@ namespace siblings {
         template <typename T> const key_type
         key(const std::pair<const key_type, T> p) const { return p.first; }
 
-        local_iterator find(bucket_type& b, const key_type& k) const
+        local_iterator find_local(bucket_type& b, const key_type& k) const
         {
             local_iterator i = b.begin();
             local_iterator last = b.end();
@@ -442,7 +464,7 @@ namespace siblings {
         }
 
         const_local_iterator
-        find(const bucket_type& b, const key_type& k) const
+        find_local(const bucket_type& b, const key_type& k) const
         {
             return find(const_cast<bucket_type&>(b), k);
         }

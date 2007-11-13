@@ -133,7 +133,9 @@ namespace siblings {
 
         iterator find(const key_type& k) { return impl_.find(k); }
         const_iterator find(const key_type& k) const { return impl_.find(k); }
-        size_type count(const key_type& k) const { return impl_.count(k); }
+
+        size_type
+        count(const key_type& k) const { return impl_.count_unique(k); }
 
         std::pair<iterator, iterator>
         equal_range(const key_type& k) { return impl_.equal_range(k); }
