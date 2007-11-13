@@ -179,8 +179,7 @@ namespace siblings {
                     const flat_set<Key, Compare, Sequence>& right)
     {
         return left.size() == right.size()
-            && std::equal(left.begin(), left.end(), right.begin(),
-                          equal_from_less<Key, Compare>(left.key_comp()));
+            && std::equal(left.begin(), left.end(), right.begin());
     }
             
     template <typename Key, typename Compare, typename Sequence>
@@ -188,8 +187,7 @@ namespace siblings {
                    const flat_set<Key, Compare, Sequence>& right)
     {
         return std::lexicographical_compare(left.begin(), left.end(),
-                                            right.begin(), right.end(),
-                                            left.key_comp());
+                                            right.begin(), right.end());
     }
 }
 
