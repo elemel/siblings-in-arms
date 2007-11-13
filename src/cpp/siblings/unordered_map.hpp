@@ -109,7 +109,7 @@ namespace siblings {
 
         iterator erase(iterator i) { return impl_.erase(i); }
         const_iterator erase(const_iterator i) { return impl_.erase(i); }
-        size_type erase(const key_type& k) { return impl_.erase(k); }
+        size_type erase(const key_type& k) { return impl_.erase_unique(k); }
 
         iterator erase(iterator first, iterator last)
         {

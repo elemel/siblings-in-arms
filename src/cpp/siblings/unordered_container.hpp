@@ -185,8 +185,7 @@ namespace siblings {
         {
             bucket_iterator b = buckets_.begin() + bucket(key(obj));
             local_iterator v = find_local(*b, key(obj));
-            iterator i = insert_at(b, v, obj);
-            return std::make_pair(i, true);
+            return std::make_pair(insert_at(b, v, obj), true);
         }
 
         iterator insert(iterator hint, const value_type& obj)
@@ -219,24 +218,13 @@ namespace siblings {
 
         std::pair<iterator, bool> insert_unique(const value_type& obj)
         {
-            std::pair<iterator, bool> result;
             bucket_iterator b = buckets_.begin() + bucket(key(obj));
-            local_iterator i = find_local(*b, key(obj));
-            if (i == b->end()) {
-                i = b->insert(i, obj);
-                ++size_;
-                if (load_factor() > max_load_factor()) {
-                    rehash(bucket_count() * 2 + 1);
-                    result = std::make_pair(find(key(obj)), true);
-                } else {
-                    result = std::make_pair(iterator(b, buckets_.end(), i),
-                                            true);
-                }
+            local_iterator v = find_local(*b, key(obj));
+            if (v == b->end()) {
+                return std::make_pair(insert_at(b, v, obj), true);
             } else {
-                result = std::make_pair(iterator(b, buckets_.end(), i), false);
+                return std::make_pair(iterator(b, buckets_.end(), v), false);
             }
-            assert(find(key(obj)) != end());
-            return result;
         }
         
         iterator insert_unique(iterator hint, const value_type& obj)
@@ -324,6 +312,26 @@ namespace siblings {
                 first = erase(first);
             }
             return first;
+        }
+
+        /// Erases an element with key equal to @c k.
+        ///
+        /// Exception safety: No-throw if the hash and comparison functions do
+        /// not throw; strong otherwise.
+        ///
+        /// @post result <= 1
+        /// @post result == old(size()) - size()
+        size_type erase_unique(const key_type& k)
+        {
+            bucket_type& b = buckets_[bucket(k)];
+            local_iterator v = find_local(b, k);
+            if (v == b.end()) {
+                return 0;
+            } else {
+                b.erase(v);
+                --size_;
+                return 1;
+            }
         }
 
         /// Erases all elements in the container.
