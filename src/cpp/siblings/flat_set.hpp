@@ -1,7 +1,6 @@
 #ifndef SIBLINGS_FLAT_SET_HPP
 #define SIBLINGS_FLAT_SET_HPP
 
-#include "equal_from_less.hpp"
 #include <algorithm>
 #include <functional>
 #include <utility>
