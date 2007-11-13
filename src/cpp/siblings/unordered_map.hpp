@@ -6,7 +6,9 @@
 #include "unordered_container.hpp"
 
 namespace siblings {
-    // 23.4.1, class template unordered_map:
+    /// Implementation of 23.4.1, class template unordered_map.
+    ///
+    /// @author Mikael Lind
     template <class Key,
               class T,
               class Hash = boost::hash<Key>,
@@ -148,35 +150,56 @@ namespace siblings {
 
         mapped_type& operator[](const key_type& k)
         {
-            return impl_.insert_unique(value_type(k, T())).first->second;
+            value_type v(k, mapped_type());
+            return impl_.insert_unique(v).first->second;
         }
 
         // bucket interface ///////////////////////////////////////////////////
 
+        /// @copydoc unordered_container::bucket_count
         size_type bucket_count() const { return impl_.bucket_count(); }
+
+        /// @copydoc unordered_container::max_bucket_count
         size_type max_bucket_count() const { return impl_.max_bucket_count(); }
 
+        /// @copydoc unordered_container::bucket_size
         size_type
         bucket_size(size_type i) const { return impl_.bucket_size(i); }
 
+        /// @copydoc unordered_container::bucket
         size_type bucket(const key_type& k) const { return impl_.bucket(k); }
+
+        /// @copydoc unordered_container::begin(size_type)
         local_iterator begin(size_type i) { return impl_.begin(i); }
 
+        /// @copydoc unordered_container::begin(size_type)
         const_local_iterator
         begin(size_type i) const { return impl_.begin(i); }
 
+        /// @copydoc unordered_container::end(size_type)
         local_iterator end(size_type i) { return impl_.end(i); }
+
+        /// @copydoc unordered_container::end(size_type)
         const_local_iterator end(size_type i) const { return impl_.end(i); }
 
         // hash policy ////////////////////////////////////////////////////////
 
+        /// @copydoc unordered_container::load_factor
         float load_factor() const { return impl_.load_factor(); }
+
+        /// @copydoc unordered_container::max_load_factor()
         float max_load_factor() const { return impl_.max_load_factor(); }
+
+        /// @copydoc unordered_container::max_load_factor(float)
         void max_load_factor(float z) { impl_.max_load_factor(z); }
+
+        /// @copydoc unordered_container::rehash
         void rehash(size_type n) { impl_.rehash(n); }
     };
 
-    // 23.4.2, class template unordered_multimap:
+    /// Implementation of 23.4.2, class template unordered_multimap.
+    ///
+    /// @author Mikael Lind
     template <class Key,
               class T,
               class Hash = boost::hash<Key>,

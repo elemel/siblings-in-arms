@@ -1,6 +1,7 @@
 #ifndef SIBLINGS_FLAT_SET_HPP
 #define SIBLINGS_FLAT_SET_HPP
 
+#include "equal_from_less.hpp"
 #include <algorithm>
 #include <functional>
 #include <utility>
@@ -162,20 +163,6 @@ namespace siblings {
             }
         }
 
-        friend bool operator==(const flat_set& left, const flat_set& right)
-        {
-            return left.size() == right.size()
-                && std::equal(left.begin(), left.end(), right.begin(),
-                              left.less_);
-        }
-
-        friend bool operator<(const flat_set& left, const flat_set& right)
-        {
-            return std::lexicographical_compare(left.begin(), left.end(),
-                                                right.begin(), right.end(),
-                                                left.less_);
-        }
-
     private:
         key_compare less_;
         sequence_type storage_;
@@ -186,6 +173,24 @@ namespace siblings {
                                     less_);
         }
     };
+
+    template <typename Key, typename Compare, typename Sequence>
+    bool operator==(const flat_set<Key, Compare, Sequence>& left,
+                    const flat_set<Key, Compare, Sequence>& right)
+    {
+        return left.size() == right.size()
+            && std::equal(left.begin(), left.end(), right.begin(),
+                          equal_from_less<Key, Compare>(left.key_comp()));
+    }
+            
+    template <typename Key, typename Compare, typename Sequence>
+    bool operator<(const flat_set<Key, Compare, Sequence>& left,
+                   const flat_set<Key, Compare, Sequence>& right)
+    {
+        return std::lexicographical_compare(left.begin(), left.end(),
+                                            right.begin(), right.end(),
+                                            left.key_comp());
+    }
 }
 
 #endif

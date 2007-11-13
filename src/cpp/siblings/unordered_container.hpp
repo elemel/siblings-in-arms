@@ -389,6 +389,7 @@ namespace siblings {
             return const_cast<unordered_container&>(*this).find(k);
         }
 
+        /// Returns the number of elements with key equal to @c k.
         size_type count(const key_type& k) const
         {
             const_bucket_iterator b = buckets_.begin() + bucket(k);
@@ -456,12 +457,22 @@ namespace siblings {
 
         // bucket interface ///////////////////////////////////////////////////
 
+        /// Returns the number of buckets.
+        ///
+        /// Complexity: Constant.
+        ///
         /// Exception safety: No-throw.
         size_type bucket_count() const { return buckets_.size(); }
 
+        /// Returns the maximum number of buckets that the container can hold.
+        ///
+        /// Complexity: Constant.
+        ///
         /// Exception safety: No-throw.
         size_type max_bucket_count() const { return buckets_.max_size(); }
 
+        /// Returns the number of elements in the bucket with index @c i.
+        ///
         /// Exception safety: No-throw.
         ///
         /// @pre i < bucket_count()
@@ -472,6 +483,8 @@ namespace siblings {
             return buckets_[i].size();
         }
 
+        /// Returns the bucket index for the specified key.
+        ///
         /// Exception safety: No-throw if the hash function is no-throw; strong
         /// otherwise.
         size_type bucket(const key_type& k) const
