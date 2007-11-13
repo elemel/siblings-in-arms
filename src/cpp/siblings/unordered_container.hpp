@@ -122,6 +122,42 @@ namespace siblings {
 
         // modifiers //////////////////////////////////////////////////////////
 
+        std::pair<iterator, bool> insert(const value_type& obj)
+        {
+            std::pair<iterator, bool> result;
+            bucket_iterator b = buckets_.begin() + bucket(key(obj));
+            local_iterator i = find(*b, key(obj));
+            i = b->insert(i, obj);
+            ++size_;
+            if (load_factor() > max_load_factor()) {
+                rehash(bucket_count() * 2 + 1);
+                result = std::make_pair(find(key(obj)), true);
+            } else {
+                result = std::make_pair(iterator(b, buckets_.end(), i),
+                                        true);
+            }
+            assert(find(key(obj)) != end());
+            return result;
+        }
+
+        iterator insert(iterator hint, const value_type& obj)
+        {
+            return insert(obj).first;
+        }
+
+        const_iterator insert(const_iterator hint, const value_type& obj)
+        {
+            return insert(obj).first;
+        }
+
+        template <class InputIterator>
+        void insert(InputIterator first, InputIterator last)
+        {
+            while (first != last) {
+                insert(*first++);
+            }
+        }
+
         std::pair<iterator, bool> insert_unique(const value_type& obj)
         {
             std::pair<iterator, bool> result;
@@ -152,7 +188,7 @@ namespace siblings {
         const_iterator insert_unique(const_iterator hint,
                                      const value_type& obj)
         {
-            return insert(obj).first;
+            return insert_unique(obj).first;
         }
 
         template <class InputIterator>

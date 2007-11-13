@@ -162,21 +162,6 @@ namespace siblings {
     {
         x.swap(y);
     }
-
-    template <class Value, class Hash, class Pred, class Alloc>
-    bool operator==(unordered_set<Value, Hash, Pred, Alloc>& x,
-                    unordered_set<Value, Hash, Pred, Alloc>& y)
-    {
-        return x.size() == y.size()
-            && std::equal(x.begin(), x.end(), y.begin());
-    }
-
-    template <class Value, class Hash, class Pred, class Alloc>
-    bool operator!=(unordered_set<Value, Hash, Pred, Alloc>& x,
-                    unordered_set<Value, Hash, Pred, Alloc>& y)
-    {
-        return !(x == y);
-    }
 }
 
 #endif

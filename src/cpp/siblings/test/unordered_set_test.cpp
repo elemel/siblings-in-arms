@@ -19,6 +19,14 @@ namespace {
     // const std::string* const first_string = string_data + 0;
     // const std::string* const last_string = string_data + string_count;
 
+    template <class Value, class Hash, class Pred, class Alloc>
+    bool equal(unordered_set<Value, Hash, Pred, Alloc>& x,
+               unordered_set<Value, Hash, Pred, Alloc>& y)
+    {
+        return x.size() == y.size()
+            && std::equal(x.begin(), x.end(), y.begin());
+    }
+
     void test_default_ctor()
     {
         unordered_set<int> s;
@@ -37,7 +45,7 @@ namespace {
     void test_copy_ctor()
     {
         unordered_set<int> s(first_int, last_int), t(s);
-        assert(s == t);
+        assert(equal(s, t));
     }
 
     void test_erase_absent_key()
