@@ -184,15 +184,15 @@ namespace siblings {
         std::pair<iterator, bool> insert(const value_type& obj)
         {
             bucket_iterator b = buckets_.begin() + bucket(key(obj));
-            local_iterator v = find_local(*b, key(obj));
-            return std::make_pair(insert_at(b, v, obj), true);
+            local_iterator v = find_impl(*b, key(obj));
+            return std::make_pair(insert_impl(b, v, obj), true);
         }
 
         iterator insert(iterator hint, const value_type& obj)
         {
             if (hint != end() && eq_(key(*hint), key(obj))) {
-                return insert_at(hint.current_outer(), hint.current_inner(),
-                                 obj);
+                return insert_impl(hint.current_outer(), hint.current_inner(),
+                                   obj);
             } else {
                 return insert_unique(obj).first;
             }
@@ -201,8 +201,8 @@ namespace siblings {
         const_iterator insert(const_iterator hint, const value_type& obj)
         {
             if (hint != end() && eq_(key(*hint), key(obj))) {
-                return insert_at(hint.current_outer(), hint.current_inner(),
-                                 obj);
+                return insert_impl(hint.current_outer(), hint.current_inner(),
+                                   obj);
             } else {
                 return insert_unique(obj).first;
             }
@@ -219,9 +219,9 @@ namespace siblings {
         std::pair<iterator, bool> insert_unique(const value_type& obj)
         {
             bucket_iterator b = buckets_.begin() + bucket(key(obj));
-            local_iterator v = find_local(*b, key(obj));
+            local_iterator v = find_impl(b, key(obj));
             if (v == b->end()) {
-                return std::make_pair(insert_at(b, v, obj), true);
+                return std::make_pair(insert_impl(b, v, obj), true);
             } else {
                 return std::make_pair(iterator(b, buckets_.end(), v), false);
             }
@@ -282,16 +282,16 @@ namespace siblings {
         /// @post result == old(size()) - size()
         size_type erase(const key_type& k)
         {
-            bucket_type& b = buckets_[bucket(k)];
-            local_iterator v = find_local(b, k);
-            if (v == b.end()) {
+            bucket_iterator b = buckets_.begin() + bucket(k);
+            local_iterator v = find_impl(b, k);
+            if (v == b->end()) {
                 return 0;
             } else {
                 size_type old_size = size();
                 do {
-                    v = b.erase(v);
+                    v = b->erase(v);
                     --size_;
-                } while (v != b.end() && eq_(k, key(*v)));
+                } while (v != b->end() && eq_(k, key(*v)));
                 return old_size - size();
             }
         }
@@ -331,12 +331,12 @@ namespace siblings {
         /// @post result == old(size()) - size()
         size_type erase_unique(const key_type& k)
         {
-            bucket_type& b = buckets_[bucket(k)];
-            local_iterator v = find_local(b, k);
-            if (v == b.end()) {
+            bucket_iterator b = buckets_.begin() + bucket(k);
+            local_iterator v = find_impl(b, k);
+            if (v == b->end()) {
                 return 0;
             } else {
-                b.erase(v);
+                b->erase(v);
                 --size_;
                 return 1;
             }
@@ -380,7 +380,7 @@ namespace siblings {
         iterator find(const key_type& k)
         {
             bucket_iterator b = buckets_.begin() + bucket(k);
-            local_iterator v = find_local(*b, k);
+            local_iterator v = find_impl(b, k);
             return (v == b->end()) ? end() : iterator(b, buckets_.end(), v);
         }
 
@@ -391,32 +391,31 @@ namespace siblings {
 
         size_type count(const key_type& k) const
         {
-            const bucket_type& b = buckets_[bucket(k)];
-            const_local_iterator v = find_local(b, k);
-            if (v == b.end()) {
+            const_bucket_iterator b = buckets_.begin() + bucket(k);
+            const_local_iterator v = find_impl(b, k);
+            if (v == b->end()) {
                 return 0;
             }
-
             size_type result = 0;
             do {
                 ++v;
                 ++result;
-            } while (v != b.end() && eq_(k, key(*v)));
+            } while (v != b->end() && eq_(k, key(*v)));
             return result;
         }
 
         size_type count_unique(const key_type& k) const
         {
-            const bucket_type& b = buckets_[bucket(k)];
-            const_local_iterator v = find_local(b, k);
-            return (v == b.end()) ? 0 : 1;
+            const_bucket_iterator b = buckets_.begin() + bucket(k);
+            const_local_iterator v = find_impl(b, k);
+            return (v == b->end()) ? 0 : 1;
         }
 
         std::pair<iterator, iterator> equal_range(const key_type& k)
         {
             bucket_iterator b = buckets_.begin() + bucket(k);
             std::pair<local_iterator, local_iterator> r
-                = equal_range_local(*b, k);
+                = equal_range_impl(*b, k);
             if (r.first == b->end()) {
                 return std::make_pair(end(), end());
             } else if (r.second == b->end()) {
@@ -438,7 +437,7 @@ namespace siblings {
         std::pair<iterator, iterator> equal_range_unique(const key_type& k)
         {
             bucket_iterator b = buckets_.begin() + bucket(k);
-            local_iterator v = find_local(*b, k);
+            local_iterator v = find_impl(*b, k);
             if (v == b->end()) {
                 return std::make_pair(end(), end());
             } else {
@@ -603,8 +602,8 @@ namespace siblings {
         /// @param b Iterator to bucket.
         /// @param v Insertion point in bucket. Points to an element in the
         ///          bucket or to its end.
-        iterator insert_at(bucket_iterator b, local_iterator v,
-                           const value_type& obj)
+        iterator insert_impl(bucket_iterator b, local_iterator v,
+                             const value_type& obj)
         {
             v = b->insert(v, obj);
             ++size_;
@@ -621,10 +620,10 @@ namespace siblings {
         ///
         /// Complexity: Average case constant, worst case linear in bucket
         /// size.
-        local_iterator find_local(bucket_type& b, const key_type& k) const
+        local_iterator find_impl(bucket_iterator b, const key_type& k) const
         {
-            local_iterator first = b.begin();
-            local_iterator last = b.end();
+            local_iterator first = b->begin();
+            local_iterator last = b->end();
             while (first != last && !eq_(k, key(*first))) {
                 ++first;
             }
@@ -636,11 +635,11 @@ namespace siblings {
         ///
         /// Complexity: Linear in bucket size.
         std::pair<local_iterator, local_iterator>
-        equal_range_local(bucket_type& b, const key_type& k) const
+        equal_range_impl(bucket_iterator b, const key_type& k) const
         {
-            local_iterator first = find_local(b, k);
+            local_iterator first = find_impl(b, k);
             local_iterator last = first;
-            while (last != b.end() && eq_(k, key(*last))) {
+            while (last != b->end() && eq_(k, key(*last))) {
                 ++last;
             }
             return std::make_pair(first, last);
