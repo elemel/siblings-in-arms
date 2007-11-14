@@ -23,7 +23,9 @@ install dist : src/cpp/siblings
 
 # kludge: generate separate documentation trees for debug and release builds to
 # avoid target collisions
-doxygen siblings.html : [ glob src/cpp/siblings/*.hpp ]
+doxygen siblings.html
+    : [ glob src/cpp/siblings/*.hpp src/cpp/siblings/detail/*.hpp ]
     : <location>doc/api/debug <variant>debug ;
-doxygen siblings.html : [ glob src/cpp/siblings/*.hpp ]
+doxygen siblings.html
+    : [ glob src/cpp/siblings/*.hpp src/cpp/siblings/detail/*.hpp ]
     : <location>doc/api/release <variant>release ;

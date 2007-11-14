@@ -3,6 +3,7 @@
 #ifndef SIBLINGS_UNORDERED_MAP_HPP
 #define SIBLINGS_UNORDERED_MAP_HPP
 
+#include "get_first.hpp"
 #include "detail/unordered_container.hpp"
 
 namespace siblings {
@@ -17,8 +18,12 @@ namespace siblings {
     class unordered_map
     {
     private:
+        /// Pair type.
+        typedef std::pair<const Key, T> pair_type;
+
         /// Implementation type.
-        typedef detail::unordered_container<Key, std::pair<const Key, T>,
+        typedef detail::unordered_container<Key, pair_type,
+                                            get_first<pair_type>,
                                             Hash, Pred, Alloc>
         impl_type;
         
@@ -26,52 +31,52 @@ namespace siblings {
         /// @name Types
         /// @{
         
-        /// @copydoc unordered_container::key_type
+        /// @copydoc detail::unordered_container::key_type
         typedef typename impl_type::key_type key_type;
         
-        /// @copydoc unordered_container::value_type
+        /// @copydoc detail::unordered_container::value_type
         typedef typename impl_type::value_type value_type;
 
         /// Mapped type.
         typedef T mapped_type;
 
-        /// @copydoc unordered_container::hasher
+        /// @copydoc detail::unordered_container::hasher
         typedef typename impl_type::hasher hasher;
 
-        /// @copydoc unordered_container::key_equal
+        /// @copydoc detail::unordered_container::key_equal
         typedef typename impl_type::key_equal key_equal;
 
-        /// @copydoc unordered_container::allocator_type
+        /// @copydoc detail::unordered_container::allocator_type
         typedef typename impl_type::allocator_type allocator_type;
 
-        /// @copydoc unordered_container::pointer
+        /// @copydoc detail::unordered_container::pointer
         typedef typename impl_type::pointer pointer;
 
-        /// @copydoc unordered_container::const_pointer
+        /// @copydoc detail::unordered_container::const_pointer
         typedef typename impl_type::const_pointer const_pointer;
 
-        /// @copydoc unordered_container::reference
+        /// @copydoc detail::unordered_container::reference
         typedef typename impl_type::reference reference;
 
-        /// @copydoc unordered_container::const_reference
+        /// @copydoc detail::unordered_container::const_reference
         typedef typename impl_type::const_reference const_reference;
 
-        /// @copydoc unordered_container::size_type
+        /// @copydoc detail::unordered_container::size_type
         typedef typename impl_type::size_type size_type;
 
-        /// @copydoc unordered_container::difference_type
+        /// @copydoc detail::unordered_container::difference_type
         typedef typename impl_type::difference_type difference_type;
 
-        /// @copydoc unordered_container::iterator
+        /// @copydoc detail::unordered_container::iterator
         typedef typename impl_type::iterator iterator;
 
-        /// @copydoc unordered_container::const_iterator
+        /// @copydoc detail::unordered_container::const_iterator
         typedef typename impl_type::const_iterator const_iterator;
 
-        /// @copydoc unordered_container::local_iterator
+        /// @copydoc detail::unordered_container::local_iterator
         typedef typename impl_type::local_iterator local_iterator;
 
-        /// @copydoc unordered_container::const_local_iterator
+        /// @copydoc detail::unordered_container::const_local_iterator
         typedef typename impl_type::const_local_iterator const_local_iterator;
 
         /// @}
@@ -84,7 +89,7 @@ namespace siblings {
                                const hasher& hf = hasher(),
                                const key_equal& eql = key_equal(),
                                const allocator_type& a = allocator_type())
-            : impl_(n, hf, eql, a)
+            : impl_(n,  typename impl_type::get_key(), hf, eql, a)
         { }
 
         /// Range constructor.
@@ -94,7 +99,7 @@ namespace siblings {
                       const hasher& hf = hasher(),
                       const key_equal& eql = key_equal(),
                       const allocator_type& a = allocator_type())
-            : impl_(n, hf, eql, a)
+            : impl_(n, typename impl_type::get_key(), hf, eql, a)
         {
             impl_.insert_unique(f, l);
         }
@@ -112,7 +117,7 @@ namespace siblings {
             return *this;
         }
 
-        /// @copydoc unordered_container::get_allocator
+        /// @copydoc detail::unordered_container::get_allocator
         allocator_type get_allocator() const { impl_.get_allocator(); }
 
         /// @}
@@ -120,8 +125,13 @@ namespace siblings {
         /// @name Size and Capacity
         /// @{
 
+        /// @copydoc detail::unordered_container::empty
         bool empty() const { return impl_.empty(); }
+
+        /// @copydoc detail::unordered_container::size
         size_type size() const { return impl_.size(); }
+
+        /// @copydoc detail::unordered_container::max_size
         size_type max_size() const { return impl_.max_size(); }
 
         /// @}
@@ -129,11 +139,22 @@ namespace siblings {
         /// @name Iterators
         /// @{
 
+        /// @copydoc detail::unordered_container::begin
         iterator begin() { return impl_.begin(); }
+
+        /// @copydoc detail::unordered_container::begin
         const_iterator begin() const { return impl_.begin(); }
+
+        /// @copydoc detail::unordered_container::end
         iterator end() { return impl_.end(); }
+
+        /// @copydoc detail::unordered_container::end
         const_iterator end() const { return impl_.end(); }
+
+        /// @copydoc detail::unordered_container::cbegin
         const_iterator cbegin() const { return impl_.cbegin(); }
+
+        /// @copydoc detail::unordered_container::cbegin
         const_iterator cend() const { return impl_.cend(); }
 
         /// @}
@@ -141,42 +162,60 @@ namespace siblings {
         /// @name Modifiers
         /// @{
 
+        /// @copydoc detail::unordered_container::insert(const value_type&)
         std::pair<iterator, bool> insert(const value_type& obj)
         {
             return impl_.insert_unique(obj);
         }
 
+        /// @copydoc
+        /// detail::unordered_container::insert(iterator,const value_type&)
         iterator insert(iterator hint, const value_type& obj)
         {
             return impl_.insert_unique(hint, obj);
         }
 
+        /// @copydoc
+        /// detail::unordered_container::insert(const_iterator,const value_type&)
         const_iterator insert(const_iterator hint, const value_type& obj)
         {
             return impl_.insert_unique(hint, obj);
         }
 
+        /// @copydoc
+        /// detail::unordered_container::insert(InputIterator,InputIterator)
         template <class InputIterator>
         void insert(InputIterator first, InputIterator last)
         {
             return impl_.insert_unique(first, last);
         }
 
+        /// @copydoc detail::unordered_container::erase(iterator)
         iterator erase(iterator i) { return impl_.erase(i); }
+
+        /// @copydoc detail::unordered_container::erase(const_iterator)
         const_iterator erase(const_iterator i) { return impl_.erase(i); }
+
+        /// @copydoc detail::unordered_container::erase(const key_type&)
         size_type erase(const key_type& k) { return impl_.erase_unique(k); }
 
+        /// @copydoc detail::unordered_container::erase(iterator,iterator)
         iterator erase(iterator first, iterator last)
         {
             return impl_.erase(first, last);
         }
 
+        /// @copydoc
+        /// detail::unordered_container::erase(const_iterator,const_iterator)
         const_iterator erase(const_iterator first, const_iterator last)
         {
             return impl_.erase(first, last);
         }
 
+        /// @copydoc detail::unordered_container::clear
         void clear() { impl_.clear(); }
+
+        /// @copydoc detail::unordered_container::swap
         void swap(unordered_map& other) { impl_.swap(other.impl_); }
 
         /// @}
@@ -184,7 +223,10 @@ namespace siblings {
         /// @name Observers
         /// @{
 
+        /// @copydoc detail::unordered_container::hash_function
         hasher hash_function() const { return impl_.hash_function(); }
+
+        /// @copydoc detail::unordered_container::key_eq
         key_equal key_eq() const { return impl_.key_eq(); }
 
         /// @}
@@ -192,21 +234,33 @@ namespace siblings {
         /// @name Lookup
         /// @{
 
+        /// @copydoc detail::unordered_container::find
         iterator find(const key_type& k) { return impl_.find(k); }
+
+        /// @copydoc detail::unordered_container::find
         const_iterator find(const key_type& k) const { return impl_.find(k); }
 
+        /// @copydoc detail::unordered_container::count
         size_type
         count(const key_type& k) const { return impl_.count_unique(k); }
 
+        /// @copydoc detail::unordered_container::equal_range
         std::pair<iterator, iterator>
         equal_range(const key_type& k) { return impl_.equal_range_unique(k); }
 
+        /// @copydoc detail::unordered_container::equal_range
         std::pair<const_iterator, const_iterator>
         equal_range(const key_type& k) const
         {
             return impl_.equal_range_unique(k);
         }
 
+        /// Index operator.
+        ///
+        /// Inserts an element with the specified key and a default-constructed
+        /// mapped value. Returns a reference to the mapped value.
+        ///
+        /// @post m.find(k) != m.end()
         mapped_type& operator[](const key_type& k)
         {
             value_type v(k, mapped_type());
@@ -218,30 +272,30 @@ namespace siblings {
         /// @name Bucket Interface
         /// @{
 
-        /// @copydoc unordered_container::bucket_count
+        /// @copydoc detail::unordered_container::bucket_count
         size_type bucket_count() const { return impl_.bucket_count(); }
 
-        /// @copydoc unordered_container::max_bucket_count
+        /// @copydoc detail::unordered_container::max_bucket_count
         size_type max_bucket_count() const { return impl_.max_bucket_count(); }
 
-        /// @copydoc unordered_container::bucket_size
+        /// @copydoc detail::unordered_container::bucket_size
         size_type
         bucket_size(size_type i) const { return impl_.bucket_size(i); }
 
-        /// @copydoc unordered_container::bucket
+        /// @copydoc detail::unordered_container::bucket
         size_type bucket(const key_type& k) const { return impl_.bucket(k); }
 
-        /// @copydoc unordered_container::begin(size_type)
+        /// @copydoc detail::unordered_container::begin(size_type)
         local_iterator begin(size_type i) { return impl_.begin(i); }
 
-        /// @copydoc unordered_container::begin(size_type)
+        /// @copydoc detail::unordered_container::begin(size_type)
         const_local_iterator
         begin(size_type i) const { return impl_.begin(i); }
 
-        /// @copydoc unordered_container::end(size_type)
+        /// @copydoc detail::unordered_container::end(size_type)
         local_iterator end(size_type i) { return impl_.end(i); }
 
-        /// @copydoc unordered_container::end(size_type)
+        /// @copydoc detail::unordered_container::end(size_type)
         const_local_iterator end(size_type i) const { return impl_.end(i); }
 
         /// @}
@@ -249,16 +303,16 @@ namespace siblings {
         /// @name Hash Policy
         /// @{
 
-        /// @copydoc unordered_container::load_factor
+        /// @copydoc detail::unordered_container::load_factor
         float load_factor() const { return impl_.load_factor(); }
 
-        /// @copydoc unordered_container::max_load_factor()
+        /// @copydoc detail::unordered_container::max_load_factor()
         float max_load_factor() const { return impl_.max_load_factor(); }
 
-        /// @copydoc unordered_container::max_load_factor(float)
+        /// @copydoc detail::unordered_container::max_load_factor(float)
         void max_load_factor(float z) { impl_.max_load_factor(z); }
 
-        /// @copydoc unordered_container::rehash
+        /// @copydoc detail::unordered_container::rehash
         void rehash(size_type n) { impl_.rehash(n); }
 
         /// @}
@@ -279,7 +333,12 @@ namespace siblings {
     class unordered_multimap
     {
     private:
-        typedef detail::unordered_container<Key, std::pair<const Key, T>,
+        /// Pair type.
+        typedef std::pair<const Key, T> pair_type;
+
+        /// Implementation type.
+        typedef detail::unordered_container<Key, pair_type,
+                                            get_first<pair_type>,
                                             Hash, Pred, Alloc>
         impl_type;
 
@@ -312,7 +371,7 @@ namespace siblings {
                                     const hasher& hf = hasher(),
                                     const key_equal& eql = key_equal(),
                                     const allocator_type& a = allocator_type())
-            : impl_(n, hf, eql, a)
+            : impl_(n, typename impl_type::get_key(), hf, eql, a)
         { }
 
         template <class InputIterator>
@@ -321,7 +380,7 @@ namespace siblings {
                            const hasher& hf = hasher(),
                            const key_equal& eql = key_equal(),
                            const allocator_type& a = allocator_type())
-            : impl_(n, hf, eql, a)
+            : impl_(n, typename impl_type::get_key(), hf, eql, a)
         {
             impl_.insert(f, l);
         }

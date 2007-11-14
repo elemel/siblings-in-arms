@@ -19,12 +19,20 @@ namespace siblings { namespace detail {
     /// @invariant size() <= max_size()
     /// @invariant bucket_count() <= max_bucket_count()
     /// @invariant load_factor() <= max_load_factor()
-    template <class Key, class Value, class Hash, class Pred, class Alloc>
+    template <class Key, class Value, class GetKey, class Hash, class Pred,
+              class Alloc>
     class unordered_container {
     private:
+        /// Bucket type.
         typedef std::list<Value, Alloc> bucket_type;
+
+        /// Bucket vector type.
         typedef std::vector<bucket_type> bucket_vector;
+
+        /// Bucket iterator type.
         typedef typename bucket_vector::iterator bucket_iterator;
+
+        /// Constant bucket iterator type.
         typedef typename bucket_vector::const_iterator const_bucket_iterator;
 
     public:
@@ -35,6 +43,9 @@ namespace siblings { namespace detail {
 
         /// Value type.
         typedef Value value_type;
+
+        /// Key retrieval function.
+        typedef GetKey get_key;
 
         /// Hash function type.
         typedef Hash hasher;
@@ -86,10 +97,10 @@ namespace siblings { namespace detail {
         // construct/destroy/copy /////////////////////////////////////////////
 
         /// Default constructor.
-        explicit unordered_container(size_type n, const hasher& hf,
-                                     const key_equal& eql,
+        explicit unordered_container(size_type n, const get_key& k,
+                                     const hasher& hf, const key_equal& eql,
                                      const allocator_type& a)
-            : buckets_(n, bucket_type(a)), hash_(hf), eq_(eql),
+            : buckets_(n, bucket_type(a)), key_(k), hash_(hf), eq_(eql),
               alloc_(a), size_(0), max_load_factor_(1)
         { }
 
@@ -187,6 +198,8 @@ namespace siblings { namespace detail {
 
         // modifiers //////////////////////////////////////////////////////////
 
+        /// Inserts the specified value into the container.
+        ///
         /// Complexity. Average case 
         ///
         /// Exception safety: Strong if the hash function is no-throw; basic
@@ -195,14 +208,15 @@ namespace siblings { namespace detail {
         /// @post result.second
         std::pair<iterator, bool> insert(const value_type& obj)
         {
-            bucket_iterator b = buckets_.begin() + bucket(key(obj));
-            local_iterator v = find_impl(*b, key(obj));
+            bucket_iterator b = buckets_.begin() + bucket(key_(obj));
+            local_iterator v = find_impl(*b, key_(obj));
             return std::make_pair(insert_impl(b, v, obj), true);
         }
 
+        /// Inserts a value using the specified iterator as a hint.
         iterator insert(iterator hint, const value_type& obj)
         {
-            if (hint != end() && eq_(key(*hint), key(obj))) {
+            if (hint != end() && eq_(key_(*hint), key_(obj))) {
                 return insert_impl(hint.current_outer(), hint.current_inner(),
                                    obj);
             } else {
@@ -210,9 +224,10 @@ namespace siblings { namespace detail {
             }
         }
 
+        /// Inserts a value using the specified iterator as a hint.
         const_iterator insert(const_iterator hint, const value_type& obj)
         {
-            if (hint != end() && eq_(key(*hint), key(obj))) {
+            if (hint != end() && eq_(key_(*hint), key_(obj))) {
                 return insert_impl(hint.current_outer(), hint.current_inner(),
                                    obj);
             } else {
@@ -220,6 +235,7 @@ namespace siblings { namespace detail {
             }
         }
 
+        /// Inserts all values in the specified range.
         template <class InputIterator>
         void insert(InputIterator first, InputIterator last)
         {
@@ -228,10 +244,11 @@ namespace siblings { namespace detail {
             }
         }
 
+        /// Inserts the specified value unless it is already present.
         std::pair<iterator, bool> insert_unique(const value_type& obj)
         {
-            bucket_iterator b = buckets_.begin() + bucket(key(obj));
-            local_iterator v = find_impl(b, key(obj));
+            bucket_iterator b = buckets_.begin() + bucket(key_(obj));
+            local_iterator v = find_impl(b, key_(obj));
             if (v == b->end()) {
                 return std::make_pair(insert_impl(b, v, obj), true);
             } else {
@@ -239,25 +256,28 @@ namespace siblings { namespace detail {
             }
         }
         
+        /// Inserts value unless present; the iterator is used as a hint.
         iterator insert_unique(iterator hint, const value_type& obj)
         {
-            if (hint != end() && eq_(key(*hint), key(obj))) {
+            if (hint != end() && eq_(key_(*hint), key_(obj))) {
                 return hint;
             } else {
                 return insert_unique(obj).first;
             }
         }
             
+        /// Inserts value unless present; the iterator is used as a hint.
         const_iterator insert_unique(const_iterator hint,
                                      const value_type& obj)
         {
-            if (hint != end() && eq_(key(*hint), key(obj))) {
+            if (hint != end() && eq_(key_(*hint), key_(obj))) {
                 return hint;
             } else {
                 return insert_unique(obj).first;
             }
         }
 
+        /// Inserts those values in the specified range that are not present.
         template <class InputIterator>
         void insert_unique(InputIterator first, InputIterator last)
         {
@@ -266,6 +286,7 @@ namespace siblings { namespace detail {
             }
         }
 
+        /// Erases the element at the specified position.
         iterator erase(iterator i)
         {
             assert(i != end());
@@ -275,6 +296,7 @@ namespace siblings { namespace detail {
             return result;
         }
 
+        /// Erases the element at the specified position.
         const_iterator erase(const_iterator i)
         {
             assert(i != end());
@@ -303,7 +325,7 @@ namespace siblings { namespace detail {
                 do {
                     v = b->erase(v);
                     --size_;
-                } while (v != b->end() && eq_(k, key(*v)));
+                } while (v != b->end() && eq_(k, key_(*v)));
                 return old_size - size();
             }
         }
@@ -372,9 +394,11 @@ namespace siblings { namespace detail {
             size_ = 0;
         }
 
+        /// Swaps this container with another.
         void swap(unordered_container& other)
         {
             buckets_.swap(other.buckets_);
+            std::swap(key_, other.key_);
             std::swap(hash_, other.hash_);
             std::swap(eq_, other.eq_);
             std::swap(alloc_, other.alloc_);
@@ -384,11 +408,24 @@ namespace siblings { namespace detail {
 
         // observers //////////////////////////////////////////////////////////
 
+        /// Returns the hash function.
         hasher hash_function() const { return hash_; }
+
+        /// Returns the key comparison function.
         key_equal key_eq() const { return eq_; }
 
         // lookup /////////////////////////////////////////////////////////////
 
+        /// Finds an element with the specified key.
+        ///
+        /// Returns an iterator to an element whose key is equivalent to the
+        /// one specified. If no such element was found, an iterator to the end
+        /// of the container is returned instead.
+        ///
+        /// Complexity: Average case constant, worst case linear.
+        ///
+        /// Exception safety: No-throw if the hash and comparison functions are
+        /// no throw; strong otherwise.
         iterator find(const key_type& k)
         {
             bucket_iterator b = buckets_.begin() + bucket(k);
@@ -396,12 +433,28 @@ namespace siblings { namespace detail {
             return (v == b->end()) ? end() : iterator(b, buckets_.end(), v);
         }
 
+        /// Finds an element with the specified key.
+        ///
+        /// Returns a constant iterator to an element whose key is equivalent
+        /// to the one specified. If no such element was found, a constant
+        /// iterator to the end of the container is returned instead.
+        ///
+        /// Complexity: Average case constant, worst case linear.
+        ///
+        /// Exception safety: No-throw if the hash and comparison functions are
+        /// no throw; strong otherwise.
         const_iterator find(const key_type& k) const
         {
             return const_cast<unordered_container&>(*this).find(k);
         }
 
-        /// Returns the number of elements with key equal to @c k.
+        /// Counts all occurences of the specified key.
+        ///
+        /// Complexity: Average case linear in result, worst case linear in
+        /// number of elements.
+        ///
+        /// Exception safety: No-throw if the hash and comparison functions are
+        /// no throw; strong otherwise.
         size_type count(const key_type& k) const
         {
             const_bucket_iterator b = buckets_.begin() + bucket(k);
@@ -413,10 +466,18 @@ namespace siblings { namespace detail {
             do {
                 ++v;
                 ++result;
-            } while (v != b->end() && eq_(k, key(*v)));
+            } while (v != b->end() && eq_(k, key_(*v)));
             return result;
         }
 
+        /// Counts at most one occurence of the specified key.
+        ///
+        /// Complexity: Average case constant, worst case linear.
+        ///
+        /// Exception safety: No-throw if the hash and comparison functions are
+        /// no throw; strong otherwise.
+        ///
+        /// @post result <= 1
         size_type count_unique(const key_type& k) const
         {
             const_bucket_iterator b = buckets_.begin() + bucket(k);
@@ -612,7 +673,7 @@ namespace siblings { namespace detail {
                      ++i)
                 {
                     while (!i->empty()) {
-                        bucket_type& b = v[hash_(key(i->front())) % n];
+                        bucket_type& b = v[hash_(key_(i->front())) % n];
                         b.splice(b.end(), *i, i->begin());
                         --size_;
                     }
@@ -624,29 +685,26 @@ namespace siblings { namespace detail {
 
     private:
         bucket_vector buckets_;
+        get_key key_;
         hasher hash_;
         key_equal eq_;
         allocator_type alloc_;
         size_type size_;
         float max_load_factor_;
 
+        /// Calculates the load factor using the specified bucket count.
+        ///
+        /// Complexity: Constant.
+        ///
+        /// Exception safety: No-throw.
         float load_factor(size_type n) const
         {
             assert(n >= 1);
             return float(size()) / float(n);
         }
 
-        /// Complexity: Constant.
+        /// Inserts a value at the specified position.
         ///
-        /// Exception safety: No-throw.
-        const key_type& key(const key_type& k) const { return k; }
-
-        /// Complexity: Constant.
-        ///
-        /// Exception safety: No-throw.
-        template <typename T> const key_type
-        key(const std::pair<const key_type, T> p) const { return p.first; }
-
         /// Complexity: Constant unless a rehash is triggered, in which case it
         /// is linear in the number of elements plus the number of buckets.
         ///
@@ -656,6 +714,7 @@ namespace siblings { namespace detail {
         /// @param b Iterator to bucket.
         /// @param v Insertion point in bucket. Points to an element in the
         ///          bucket or to its end.
+        /// @return  An iterator to the inserted element.
         iterator insert_impl(bucket_iterator b, local_iterator v,
                              const value_type& obj)
         {
@@ -665,20 +724,19 @@ namespace siblings { namespace detail {
                 return iterator(b, buckets_.end(), v);
             } else {
                 rehash(bucket_count() * 2 + 1);
-                return find(key(obj));
+                return find(key_(obj));
             }
         }
 
         /// Exception safety: No-throw if the comparison function is no-throw;
         /// strong otherwise.
         ///
-        /// Complexity: Average case constant, worst case linear in bucket
-        /// size.
+        /// Complexity: Average case constant, worst case linear.
         local_iterator find_impl(bucket_iterator b, const key_type& k) const
         {
             local_iterator first = b->begin();
             local_iterator last = b->end();
-            while (first != last && !eq_(k, key(*first))) {
+            while (first != last && !eq_(k, key_(*first))) {
                 ++first;
             }
             return first;
@@ -687,13 +745,14 @@ namespace siblings { namespace detail {
         /// Exception safety: No-throw if the comparison function is no-throw;
         /// strong otherwise.
         ///
-        /// Complexity: Linear in bucket size.
+        /// Complexity: Average case linear in size of range, worst case linear
+        /// in total element count.
         std::pair<local_iterator, local_iterator>
         equal_range_impl(bucket_iterator b, const key_type& k) const
         {
             local_iterator first = find_impl(b, k);
             local_iterator last = first;
-            while (last != b->end() && eq_(k, key(*last))) {
+            while (last != b->end() && eq_(k, key_(*last))) {
                 ++last;
             }
             return std::make_pair(first, last);
