@@ -29,48 +29,59 @@ namespace siblings {
     public:
         // types //////////////////////////////////////////////////////////////
 
+        /// Key type.
         typedef Key key_type;
+
+        /// Value type.
         typedef Value value_type;
+
+        /// Hash function type.
         typedef Hash hasher;
+
+        /// Key comparison type.
         typedef Pred key_equal;
+
+        /// Allocator type.
         typedef Alloc allocator_type;
 
+        /// Pointer type.
         typedef typename allocator_type::pointer pointer;
+
+        /// Constant pointer type.
         typedef typename allocator_type::const_pointer const_pointer;
+
+        /// Reference type.
         typedef typename allocator_type::reference reference;
+
+        /// Constant reference type.
         typedef typename allocator_type::const_reference const_reference;
+
+        /// Size type.
         typedef std::size_t size_type;
+
+        /// Pointer difference type.
         typedef std::ptrdiff_t difference_type;
 
+        /// Local iterator type.
         typedef typename bucket_type::iterator local_iterator;
+
+        /// Constant local iterator type.
         typedef typename bucket_type::const_iterator const_local_iterator;
 
+        /// Iterator type.
         typedef nested_iterator<value_type, bucket_iterator, local_iterator>
         iterator;
 
+        /// Constant iterator type.
         typedef nested_iterator<const value_type, const_bucket_iterator,
                                 const_local_iterator>
         const_iterator;
 
         // constants //////////////////////////////////////////////////////////
 
+        /// Default bucket type.
         static const size_type default_bucket_count = 3;
 
-    private:
-        bucket_vector buckets_;
-        hasher hash_;
-        key_equal eq_;
-        allocator_type alloc_;
-        size_type size_;
-        float max_load_factor_;
-
-        float load_factor(size_type n) const
-        {
-            assert(n >= 1);
-            return float(size()) / float(n);
-        }
-
-    public:
         // construct/destroy/copy /////////////////////////////////////////////
 
         /// Default constructor.
@@ -473,6 +484,8 @@ namespace siblings {
 
         /// Returns the number of elements in the bucket with index @c i.
         ///
+        /// Complexity: Constant.
+        ///
         /// Exception safety: No-throw.
         ///
         /// @pre i < bucket_count()
@@ -485,6 +498,8 @@ namespace siblings {
 
         /// Returns the bucket index for the specified key.
         ///
+        /// Complexity: Constant.
+        ///
         /// Exception safety: No-throw if the hash function is no-throw; strong
         /// otherwise.
         size_type bucket(const key_type& k) const
@@ -492,6 +507,8 @@ namespace siblings {
             return hash_(k) % bucket_count();
         }
 
+        /// Complexity: Constant.
+        ///
         /// Exception safety: No-throw.
         ///
         /// @pre i < bucket_count()
@@ -501,6 +518,8 @@ namespace siblings {
             return buckets_[i].begin();
         }
 
+        /// Complexity: Constant.
+        ///
         /// Exception safety: No-throw.
         ///
         /// @pre i < bucket_count()
@@ -510,6 +529,8 @@ namespace siblings {
             return buckets_[i].begin();
         }
 
+        /// Complexity: Constant.
+        ///
         /// Exception safety: No-throw.
         ///
         /// @pre i < bucket_count()
@@ -519,6 +540,8 @@ namespace siblings {
             return buckets_[i].end();
         }
 
+        /// Complexity: Constant.
+        ///
         /// Exception safety: No-throw.
         ///
         /// @pre i < bucket_count()
@@ -530,6 +553,8 @@ namespace siblings {
 
         // hash policy ////////////////////////////////////////////////////////
 
+        /// Complexity: Constant.
+        ///
         /// Exception safety: No-throw.
         ///
         // @post result >= 0 && result <= max_load_factor()
@@ -538,14 +563,16 @@ namespace siblings {
             return load_factor(bucket_count());
         }
 
+        /// Complexity: Constant.
+        ///
         /// Exception safety: No-throw.
         ///
         /// @post result >= 0
         float max_load_factor() const { return max_load_factor_; }
 
         /// Complexity: Constant unless the new maximum load factor triggers a
-        /// rehash, in which case it is linear in the number of elements plus
-        /// the number of buckets.
+        /// rehash, in which case the complexity is linear in the number of
+        /// elements plus the number of buckets.
         ///
         /// Exception safety: Strong.
         ///
@@ -595,6 +622,19 @@ namespace siblings {
         }
 
     private:
+        bucket_vector buckets_;
+        hasher hash_;
+        key_equal eq_;
+        allocator_type alloc_;
+        size_type size_;
+        float max_load_factor_;
+
+        float load_factor(size_type n) const
+        {
+            assert(n >= 1);
+            return float(size()) / float(n);
+        }
+
         /// Complexity: Constant.
         ///
         /// Exception safety: No-throw.
