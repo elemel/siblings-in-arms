@@ -59,7 +59,7 @@ namespace {
     template <typename T>
     void measure_find(int count)
     {
-        std::cout << "find... ";
+        std::cout << "find (10 x repeats)... ";
         std::cout.flush();
 
         T m;
@@ -69,8 +69,10 @@ namespace {
         }
 
         boost::progress_timer t;
-        for (int i = 0; i < count; ++i) {
-            m.find(i);
+        for (int j = 0; j < 10; ++j) {
+            for (int i = 0; i < count; ++i) {
+                m.find(i);
+            }
         }
     }
 }
