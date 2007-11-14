@@ -1,4 +1,4 @@
-// Copyright 2007 Mikael Lind
+// Copyright 2007 Mikael Lind.
 
 #ifndef SIBLINGS_UNORDERED_IMPL_HPP
 #define SIBLINGS_UNORDERED_IMPL_HPP
@@ -15,7 +15,6 @@
 #include <boost/utility.hpp>
 
 namespace siblings { namespace detail {
-
     /// @brief Unordered container implementation.
     ///
     /// @invariant size() <= max_size()
@@ -471,7 +470,7 @@ namespace siblings { namespace detail {
         /// @name Lookup
         /// @{
 
-        /// @brief Finds an element with the specified key.
+        /// @brief Searches for an element having the specified key.
         ///
         /// Returns an iterator to an element whose key is equivalent to the
         /// one specified. If no such element was found, an iterator to the end
@@ -488,7 +487,7 @@ namespace siblings { namespace detail {
             return (v == b->end()) ? end() : iterator(b, buckets_.end(), v);
         }
 
-        /// @brief Finds an element with the specified key.
+        /// @brief Searches for an element having the specified key.
         ///
         /// Returns a constant iterator to an element whose key is equivalent
         /// to the one specified. If no such element was found, a constant
@@ -582,8 +581,8 @@ namespace siblings { namespace detail {
             }
         }
 
-        /// @brief Returns a constant range of at most one element whose key
-        /// is equivalent to the specified key.
+        /// @brief Returns a constant range of at most one element having the
+        /// the specified key.
         std::pair<const_iterator, const_iterator>
         equal_range_unique(const key_type& k) const
         {
@@ -870,7 +869,6 @@ namespace siblings { namespace detail {
             return std::make_pair(first, last);
         }
     };
-
 } }
 
 #endif

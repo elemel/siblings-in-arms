@@ -1,4 +1,4 @@
-// Copyright 2007 Mikael Lind
+// Copyright 2007 Mikael Lind.
 
 #ifndef SIBLINGS_GET_FIRST_HPP
 #define SIBLINGS_GET_FIRST_HPP

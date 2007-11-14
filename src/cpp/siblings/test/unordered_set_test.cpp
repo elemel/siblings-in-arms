@@ -1,3 +1,5 @@
+// Copyright 2007 Mikael Lind.
+
 #include "../unordered_set.hpp"
 #include <cassert>
 #include <set>

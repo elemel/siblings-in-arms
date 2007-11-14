@@ -1,3 +1,5 @@
+// Copyright 2007 Mikael Lind.
+
 #ifndef SIBLINGS_MATH_HPP
 #define SIBLINGS_MATH_HPP
 

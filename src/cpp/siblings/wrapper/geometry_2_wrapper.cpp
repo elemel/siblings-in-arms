@@ -1,3 +1,5 @@
+// Copyright 2007 Mikael Lind.
+
 #include "../config.hpp"
 #include "../geometry_2.hpp"
 #include <boost/python.hpp>

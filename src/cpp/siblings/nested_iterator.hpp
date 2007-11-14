@@ -1,4 +1,4 @@
-// Copyright 2007 Mikael Lind
+// Copyright 2007 Mikael Lind.
 
 #ifndef SIBLINGS_NESTED_ITERATOR_HPP
 #define SIBLINGS_NESTED_ITERATOR_HPP

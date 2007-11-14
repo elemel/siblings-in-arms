@@ -1,3 +1,5 @@
+// Copyright 2007 Mikael Lind.
+
 #include "../circle_2.hpp"
 #include "../config.hpp"
 #include <boost/python.hpp>

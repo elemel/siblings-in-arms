@@ -1,3 +1,5 @@
+// Copyright 2007 Mikael Lind.
+
 #ifndef SIBLINGS_CIRCLE_2_HPP
 #define SIBLINGS_CIRCLE_2_HPP
 
@@ -5,7 +7,7 @@
 #include <ostream>
 
 namespace siblings {
-    /// Geometric circle in 2D.
+    /// @brief Geometric circle in 2D.
     ///
     /// @invariant radius() >= 0
     template <typename R>

@@ -1,3 +1,5 @@
+// Copyright 2007 Mikael Lind.
+
 #ifndef SIBLINGS_SPARSE_GRID_2_HPP
 #define SIBLINGS_SPARSE_GRID_2_HPP
 

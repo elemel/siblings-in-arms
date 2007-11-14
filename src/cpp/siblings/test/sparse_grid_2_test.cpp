@@ -1,3 +1,5 @@
+// Copyright 2007 Mikael Lind.
+
 #include "../config.hpp"
 #include "../sparse_grid_2.hpp"
 #include <cassert>

@@ -1,3 +1,5 @@
+// Copyright 2007 Mikael Lind.
+
 #ifndef SIBLINGS_GEOMETRY_HPP
 #define SIBLINGS_GEOMETRY_HPP
 

@@ -1,4 +1,4 @@
-// Copyright 2007 Mikael Lind
+// Copyright 2007 Mikael Lind.
 
 #ifndef SIBLINGS_IDENTITY_HPP
 #define SIBLINGS_IDENTITY_HPP

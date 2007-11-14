@@ -1,3 +1,5 @@
+// Copyright 2007 Mikael Lind.
+
 #ifndef SIBLINGS_VECTOR_2_HPP
 #define SIBLINGS_VECTOR_2_HPP
 
@@ -9,17 +11,25 @@ namespace siblings {
     template <typename R>
     class vector_2 {
     public:
+        /// Real type.
         typedef R real_type;
 
-        /// Construct vector having x = y = 0.
-        vector_2() : x_(R(0)), y_(R(0)) { }
+        /// @brief Default constructor.
+        ///
+        /// Constructs a vector where all components are equal to the specified
+        /// number.
+        ///
+        /// @post v.x() == a
+        /// @post v.y() == a
+        vector_2(R a = R(0)) : x_(a), y_(a) { }
 
-        /// Construct vector having x = y = a.
-        vector_2(R a) : x_(a), y_(a) { }
-
-        /// Construct vector having the specified x and y components.
+        /// @brief Constructs a vector having the specified components.
+        ///
+        /// @post v.x() == x
+        /// @post v.y() == y
         vector_2(R x, R y) : x_(x), y_(y) { }
 
+        /// Addition assignment operator.
         vector_2& operator+=(const vector_2& other)
         {
             x() += other.x();
@@ -27,6 +37,7 @@ namespace siblings {
             return *this;
         }
 
+        /// Subtraction assignment operator.
         vector_2& operator-=(const vector_2& other)
         {
             x() -= other.x();
@@ -34,6 +45,7 @@ namespace siblings {
             return *this;
         }
 
+        /// Multiplication assignment operator.
         vector_2& operator*=(R other)
         {
             x() *= other;
@@ -41,6 +53,7 @@ namespace siblings {
             return *this;
         }
 
+        /// Division assignment operator.
         vector_2& operator/=(R other)
         {
             x() /= other;
@@ -48,30 +61,39 @@ namespace siblings {
             return *this;
         }
 
+        /// Negation operator.
         vector_2 operator-() const
         {
             return vector_2(-x(), -y());
         }
 
+        /// Returns a reference to the <em>x</em> component.
         R& x() { return x_; }
-        R& y() { return y_; }
+
+        /// Returns the <em>x</em> component.
         R x() const { return x_; }
+
+        /// Returns a reference to the <em>y</em> component.
+        R& y() { return y_; }
+
+        /// Returns the <em>y</em> component.
         R y() const { return y_; }
 
-        /// Compute squared magnitude of vector.
+        /// Returns the squared magnitude of the vector.
         R squared_magnitude() const { return dot(*this, *this); }
 
-        /// Compute magnitude of vector. Prefer squared_magnitude where
-        /// applicable; that operation is more efficient.
-        ///
-        /// @see squared_magnitude
+        /// @brief Returns the magnitude of the vector.
         R magnitude() const { return std::sqrt(squared_magnitude()); }
 
     private:
+        /// The <em>x</em> component.
         R x_;
+
+        /// The <em>y</em> component.
         R y_;
     };
 
+    /// Addition operator.
     template <typename R>
     vector_2<R> operator+(vector_2<R> left, const vector_2<R>& right)
     {
@@ -79,6 +101,7 @@ namespace siblings {
         return left;
     }
 
+    /// Subtraction operator.
     template <typename R>
     vector_2<R> operator-(vector_2<R> left, const vector_2<R>& right)
     {
@@ -86,6 +109,7 @@ namespace siblings {
         return right;
     }
 
+    /// Multiplication operator.
     template <typename R>
     vector_2<R> operator*(vector_2<R> left, R right)
     {
@@ -93,6 +117,7 @@ namespace siblings {
         return left;
     }
 
+    /// Multiplication operator.
     template <typename R>
     vector_2<R> operator*(R left, vector_2<R> right)
     {
@@ -100,6 +125,7 @@ namespace siblings {
         return right;
     }
 
+    /// Division operator.
     template <typename R>
     vector_2<R> operator/(vector_2<R> left, R right)
     {
@@ -107,28 +133,30 @@ namespace siblings {
         return left;
     }
 
-    /// Compare two vectors for equality.
+    /// Equal-to operator.
     template <typename R>
     bool operator==(const vector_2<R>& a, const vector_2<R>& b)
     {
         return a.x() == b.x() && a.y() == b.y();
     }
 
-    /// Compare two vectors for inequality.
+    /// Not-equal-to operator.
     template <typename R>
     bool operator!=(const vector_2<R>& a, const vector_2<R>& b)
     {
         return !(a == b);
     }
 
-    /// Output vector in format "[x, y]".
+    /// @brief Output operator.
+    ///
+    /// Writes the vector to the stream using the format "[x, y]".
     template <typename R>
     std::ostream& operator<<(std::ostream& out, const vector_2<R>& v)
     {
         return out << '[' << v.x() << ',' << ' ' << v.y() << ']';
     }
 
-    /// Compute magnitude of vector.
+    /// @brief Returns the magnitude of the specified vector.
     ///
     /// @see vector_2::magnitude
     template <typename R>
@@ -137,14 +165,14 @@ namespace siblings {
         return v.magnitude();
     }
 
-    /// Compute dot product of two vectors.
+    /// Returns the dot product of two vectors.
     template <typename R>
     R dot(const vector_2<R>& a, const vector_2<R>& b)
     {
         return a.x() * b.x() + a.y() * b.y();
     }
 
-    /// Compute cross product of two vectors.
+    /// Returns the cross product of two vectors.
     template <typename R>
     R cross(const vector_2<R>& a, const vector_2<R>& b)
     {

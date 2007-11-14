@@ -1,3 +1,5 @@
+// Copyright 2007 Mikael Lind.
+
 #include "../flat_set.hpp"
 #include <cassert>
 #include <boost/array.hpp>
