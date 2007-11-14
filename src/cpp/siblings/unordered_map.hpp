@@ -3,7 +3,7 @@
 #ifndef SIBLINGS_UNORDERED_MAP_HPP
 #define SIBLINGS_UNORDERED_MAP_HPP
 
-#include "unordered_container.hpp"
+#include "detail/unordered_container.hpp"
 
 namespace siblings {
     /// Implementation of 23.4.1, class template unordered_map.
@@ -18,7 +18,8 @@ namespace siblings {
     {
     private:
         /// Implementation type.
-        typedef unordered_container<Key, std::pair<const Key, T>, Hash, Pred, Alloc>
+        typedef detail::unordered_container<Key, std::pair<const Key, T>,
+                                            Hash, Pred, Alloc>
         impl_type;
         
     public:
@@ -27,7 +28,7 @@ namespace siblings {
         
         /// @copydoc unordered_container::key_type
         typedef typename impl_type::key_type key_type;
-    
+        
         /// @copydoc unordered_container::value_type
         typedef typename impl_type::value_type value_type;
 
@@ -278,11 +279,9 @@ namespace siblings {
     class unordered_multimap
     {
     private:
-        typedef unordered_container<Key, std::pair<const Key, T>,
-                                    Hash, Pred, Alloc>
+        typedef detail::unordered_container<Key, std::pair<const Key, T>,
+                                            Hash, Pred, Alloc>
         impl_type;
-
-        impl_type impl_;
 
     public:
         // types //////////////////////////////////////////////////////////////
@@ -428,6 +427,9 @@ namespace siblings {
         float max_load_factor() const { return impl_.max_load_factor(); }
         void max_load_factor(float z) { impl_.max_load_factor(z); }
         void rehash(size_type n) { impl_.rehash(n); }
+
+    private:
+        impl_type impl_;
     };
 
     template <class Key, class T, class Hash, class Pred, class Alloc>

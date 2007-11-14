@@ -3,7 +3,7 @@
 #ifndef SIBLINGS_UNORDERED_CONTAINER_HPP
 #define SIBLINGS_UNORDERED_CONTAINER_HPP
 
-#include "nested_iterator.hpp"
+#include "../nested_iterator.hpp"
 #include <cassert>
 #include <cstddef>
 #include <functional>
@@ -14,7 +14,8 @@
 #include <boost/functional/hash.hpp>
 #include <boost/utility.hpp>
 
-namespace siblings {
+namespace siblings { namespace detail {
+
     /// @invariant size() <= max_size()
     /// @invariant bucket_count() <= max_bucket_count()
     /// @invariant load_factor() <= max_load_factor()
@@ -698,6 +699,7 @@ namespace siblings {
             return std::make_pair(first, last);
         }
     };
-}
+
+} }
 
 #endif

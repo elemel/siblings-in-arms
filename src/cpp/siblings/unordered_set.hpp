@@ -3,7 +3,7 @@
 #ifndef SIBLINGS_UNORDERED_SET_HPP
 #define SIBLINGS_UNORDERED_SET_HPP
 
-#include "unordered_container.hpp"
+#include "detail/unordered_container.hpp"
 
 namespace siblings {
     // 23.4.3, class template unordered_set:
@@ -14,10 +14,8 @@ namespace siblings {
     class unordered_set
     {
     private:
-        typedef unordered_container<Value, Value, Hash, Pred, Alloc>
+        typedef detail::unordered_container<Value, Value, Hash, Pred, Alloc>
         impl_type;
-
-        impl_type impl_;
 
     public:
         // types //////////////////////////////////////////////////////////////
@@ -139,6 +137,10 @@ namespace siblings {
         float max_load_factor() const { return impl_.max_load_factor(); }
         void max_load_factor(float z) { impl_.max_load_factor(z); }
         void rehash(size_type n) { impl_.rehash(n); }
+
+    private:
+        /// Implementation.
+        impl_type impl_;
     };
 
     // 23.4.4, class template unordered_multiset:
