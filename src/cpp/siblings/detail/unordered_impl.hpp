@@ -1,7 +1,7 @@
 // Copyright 2007 Mikael Lind
 
-#ifndef SIBLINGS_UNORDERED_CONTAINER_HPP
-#define SIBLINGS_UNORDERED_CONTAINER_HPP
+#ifndef SIBLINGS_UNORDERED_IMPL_HPP
+#define SIBLINGS_UNORDERED_IMPL_HPP
 
 #include "../nested_iterator.hpp"
 #include <cassert>
@@ -16,12 +16,16 @@
 
 namespace siblings { namespace detail {
 
+    /// @brief Unordered container implementation.
+    ///
     /// @invariant size() <= max_size()
+    ///
     /// @invariant bucket_count() <= max_bucket_count()
+    ///
     /// @invariant load_factor() <= max_load_factor()
     template <class Key, class Value, class GetKey, class Hash, class Pred,
               class Alloc>
-    class unordered_container {
+    class unordered_impl {
     private:
         /// Bucket type.
         typedef std::list<Value, Alloc> bucket_type;
@@ -36,7 +40,8 @@ namespace siblings { namespace detail {
         typedef typename bucket_vector::const_iterator const_bucket_iterator;
 
     public:
-        // types //////////////////////////////////////////////////////////////
+        /// @name Types
+        /// @{
 
         /// Key type.
         typedef Key key_type;
@@ -89,26 +94,37 @@ namespace siblings { namespace detail {
                                 const_local_iterator>
         const_iterator;
 
-        // constants //////////////////////////////////////////////////////////
+        /// @}
+
+        /// @name Constants
+        /// @{
 
         /// Default bucket type.
         static const size_type default_bucket_count = 3;
 
-        // construct/destroy/copy /////////////////////////////////////////////
+        /// @}
+
+        /// @name Construct/Destroy/Copy
+        /// @{
 
         /// Default constructor.
-        explicit unordered_container(size_type n, const get_key& k,
-                                     const hasher& hf, const key_equal& eql,
-                                     const allocator_type& a)
+        explicit unordered_impl(size_type n, const get_key& k,
+                                const hasher& hf, const key_equal& eql,
+                                const allocator_type& a)
             : buckets_(n, bucket_type(a)), key_(k), hash_(hf), eq_(eql),
               alloc_(a), size_(0), max_load_factor_(1)
         { }
 
+        // Use the compiler-generated copy constructor, destructor, and copy
+        // assignment operator.
+        //
         // unordered_map(const unordered_map&);
+        //
         // ~unordered_map();
+        //
         // unordered_map& operator=(const unordered_map&);
 
-        /// Returns the allocator.
+        /// @brief Returns the allocator.
         ///
         /// Complexity: Constant.
         ///
@@ -116,33 +132,40 @@ namespace siblings { namespace detail {
         /// no-throw; strong otherwise.
         allocator_type get_allocator() const { return alloc_; }
 
-        // size and capacity //////////////////////////////////////////////////
+        /// @}
 
-        /// Returns true if there are no elements in the container; false
-        /// otherwise.
+        /// @name Size and Capacity
+        /// @{
+
+        /// @brief Returns true if there are no elements in the container;
+        /// false otherwise.
         ///
         /// Complexity: Constant.
         ///
         /// Exception safety: No-throw.
         bool empty() const { return size_ == 0; }
 
-        /// Returns the number of elements in the container.
+        /// @brief Returns the number of elements in the container.
         ///
         /// Complexity: Constant.
         ///
         /// Exception safety: No-throw.
         size_type size() const { return size_; }
 
-        /// Returns the maximum number of elements that the container can hold.
+        /// @brief Returns the maximum number of elements that the container
+        /// can hold.
         ///
         /// Complexity: Constant.
         ///
         /// Exception safety: No-throw.
         size_type max_size() const { return buckets_.max_size(); }
 
-        // iterators //////////////////////////////////////////////////////////
+        /// @}
 
-        /// Returns an iterator to the first element.
+        /// @name Iterators
+        /// @{
+
+        /// @brief Returns an iterator to the beginning of the container.
         ///
         /// Complexity: Constant.
         ///
@@ -152,17 +175,13 @@ namespace siblings { namespace detail {
             return iterator(buckets_.begin(), buckets_.end());
         }
 
-        /// Returns an iterator to the first element.
-        ///
-        /// Complexity: Constant.
-        ///
-        /// Exception safety: No-throw.
+        /// @copydoc cbegin
         const_iterator begin() const
         {
             return const_iterator(buckets_.begin(), buckets_.end());
         }
 
-        /// Returns an iterator just beyond the last element.
+        /// @brief Returns an iterator to the end of the container.
         ///
         /// Complexity: Constant.
         ///
@@ -172,35 +191,35 @@ namespace siblings { namespace detail {
             return iterator(buckets_.end(), buckets_.end());
         }
 
-        /// Returns an iterator just beyond the last element.
-        ///
-        /// Complexity: Constant.
-        ///
-        /// Exception safety: No-throw.
+        /// @copydoc cend
         const_iterator end() const
         {
             return const_iterator(buckets_.end(), buckets_.end());
         }
 
-        /// Returns an iterator to the first element.
+        /// @brief Returns a constant iterator to the beginning of the
+        /// container.
         ///
         /// Complexity: Constant.
         ///
         /// Exception safety: No-throw.
         const_iterator cbegin() const { return begin(); }
 
-        /// Returns an iterator just beyond the last element.
+        /// @brief Returns a constant iterator to the end of the container.
         ///
         /// Complexity: Constant.
         ///
         /// Exception safety: No-throw.
         const_iterator cend() const { return end(); }
 
-        // modifiers //////////////////////////////////////////////////////////
+        /// @}
 
-        /// Inserts the specified value into the container.
+        /// @name Modifiers
+        /// @{
+
+        /// @brief Inserts the specified value into the container.
         ///
-        /// Complexity. Average case 
+        /// Complexity. Average case constant, worst case linear.
         ///
         /// Exception safety: Strong if the hash function is no-throw; basic
         /// otherwise.
@@ -213,7 +232,12 @@ namespace siblings { namespace detail {
             return std::make_pair(insert_impl(b, v, obj), true);
         }
 
-        /// Inserts a value using the specified iterator as a hint.
+        /// @brief Inserts a value using the specified iterator as a hint.
+        ///
+        /// Complexity. Average case constant, worst case linear.
+        ///
+        /// Exception safety: Strong if the hash function is no-throw; basic
+        /// otherwise.
         iterator insert(iterator hint, const value_type& obj)
         {
             if (hint != end() && eq_(key_(*hint), key_(obj))) {
@@ -224,7 +248,13 @@ namespace siblings { namespace detail {
             }
         }
 
-        /// Inserts a value using the specified iterator as a hint.
+        /// @brief Inserts a value using the specified constant iterator as a
+        /// hint.
+        ///
+        /// Complexity. Average case constant, worst case linear.
+        ///
+        /// Exception safety: Strong if the hash function is no-throw; basic
+        /// otherwise.
         const_iterator insert(const_iterator hint, const value_type& obj)
         {
             if (hint != end() && eq_(key_(*hint), key_(obj))) {
@@ -244,7 +274,8 @@ namespace siblings { namespace detail {
             }
         }
 
-        /// Inserts the specified value unless it is already present.
+        /// @brief Inserts the specified value unless there is an element
+        /// with an equivalent key.
         std::pair<iterator, bool> insert_unique(const value_type& obj)
         {
             bucket_iterator b = buckets_.begin() + bucket(key_(obj));
@@ -306,13 +337,14 @@ namespace siblings { namespace detail {
             return result;
         }
 
-        /// Erases all elements with key equal to @c k.
+        /// @brief Erases all elements with key equal to @c k.
         ///
         /// Exception safety: No-throw if the hash and comparison functions are
         /// no-throw; strong if only the comparison function is no-throw; and
         /// basic otherwise.
         ///
         /// @post find(k) == end()
+        /// 
         /// @post result == old(size()) - size()
         size_type erase(const key_type& k)
         {
@@ -330,7 +362,7 @@ namespace siblings { namespace detail {
             }
         }
 
-        /// Erases all elements in the range [first, last).
+        /// @brief Erases all elements in the range [first, last).
         ///
         /// Complexity: Linear in the size of the range.
         ///
@@ -343,7 +375,7 @@ namespace siblings { namespace detail {
             return first;
         }
 
-        /// Erases all elements in the range [first, last).
+        /// @brief Erases all elements in the range [first, last).
         ///
         /// Complexity: Linear in the size of the range.
         ///
@@ -356,10 +388,11 @@ namespace siblings { namespace detail {
             return first;
         }
 
-        /// Erases an element with key equal to @c k.
+        /// @brief Erases an element whose key is equivalent to the one
+        /// specified.
         ///
-        /// Exception safety: No-throw if the hash and comparison functions do
-        /// not throw; strong otherwise.
+        /// Exception safety: No-throw if the hash and comparison functions are
+        /// no-throw; strong otherwise.
         ///
         /// @post result <= 1
         /// @post result == old(size()) - size()
@@ -376,7 +409,7 @@ namespace siblings { namespace detail {
             }
         }
 
-        /// Erases all elements in the container.
+        /// @brief Erases all elements in the container.
         ///
         /// Complexity: Linear in the number of elements plus the number of
         /// buckets.
@@ -389,13 +422,19 @@ namespace siblings { namespace detail {
             for (bucket_iterator i = buckets_.begin(); i != buckets_.end();
                  ++i)
             {
-                i->clear(); // no-throw operation
+                i->clear(); // no-throw
             }
             size_ = 0;
         }
 
-        /// Swaps this container with another.
-        void swap(unordered_container& other)
+        /// @brief Swaps this container with another.
+        ///
+        /// Complexity: Constant.
+        ///
+        /// Exception safety: No-throw if the hash and comparison functions
+        /// have no-throw swap operations; otherwise, no exception safety
+        /// guarantee can be offered.
+        void swap(unordered_impl& other)
         {
             buckets_.swap(other.buckets_);
             std::swap(key_, other.key_);
@@ -406,17 +445,33 @@ namespace siblings { namespace detail {
             std::swap(max_load_factor_, other.max_load_factor_);
         }
 
-        // observers //////////////////////////////////////////////////////////
+        /// @}
 
-        /// Returns the hash function.
+        /// @name Observers
+        /// @{
+
+        /// @brief Returns the hash function.
+        ///
+        /// Complexity: Constant.
+        ///
+        /// Exception safety: No-throw if the copy constructor of the hash
+        /// function is no-throw; strong otherwise.
         hasher hash_function() const { return hash_; }
 
-        /// Returns the key comparison function.
+        /// @brief Returns the key comparison function.
+        ///
+        /// Complexity: Constant.
+        ///
+        /// Exception safety: No-throw if the copy constructor of the key
+        /// comparison function is no-throw; strong otherwise.
         key_equal key_eq() const { return eq_; }
 
-        // lookup /////////////////////////////////////////////////////////////
+        /// @}
 
-        /// Finds an element with the specified key.
+        /// @name Lookup
+        /// @{
+
+        /// @brief Finds an element with the specified key.
         ///
         /// Returns an iterator to an element whose key is equivalent to the
         /// one specified. If no such element was found, an iterator to the end
@@ -433,7 +488,7 @@ namespace siblings { namespace detail {
             return (v == b->end()) ? end() : iterator(b, buckets_.end(), v);
         }
 
-        /// Finds an element with the specified key.
+        /// @brief Finds an element with the specified key.
         ///
         /// Returns a constant iterator to an element whose key is equivalent
         /// to the one specified. If no such element was found, a constant
@@ -445,10 +500,10 @@ namespace siblings { namespace detail {
         /// no throw; strong otherwise.
         const_iterator find(const key_type& k) const
         {
-            return const_cast<unordered_container&>(*this).find(k);
+            return const_cast<unordered_impl&>(*this).find(k);
         }
 
-        /// Counts all occurences of the specified key.
+        /// @brief Counts all occurences of the specified key.
         ///
         /// Complexity: Average case linear in result, worst case linear in
         /// number of elements.
@@ -470,7 +525,7 @@ namespace siblings { namespace detail {
             return result;
         }
 
-        /// Counts at most one occurence of the specified key.
+        /// @brief Counts at most one occurence of the specified key.
         ///
         /// Complexity: Average case constant, worst case linear.
         ///
@@ -485,6 +540,8 @@ namespace siblings { namespace detail {
             return (v == b->end()) ? 0 : 1;
         }
 
+        /// @brief Returns a range of elements having keys equivalent to the
+        /// specified key.
         std::pair<iterator, iterator> equal_range(const key_type& k)
         {
             bucket_iterator b = buckets_.begin() + bucket(k);
@@ -502,12 +559,16 @@ namespace siblings { namespace detail {
             }
         }
 
+        /// @brief Returns a constant range of elements having keys equivalent
+        /// to the specified key.
         std::pair<const_iterator, const_iterator>
         equal_range(const key_type& k) const
         {
-            return const_cast<unordered_container&>(*this).equal_range(k);
+            return const_cast<unordered_impl&>(*this).equal_range(k);
         }
 
+        /// @brief Returns a range of at most one element whose key is
+        /// equivalent to the specified key.
         std::pair<iterator, iterator> equal_range_unique(const key_type& k)
         {
             bucket_iterator b = buckets_.begin() + bucket(k);
@@ -521,36 +582,43 @@ namespace siblings { namespace detail {
             }
         }
 
+        /// @brief Returns a constant range of at most one element whose key
+        /// is equivalent to the specified key.
         std::pair<const_iterator, const_iterator>
         equal_range_unique(const key_type& k) const
         {
-            return const_cast<unordered_container&>(*this)
+            return const_cast<unordered_impl&>(*this)
                 .equal_range_unique(k);
         }
 
-        // bucket interface ///////////////////////////////////////////////////
+        /// @}
 
-        /// Returns the number of buckets.
+        /// @name Bucket Interface
+        /// @{
+
+        /// @brief Returns the number of buckets in the container.
         ///
         /// Complexity: Constant.
         ///
         /// Exception safety: No-throw.
         size_type bucket_count() const { return buckets_.size(); }
 
-        /// Returns the maximum number of buckets that the container can hold.
+        /// @brief Returns the maximum number of buckets that the container can
+        /// hold.
         ///
         /// Complexity: Constant.
         ///
         /// Exception safety: No-throw.
         size_type max_bucket_count() const { return buckets_.max_size(); }
 
-        /// Returns the number of elements in the bucket with index @c i.
+        /// @brief Returns the size of the specified bucket.
         ///
         /// Complexity: Constant.
         ///
         /// Exception safety: No-throw.
         ///
         /// @pre i < bucket_count()
+        ///
         /// @post result <= size()
         size_type bucket_size(size_type i) const
         {
@@ -558,7 +626,7 @@ namespace siblings { namespace detail {
             return buckets_[i].size();
         }
 
-        /// Returns the bucket index for the specified key.
+        /// @brief Returns the bucket index for the specified key.
         ///
         /// Complexity: Constant.
         ///
@@ -569,6 +637,9 @@ namespace siblings { namespace detail {
             return hash_(k) % bucket_count();
         }
 
+        /// @brief Returns an iterator to the beginning of the specified
+        /// bucket.
+        ///
         /// Complexity: Constant.
         ///
         /// Exception safety: No-throw.
@@ -580,6 +651,9 @@ namespace siblings { namespace detail {
             return buckets_[i].begin();
         }
 
+        /// @brief Returns a constant iterator to the beginning of the
+        /// specified bucket.
+        ///
         /// Complexity: Constant.
         ///
         /// Exception safety: No-throw.
@@ -591,6 +665,8 @@ namespace siblings { namespace detail {
             return buckets_[i].begin();
         }
 
+        /// @brief Returns an iterator to the end of the specified bucket.
+        ///
         /// Complexity: Constant.
         ///
         /// Exception safety: No-throw.
@@ -602,6 +678,9 @@ namespace siblings { namespace detail {
             return buckets_[i].end();
         }
 
+        /// @brief Returns a constant iterator to the end of the specified
+        /// bucket.
+        ///
         /// Complexity: Constant.
         ///
         /// Exception safety: No-throw.
@@ -613,18 +692,25 @@ namespace siblings { namespace detail {
             return buckets_[i].end();
         }
 
-        // hash policy ////////////////////////////////////////////////////////
+        /// @}
 
+        /// @name Hash Policy
+        /// @{
+
+        /// @brief Returns the current load factor.
+        ///
         /// Complexity: Constant.
         ///
         /// Exception safety: No-throw.
         ///
-        // @post result >= 0 && result <= max_load_factor()
+        /// @post result >= 0 && result <= max_load_factor()
         float load_factor() const
         {
             return load_factor(bucket_count());
         }
 
+        /// @brief Returns the maximum load factor.
+        ///
         /// Complexity: Constant.
         ///
         /// Exception safety: No-throw.
@@ -632,6 +718,8 @@ namespace siblings { namespace detail {
         /// @post result >= 0
         float max_load_factor() const { return max_load_factor_; }
 
+        /// @brief Sets the maximum load factor.
+        ///
         /// Complexity: Constant unless the new maximum load factor triggers a
         /// rehash, in which case the complexity is linear in the number of
         /// elements plus the number of buckets.
@@ -654,8 +742,10 @@ namespace siblings { namespace detail {
             }
         }
 
+        /// @brief Rehashes the container using the specified bucket count.
+        ///
         /// Complexity: Linear in the number of elements plus the number of
-        /// buckets.
+        /// buckets in the container plus the specified number of buckets.
         ///
         /// Exception safety: Strong if the hash function is no-throw; basic
         /// otherwise.
@@ -683,16 +773,31 @@ namespace siblings { namespace detail {
             }
         }
 
+        /// @}
+
     private:
+        /// Bucket vector.
         bucket_vector buckets_;
+
+        /// Key retrieval function.
         get_key key_;
+
+        /// Hash function.
         hasher hash_;
+
+        /// Key comparison function.
         key_equal eq_;
+
+        /// Allocator.
         allocator_type alloc_;
+
+        /// Size.
         size_type size_;
+
+        /// Maximum load factor.
         float max_load_factor_;
 
-        /// Calculates the load factor using the specified bucket count.
+        /// @brief Calculates the load factor using the specified bucket count.
         ///
         /// Complexity: Constant.
         ///
@@ -703,17 +808,18 @@ namespace siblings { namespace detail {
             return float(size()) / float(n);
         }
 
-        /// Inserts a value at the specified position.
+        /// @brief Inserts a value at the specified position.
         ///
-        /// Complexity: Constant unless a rehash is triggered, in which case it
-        /// is linear in the number of elements plus the number of buckets.
+        /// Complexity: Constant unless the insertion triggers a rehash.
         ///
         /// Exception safety: Strong if the hash function is no-throw; basic
         /// otherwise.
         ///
         /// @param b Iterator to bucket.
+        ///
         /// @param v Insertion point in bucket. Points to an element in the
-        ///          bucket or to its end.
+        /// bucket or to its end.
+        ///
         /// @return  An iterator to the inserted element.
         iterator insert_impl(bucket_iterator b, local_iterator v,
                              const value_type& obj)
@@ -728,6 +834,9 @@ namespace siblings { namespace detail {
             }
         }
 
+        /// @brief Searches the specified bucket for an element having the
+        /// specified key.
+        ///
         /// Exception safety: No-throw if the comparison function is no-throw;
         /// strong otherwise.
         ///
@@ -742,11 +851,14 @@ namespace siblings { namespace detail {
             return first;
         }
 
+        /// @brief Returns the lower and upper bounds of the specified key in
+        /// the specified bucket.
+        ///
         /// Exception safety: No-throw if the comparison function is no-throw;
         /// strong otherwise.
         ///
         /// Complexity: Average case linear in size of range, worst case linear
-        /// in total element count.
+        /// in total number of elements.
         std::pair<local_iterator, local_iterator>
         equal_range_impl(bucket_iterator b, const key_type& k) const
         {
