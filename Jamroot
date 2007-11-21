@@ -16,10 +16,16 @@ use-project /boost : $(BOOST_ROOT) ;
 
 build-project src/cpp/siblings ;
 
-install dist : src/cpp/siblings
-    : <location>dist/lib/python/debug <install-type>LIB <variant>debug ;
-install dist : src/cpp/siblings
-    : <location>dist/lib/python/release <install-type>LIB <variant>release ;
+install dist-cpp : src/cpp/siblings
+    : <variant>debug:<location>dist/lib/python/debug/siblings
+      <variant>release:<location>dist/lib/python/release/siblings
+      <install-type>LIB <variant>debug ;
+
+install dist-python : [ glob src/python/siblings_2/*.py ]
+    : <variant>debug:<location>dist/lib/python/debug/siblings
+      <variant>release:<location>dist/lib/python/release/siblings ;
+
+alias dist : dist-cpp dist-python ;
 
 # kludge: generate separate documentation trees for debug and release builds to
 # avoid target collisions

@@ -1,22 +1,12 @@
 import time
 
-class GridBucket:
-    def __init__(self):
-        self.things = []
-
-    def add_thing(self, thing):
-        self.things.append(thing)
-
-    def remove_thing(self, thing):
-        self.things.erase(thing)
-
 class Grid:
     def __init__(self):
         self.buckets = []
         for x in range(100):
             self.buckets.append([])
             for y in range(100):
-                self.buckets[x].append(GridBucket())
+                self.buckets[x].append(Grid._Bucket())
         self.things = {}
 
     def add_thing(self, thing):
@@ -32,6 +22,16 @@ class Grid:
     def update_thing(self, thing):
         self.remove_thing(thing)
         self.add_thing(thing)
+
+    class _Bucket:
+        def __init__(self):
+            self.things = []
+
+        def add_thing(self, thing):
+            self.things.append(thing)
+
+        def remove_thing(self, thing):
+            self.things.erase(thing)
 
 class PathFinder:
     def __call__(self, grid, from_pos, to_pos):
