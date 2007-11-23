@@ -1,5 +1,5 @@
 import math, sys
-from heapq import heappush, heappop
+from heapq import heappush, heappop, heapify
 
 SQRT_2 = math.sqrt(2)
 
@@ -28,6 +28,9 @@ class Node:
         else:
             return "%s, %s" % (self.p, self.parent._str())
 
+    def __repr__(self):
+        return "Node#%d" % self.id_
+
 def grid_neighbors(p):
     x, y = p
     return [(x - 1, y + 1), (x + 0, y + 1), (x + 1, y + 1),
@@ -51,6 +54,7 @@ def a_star(start, goal, neighbors = grid_neighbors, predicate = true_predicate,
     nodes = {}
     best_h = heuristic(start, goal)
     best = Node(ids.next(), start, best_h)
+    nodes[start] = best
     q = []
     heappush(q, best)
     while q:
@@ -63,8 +67,7 @@ def a_star(start, goal, neighbors = grid_neighbors, predicate = true_predicate,
                 neighbor = Node(ids.next(), n, heuristic(n, goal), neighbor_g,
                                 current)
                 if neighbor.p == goal:
-                    print "Node count: %d" % len(nodes)
-                    return neighbor
+                    return neighbor, nodes
                 nodes[n] = neighbor
                 heappush(q, neighbor)
             elif neighbor_g < neighbor.g:
@@ -73,7 +76,9 @@ def a_star(start, goal, neighbors = grid_neighbors, predicate = true_predicate,
                 if neighbor.closed:
                     neighbor.closed = False
                     heappush(q, neighbor)
-    return best
+                else:
+                    heapify(q)
+    return best, nodes
 
 def create_grid(width, height, symbol):
     grid = []
@@ -86,21 +91,38 @@ def paint_block(grid, min_, max_, symbol):
         for y in xrange(min_[1], max_[1] + 1):
             grid[x][y] = symbol
 
+def paint_nodes(grid, nodes, symbol):
+    for id_, n in nodes.iteritems():
+        x, y = n.p
+        grid[x][y] = symbol
+
+def paint_path(grid, path, symbol):
+    while path is not None:
+        x, y = path.p
+        grid[x][y] = symbol
+        path = path.parent
+
 def print_grid(g):
     height = len(g[0])
     for y in xrange(height - 1, -1, -1):
         print "".join(g[x][y] for x in xrange(len(g)))
 
 def test():
-    grid = create_grid(75, 15, " ")
-    paint_block(grid, (17, 2), (19, 9), "#")
-    paint_block(grid, (35, 5), (38, 12), "#")
-    path = a_star((4, 7), (44, 5),
-                  predicate = lambda p: grid[p[0]][p[1]] != "#")
-    while path is not None:
-        x, y = path.p
-        grid[x][y] = "*"
-        path = path.parent
+    width, height = 75, 20
+    grid = create_grid(width, height, " ")
+    paint_block(grid, (17, 2), (19, 15), "#")
+    paint_block(grid, (35, 5), (38, 18), "#")
+
+    def predicate(p):
+        x, y = p
+        return (x >= 0 and x < width and y >= 0 and y < height
+                and grid[x][y] != "#")
+
+    path, nodes = a_star((4, 13), (44, 7), predicate = predicate)
+    print "Examined nodes: %d" % len(nodes)
+    print "Path cost: %f" % path.f()
+    paint_nodes(grid, nodes, ".")
+    paint_path(grid, path, "@")
     print_grid(grid)
 
 if __name__ == "__main__":
