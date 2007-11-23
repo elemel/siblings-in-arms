@@ -3,10 +3,6 @@ from siblings.Circle2 import Circle2
 from siblings.SparseGrid2 import SparseGrid2
 from siblings.Vector2 import Vector2
 
-class PathFinder:
-    def __call__(self, grid, from_pos, to_pos):
-        pass
-
 class Thing:
     _next_id = 1
 
