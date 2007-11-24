@@ -1,4 +1,4 @@
-from a_star import a_star, grid_neighbors, diagonal_distance
+from a_star_search import a_star_search, grid_neighbors, diagonal_distance
 
 def create_grid(width, height, symbol):
     grid = []
@@ -54,8 +54,8 @@ def main():
     def heuristic(p):
         return diagonal_distance(p, goal)
 
-    path, nodes = a_star(start, goal, neighbors, diagonal_distance,
-                         heuristic)
+    path, nodes = a_star_search(start, goal, neighbors, diagonal_distance,
+                                heuristic)
 
     print "Path:", path
     print "Path cost:", path.f()

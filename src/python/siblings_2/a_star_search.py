@@ -43,34 +43,45 @@ def diagonal_distance(a, b):
     dy = abs(a[1] - b[1])
     return min(dx, dy) * SQRT_2 + abs(dx - dy)
 
-def a_star(start, goal, neighbors, cost, heuristic):
-    best_h = heuristic(start)
-    best = Node(start, best_h)
-    nodes = {start: best}
-    q = [best]
-    while q:
-        current = heappop(q)
+def a_star_search(start, goal, neighbors, cost, heuristic):
+    # initialization
+    start_node = Node(start, heuristic(start)) # create start node
+    nodes = {start: start_node} # register start node
+    open_list = [start_node] # add start node to open list
+
+    # track which node is closest to goal
+    closest = start_node 
+    closest_h = start_node.h
+
+    while open_list:
+        # continue search from node with lowest f
+        current = heappop(open_list)
         current.state = CLOSED
+
+        # process neighbors of current node
         for n in neighbors(current.p):
-            neighbor_g = current.g + cost(current.p, n)
-            neighbor = nodes.get(n, None)
+            neighbor_g = current.g + cost(current.p, n) # total cost of path
+            neighbor = nodes.get(n, None) # find neighbor if registered
             if neighbor is None:
+                # create node for neighbor
                 neighbor = Node(n, heuristic(n), neighbor_g, current)
                 if neighbor.p == goal:
+                    # found path to goal
                     return neighbor, nodes
-                nodes[n] = neighbor
-                heappush(q, neighbor)
-                if neighbor.h < best_h:
-                    best_h = neighbor.h
-                    best = neighbor
+                nodes[n] = neighbor # register neighbor
+                heappush(open_list, neighbor) # add neighbor to open list
+                if neighbor.h < closest_h:
+                    # neighbor is closest to goal so far
+                    closest = neighbor
+                    closest_h = neighbor.h
             elif neighbor_g < neighbor.g:
+                # update neighbor with shorter path
                 neighbor.parent = current
-                neighbor.g = neighbor_g
+                neighbor.g = neighbor_g # may break heap invariant
                 if neighbor.state == CLOSED:
-                    # reopen neighbor node
+                    # reopen neighbor
                     neighbor.state = OPEN
-                    heappush(q, neighbor)
+                    heappush(open_list, neighbor) # add neighbor to open list
                 else:
-                    # reestablish heap invariant
-                    heapify(q)
-    return best, nodes
+                    heapify(open_list) # reestablish heap invariant
+    return closest, nodes # return closest path
