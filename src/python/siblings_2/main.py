@@ -1,15 +1,14 @@
-import time
+import time, sys
 from siblings.Circle2 import Circle2
 from siblings.SparseGrid2 import SparseGrid2
 from siblings.Vector2 import Vector2
 
 class Thing:
-    _next_id = 1
+    _ids = iter(xrange(1, sys.maxint))
 
     def __init__(self):
-        self.id = Thing._next_id
+        self.id = Thing._ids.next()
         print "Creating thing #%d." % self.id
-        Thing._next_id += 1
         self.position = Vector2(0, 0)
     
     def update(self, dt, game_engine):
