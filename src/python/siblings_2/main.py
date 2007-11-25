@@ -136,7 +136,6 @@ def main():
     game = GameEngine()
     unit = Unit()
     unit.pos = (2, 3)
-    unit.add_waypoint((10, 7))
     game.add_unit(unit)
     old_time = time.time()
     selected = None

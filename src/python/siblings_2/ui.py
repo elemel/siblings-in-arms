@@ -11,8 +11,8 @@ screen = pygame.display.get_surface()
 warrior_path = os.path.join('data', 'warrior.png')
 warrior_surface = pygame.image.load(warrior_path)
 
-PIXELS_PER_METER_X = 20
-PIXELS_PER_METER_Y = 15
+PIXELS_PER_METER_X = 40
+PIXELS_PER_METER_Y = 30
 
 def to_screen_coords(point, screen_size):
     x, y = point
