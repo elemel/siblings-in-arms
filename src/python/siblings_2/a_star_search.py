@@ -1,4 +1,4 @@
-import math
+import math, sys
 from heapq import heappush, heappop, heapify
 
 SQRT_2 = math.sqrt(2)
@@ -43,7 +43,7 @@ def diagonal_distance(a, b):
     dy = abs(a[1] - b[1])
     return min(dx, dy) * SQRT_2 + abs(dx - dy)
 
-def a_star_search(start, goal, neighbors, cost, heuristic):
+def a_star_search(start, goal, neighbors, cost, heuristic, limit = sys.maxint):
     # initialization
     start_node = Node(start, heuristic(start)) # create start node
     nodes = {start: start_node} # register start node
@@ -53,7 +53,7 @@ def a_star_search(start, goal, neighbors, cost, heuristic):
     closest = start_node 
     closest_h = start_node.h
 
-    while open_list:
+    while open_list and len(nodes) < limit:
         # continue search from node with lowest f
         current = heappop(open_list)
         current.state = CLOSED

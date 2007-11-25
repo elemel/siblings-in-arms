@@ -4,6 +4,8 @@ from collections import deque
 import ui
 from ui import QuitEvent, MoveEvent, SelectEvent
 
+A_STAR_SEARCH_LIMIT = 1000
+
 class Grid:
     def __init__(self, size):
         self.size = size
@@ -123,7 +125,8 @@ class GameEngine:
             return diagonal_distance(p, waypoint)
 
         path, nodes = a_star_search(unit.pos, waypoint, neighbors,
-                                    diagonal_distance, heuristic)
+                                    diagonal_distance, heuristic,
+                                    A_STAR_SEARCH_LIMIT)
         print "A* search: Examined %d node(s)." % len(nodes)
         d = deque()
         d.extendleft(node.p for node in path)
