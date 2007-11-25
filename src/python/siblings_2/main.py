@@ -1,6 +1,7 @@
 import time, sys
 from a_star_search import a_star_search, grid_neighbors, diagonal_distance
 from collections import deque
+import ui
 
 class Grid:
     def __init__(self, size):
@@ -132,6 +133,7 @@ def main():
                 dt = MAX_TIME_STEP
             old_time = new_time
             engine.update(dt)
+            ui.update_screen(engine)
 
 if __name__ == "__main__":
     main()
