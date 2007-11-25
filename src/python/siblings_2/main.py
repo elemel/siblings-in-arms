@@ -40,7 +40,15 @@ class Unit:
         self.speed = 5
 
     def get_pos(self):
-        return self.old_pos
+        if self.old_pos == self.new_pos:
+            return self.old_pos
+        else:
+            old_x, old_y = self.old_pos
+            new_x, new_y = self.new_pos
+            new_weight = min(float(self.progress) / self.cost, 1.0)
+            x = old_x * (1 - new_weight) + new_x * new_weight
+            y = old_y * (1 - new_weight) + new_y * new_weight
+            return (x, y)
 
     pos = property(get_pos)
     
