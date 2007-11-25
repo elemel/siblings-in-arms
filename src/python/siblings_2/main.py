@@ -4,8 +4,6 @@ from collections import deque
 import ui
 from ui import QuitEvent, MoveEvent, SelectEvent
 
-A_STAR_SEARCH_LIMIT = 1000
-
 class Grid:
     def __init__(self, size):
         self.size = size
@@ -21,37 +19,49 @@ class Grid:
         self._slots[x][y] = num
 
 IDLE = 1
-BEFORE_PATH_REQUEST = 2
-AFTER_PATH_REQUEST = 3
-FOLLOWING_PATH = 4
+REQUEST_PATH = 2
+WAIT_FOR_PATH = 3
+START_MOVING = 4
+MOVE = 5
 
 class Unit:
     _nums = iter(xrange(1, sys.maxint))
 
     def __init__(self):
         self.num = Unit._nums.next()
-        self.pos = (0, 0)
+        self.old_pos = (0, 0)
+        self.new_pos = self.old_pos
         self.state = IDLE
         self.path = deque()
         self.waypoints = deque()
         self.progress = 0
+        self.cost = 1
+        self.slots = set()
+        self.speed = 5
+
+    def get_pos(self):
+        return self.old_pos
+
+    pos = property(get_pos)
     
     def update(self, dt, game):
         if self.state == IDLE:
-            if self.waypoints:
-                self.state = BEFORE_PATH_REQUEST
-
-        if self.state == BEFORE_PATH_REQUEST:
+            if self.path:
+                self.state = START_MOVING
+            elif self.waypoints:
+                self.state = REQUEST_PATH
+        if self.state == REQUEST_PATH:
             self._request_path(dt, game)
-        elif self.state == FOLLOWING_PATH:
-            self._follow_path(dt, game)
+        if self.state == MOVE:
+            self._move(dt, game)
+        if self.state == START_MOVING:
+            self._start_moving(dt, game)
 
     def stop(self):
         self.waypoints.clear()
         self.path.clear()
 
     def add_waypoint(self, waypoint):
-        waypoint = (int(waypoint[0]), int(waypoint[1]))
         self.waypoints.append(waypoint)
 
     def set_waypoint(self, waypoint):
@@ -59,22 +69,33 @@ class Unit:
         self.add_waypoint(waypoint)
 
     def set_path(self, path):
-        if self.state == AFTER_PATH_REQUEST:
+        if self.state == WAIT_FOR_PATH:
             self.path = path
-            self.progress = 0
-            self.state = FOLLOWING_PATH
+            self.state = IDLE
 
     def _request_path(self, dt, game):
         game.request_path(self, self.waypoints.popleft())
-        self.state = AFTER_PATH_REQUEST
+        self.state = WAIT_FOR_PATH
 
-    def _follow_path(self, dt, game):
-        if self.path:
-            self.progress += dt * 5
-            if self.progress >= 1:
-                game.move_unit(self, self.path.popleft())
-                self.progress = 0
+    def _start_moving(self, dt, game):
+        pos = self.path.popleft()
+        if game.reserve_slot(self, pos):
+            self.slots.add(pos)
+            self.new_pos = pos
+            self.progress = 0
+            self.cost = diagonal_distance(self.old_pos, self.new_pos)
+            self.state = MOVE
         else:
+            self.path.clear()
+            self.state = IDLE
+
+    def _move(self, dt, game):
+        self.progress += dt * self.speed
+        if self.progress >= self.cost:
+            if self.old_pos in self.slots:
+                game.release_slot(self, self.old_pos)
+                self.slots.remove(self.old_pos)
+            self.old_pos = self.new_pos
             self.state = IDLE
 
 class GameEngine:
@@ -94,19 +115,28 @@ class GameEngine:
     def request_path(self, unit, waypoint):
         self.path_queue.append((unit, waypoint))
 
-    def add_unit(self, unit):
-        x, y = unit.pos
+    def add_unit(self, unit, pos):
         self.units[unit.num] = unit
-        self.grid.set(unit.pos, unit.num)
+        unit.old_pos = unit.new_pos = pos
+        if self.grid.get(unit.pos) == 0:
+            self.grid.set(unit.pos, unit.num)
 
     def remove_unit(self, unit):
         del self.units[unit.num]
         self.grid.set(unit.pos, 0)
 
-    def move_unit(self, unit, pos):
-        self.grid.set(pos, unit.num)
-        self.grid.set(unit.pos, 0)
-        unit.pos = pos
+    def reserve_slot(self, unit, pos):
+        if self.grid.get(pos) == 0:
+            self.grid.set(pos, unit.num)
+            print "Grid: Reserved slot %s for unit #%d." % (pos, unit.num)
+            return True
+        else:
+            return False
+
+    def release_slot(self, unit, pos):
+        assert self.grid.get(pos) == unit.num
+        self.grid.set(pos, 0)
+        print "Grid: Unit #%d released slot %s." % (unit.num, pos)
 
     def _find_path(self, unit, waypoint):
         def neighbors(p):
@@ -129,17 +159,21 @@ class GameEngine:
                                     A_STAR_SEARCH_LIMIT)
         print "A* search: Examined %d node(s)." % len(nodes)
         d = deque()
-        d.extendleft(node.p for node in path)
+        d.extendleft(node.p for node in path if node.p != unit.pos)
         return d
 
 MIN_TIME_STEP = 0.01
 MAX_TIME_STEP = 0.1
+A_STAR_SEARCH_LIMIT = 1000
 
 def main():
     game = GameEngine()
-    unit = Unit()
-    unit.pos = (2, 3)
-    game.add_unit(unit)
+    game.add_unit(Unit(), (2, 3))
+    game.add_unit(Unit(), (7, 4))
+    game.add_unit(Unit(), (6, 5))
+    game.add_unit(Unit(), (3, 7))
+    game.add_unit(Unit(), (8, 2))
+    game.add_unit(Unit(), (5, 6))
     old_time = time.time()
     selected = None
     while True:
@@ -153,9 +187,14 @@ def main():
             for e in ui.poll_events(game):
                 if isinstance(e, SelectEvent):
                     selected = e.unit
+                    print "Selected unit #%d." % selected.num
                 elif isinstance(e, MoveEvent):
                     if selected is not None:
-                        selected.set_waypoint(e.pos)
+                        x, y = e.pos
+                        pos = (int(x + 0.5), int(y + 0.5))
+                        selected.set_waypoint(pos)
+                        print ("Set waypoint %s for unit #%d."
+                               % (pos, selected.num))
                 elif isinstance(e, QuitEvent):
                     sys.exit(0)
             game.update(dt)
