@@ -2,6 +2,7 @@ import time, sys
 from a_star_search import a_star_search, grid_neighbors, diagonal_distance
 from collections import deque
 import ui
+from ui import QuitEvent, MoveEvent, SelectEvent
 
 class Grid:
     def __init__(self, size):
@@ -29,41 +30,54 @@ class Unit:
         self.num = Unit._nums.next()
         self.pos = (0, 0)
         self.state = IDLE
-        self.path = []
-        self.waypoints = []
+        self.path = deque()
+        self.waypoints = deque()
         self.progress = 0
     
-    def update(self, dt, engine):
+    def update(self, dt, game):
+        if self.state == IDLE:
+            if self.waypoints:
+                self.state = BEFORE_PATH_REQUEST
+
         if self.state == BEFORE_PATH_REQUEST:
-            self._request_path(dt, engine)
+            self._request_path(dt, game)
         elif self.state == FOLLOWING_PATH:
-            self._follow_path(dt, engine)
+            self._follow_path(dt, game)
+
+    def stop(self):
+        self.waypoints.clear()
+        self.path.clear()
 
     def add_waypoint(self, waypoint):
+        waypoint = (int(waypoint[0]), int(waypoint[1]))
         self.waypoints.append(waypoint)
-        self.state = BEFORE_PATH_REQUEST
+
+    def set_waypoint(self, waypoint):
+        self.stop()
+        self.add_waypoint(waypoint)
 
     def set_path(self, path):
-        self.path = path
-        self.progress = 0
-        self.state = FOLLOWING_PATH
+        if self.state == AFTER_PATH_REQUEST:
+            self.path = path
+            self.progress = 0
+            self.state = FOLLOWING_PATH
 
-    def _request_path(self, dt, engine):
-        engine.request_path(self, self.waypoints[0])
+    def _request_path(self, dt, game):
+        game.request_path(self, self.waypoints.popleft())
         self.state = AFTER_PATH_REQUEST
 
-    def _follow_path(self, dt, engine):
+    def _follow_path(self, dt, game):
         if self.path:
-            self.progress += dt
+            self.progress += dt * 5
             if self.progress >= 1:
-                engine.move_unit(self, self.path.popleft())
+                game.move_unit(self, self.path.popleft())
                 self.progress = 0
         else:
             self.state = IDLE
 
 class GameEngine:
     def __init__(self):
-        self.grid = Grid((60, 20))
+        self.grid = Grid((100, 100))
         self.units = {}
         self.path_queue = deque()
         
@@ -110,6 +124,7 @@ class GameEngine:
 
         path, nodes = a_star_search(unit.pos, waypoint, neighbors,
                                     diagonal_distance, heuristic)
+        print "A* search: Examined %d node(s)." % len(nodes)
         d = deque()
         d.extendleft(node.p for node in path)
         return d
@@ -118,12 +133,13 @@ MIN_TIME_STEP = 0.01
 MAX_TIME_STEP = 0.1
 
 def main():
-    engine = GameEngine()
+    game = GameEngine()
     unit = Unit()
     unit.pos = (2, 3)
     unit.add_waypoint((10, 7))
-    engine.add_unit(unit)
+    game.add_unit(unit)
     old_time = time.time()
+    selected = None
     while True:
         new_time = time.time()
         dt = new_time - old_time
@@ -132,8 +148,16 @@ def main():
                 print "Skipping frames."
                 dt = MAX_TIME_STEP
             old_time = new_time
-            engine.update(dt)
-            ui.update_screen(engine)
+            for e in ui.poll_events(game):
+                if isinstance(e, SelectEvent):
+                    selected = e.unit
+                elif isinstance(e, MoveEvent):
+                    if selected is not None:
+                        selected.set_waypoint(e.pos)
+                elif isinstance(e, QuitEvent):
+                    sys.exit(0)
+            game.update(dt)
+            ui.update_screen(game)
 
 if __name__ == "__main__":
     main()
