@@ -18,11 +18,6 @@ def concat(outer):
             yield element
 
 class Grid(object):
-    class _Entry(object):
-        def __init__(self, bounds, indices):
-            self.bounds = bounds
-            self.indices = indices
-    
     def __init__(self, grid_width, grid_height, cell_size = 1):
         self._grid_size = (grid_width, grid_height)
         self._cell_size = cell_size
@@ -75,7 +70,7 @@ class Grid(object):
     def _insert(self, key, bounds):
         indices = frozenset(self._indices(bounds))
         self._add_to_cells(key, indices)
-        self._entries[key] = Grid._Entry(bounds, indices)
+        self._entries[key] = _GridEntry(bounds, indices)
 
     def _update(self, key, bounds, entry):
         entry.bounds = bounds
@@ -92,6 +87,12 @@ class Grid(object):
     def _remove_from_cells(self, key, indices):
         for x, y in indices:
             self._cells[x][y].remove(key)
+
+class _GridEntry(object):
+    def __init__(self, bounds, indices):
+        self.bounds = bounds
+        self.indices = indices
+    
 
 def test():
     grid = Grid(10, 7, 3)
