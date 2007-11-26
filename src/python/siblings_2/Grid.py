@@ -1,6 +1,8 @@
 from math import floor
 
 def intersects(a, b):
+    """test two bounding boxes for intersection"""
+    
     a_min, a_max = a
     a_left, a_bottom = a_min
     a_right, a_top = a_max
@@ -13,12 +15,16 @@ def intersects(a, b):
             and a_bottom < b_top and b_bottom < a_top)
 
 def concat(outer):
+    """concatenate all inner iterables of an outer iterable"""
     for inner in outer:
         for element in inner:
             yield element
 
 class Grid(object):
+    """planar grid of fixed size"""
+    
     def __init__(self, grid_width, grid_height, cell_size = 1):
+        """initialize grid"""
         self._grid_size = (grid_width, grid_height)
         self._cell_size = cell_size
         self._cells = [[set() for y in xrange(grid_height)]
@@ -26,9 +32,11 @@ class Grid(object):
         self._entries = {}
 
     def __len__(self):
+        """return the entry count"""
         return len(self._entries)
 
     def __setitem__(self, key, bounds):
+        """insert or update an entry for a key"""
         entry = self._entries.get(key, None)
         if entry is None:
             self._insert(key, bounds)
@@ -36,17 +44,21 @@ class Grid(object):
             self._update(key, bounds, entry)
 
     def __getitem__(self, key):
+        """return the bounds for a key"""
         return self._entries[key].bounds
 
     def __delitem__(self, key):
-        for x, y in self._indices.pop(key):
+        """delete an entry"""
+        entry = self._entries.pop(key)
+        for x, y in entry.indices:
             self._cells[x][y].remove(key)
-        del self._bounds[key]
 
     def __contains__(self, key):
+        """test if there is an entry for a key"""
         return key in self._entries
 
     def intersect(self, bounds):
+        """return all keys with bounds that intersect the given bounds"""
         result = set()
         cells = (self._cells[x][y] for x, y in self._indices(bounds))
         result.update(key for key in concat(cells)
@@ -54,9 +66,11 @@ class Grid(object):
         return result
 
     def grid_size(self):
+        """return a tuple of the grid width and height"""
         return self._grid_size
 
     def cell_size(self):
+        """return the cell size"""
         return self._cell_size
 
     def _indices(self, bounds):
