@@ -59,11 +59,9 @@ class Grid(object):
 
     def intersect(self, bounds):
         """return all keys with bounds that intersect the given bounds"""
-        result = set()
         cells = (self._cells[x][y] for x, y in self._indices(bounds))
-        result.update(key for key in concat(cells)
-                      if intersects(self[key], bounds))
-        return result
+        return set(key for key in concat(cells)
+                   if intersects(self[key], bounds))
 
     def grid_size(self):
         """return a tuple of the grid width and height"""
