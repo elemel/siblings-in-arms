@@ -41,15 +41,15 @@ def main():
     width, height = len(grid), len(grid[0])
     start, goal = (5, 9), (45, 12)
 
+    def contains(p):
+        x, y = p
+        return x >= 0 and x < width and y >= 0 and y < height
+
+    def passable(p):
+        x, y = p
+        return grid[x][y] != "#"
+
     def neighbors(p):
-        def contains(p):
-            x, y = p
-            return x >= 0 and x < width and y >= 0 and y < height
-
-        def passable(p):
-            x, y = p
-            return grid[x][y] != "#"
-
         return (n for n in grid_neighbors(p) if contains(n) and passable(n))
 
     def heuristic(p):
