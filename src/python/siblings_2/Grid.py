@@ -32,11 +32,11 @@ class Grid(object):
         self._entries = {}
 
     def __getitem__(self, key):
-        """return the bounding box for a key"""
+        """return the bounding box for the given key"""
         return self._entries[key].bounds
 
     def __setitem__(self, key, bounds):
-        """insert or update an entry for a key"""
+        """insert or update an entry for the given key"""
         entry = self._entries.get(key, None)
         if entry is None:
             self._insert(key, bounds)
@@ -44,13 +44,13 @@ class Grid(object):
             self._update(key, bounds, entry)
 
     def __delitem__(self, key):
-        """delete an entry"""
+        """delete the entry for the given key"""
         entry = self._entries.pop(key)
         for x, y in entry.indices:
             self._cells[x][y].remove(key)
 
     def __contains__(self, key):
-        """test if there is an entry for a key"""
+        """test if there is an entry for the given key"""
         return key in self._entries
 
     def __len__(self):
