@@ -23,14 +23,12 @@ def concat(outer):
             yield element
 
 class Grid(object):
-    """planar grid of fixed size"""
+    """sparse planar grid"""
     
-    def __init__(self, grid_width, grid_height, cell_size = 1):
+    def __init__(self, cell_size = 1):
         """initialize grid"""
-        self._grid_size = (grid_width, grid_height)
         self._cell_size = cell_size
-        self._cells = [[set() for y in xrange(grid_height)]
-                       for x in xrange(grid_width)]
+        self._cells = {}
         self._entries = {}
 
     def __getitem__(self, key):
@@ -39,7 +37,7 @@ class Grid(object):
 
     def __setitem__(self, key, bounds):
         """insert or update an entry for the given key"""
-        entry = self._entries.get(key, None)
+        entry = self._entries.get(key)
         if entry is None:
             self._insert(key, bounds)
         else:
@@ -48,8 +46,7 @@ class Grid(object):
     def __delitem__(self, key):
         """delete the entry for the given key"""
         entry = self._entries.pop(key)
-        for x, y in entry.indices:
-            self._cells[x][y].remove(key)
+        self._remove_from_cells(key, entry.indices)
 
     def __contains__(self, key):
         """test if there is an entry for the given key"""
@@ -59,17 +56,14 @@ class Grid(object):
         """return the entry count"""
         return len(self._entries)
 
-    def grid_size(self):
-        """return a tuple of the grid width and height"""
-        return self._grid_size
-
     def cell_size(self):
         """return the cell size"""
         return self._cell_size
 
     def intersect(self, bounds):
         """return keys for entries that intersect the given bounding box"""
-        cells = (self._cells[x][y] for x, y in self._indices(bounds))
+        empty = set()
+        cells = (self._cells.get(p, empty) for p in self._indices(bounds))
         return set(key for key in concat(cells)
                    if intersects(self[key], bounds))
 
@@ -77,9 +71,12 @@ class Grid(object):
         min_p, max_p = bounds
         min_x, min_y = min_p
         max_x, max_y = max_p
-        h = lambda v: int(v / self._cell_size)
-        return ((x, y) for x in xrange(h(min_x), h(max_x) + 1)
-                for y in xrange(h(min_y), h(max_y) + 1))
+
+        def hash(value):
+            return int(value / self._cell_size)
+
+        return ((x, y) for x in xrange(hash(min_x), hash(max_x) + 1)
+                for y in xrange(hash(min_y), hash(max_y) + 1))
 
     def _insert(self, key, bounds):
         indices = frozenset(self._indices(bounds))
@@ -95,12 +92,18 @@ class Grid(object):
             entry.indices = indices
 
     def _add_to_cells(self, key, indices):
-        for x, y in indices:
-            self._cells[x][y].add(key)
+        for p in indices:
+            cells = self._cells.get(p)
+            if cells is None:
+                cells = self._cells[p] = set()
+            cells.add(key)
 
     def _remove_from_cells(self, key, indices):
-        for x, y in indices:
-            self._cells[x][y].remove(key)
+        for p in indices:
+            cells = self._cells[p]
+            cells.remove(key)
+            if not cells:
+                del self._cells[p]
 
 class _GridEntry(object):
     def __init__(self, bounds, indices):

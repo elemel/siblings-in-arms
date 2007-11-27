@@ -29,7 +29,7 @@ def test_concat():
             == (1, 2, 3, 4, 5, 6, 7))
 
 def test_getitem_when_absent():
-    g = Grid(10, 10)
+    g = Grid()
     try:
         g["a"]
     except KeyError, e:
@@ -38,23 +38,23 @@ def test_getitem_when_absent():
         assert False
 
 def test_getitem_when_present():
-    g = Grid(10, 10)    
+    g = Grid()    
     g["a"] = ((1, 2), (3, 4))
     assert g["a"] == ((1, 2), (3, 4))
 
 def test_setitem_when_absent():
-    g = Grid(10, 10)
+    g = Grid()
     g["a"] = ((1, 2), (3, 4))
     assert g["a"] == ((1, 2), (3, 4))
 
 def test_setitem_when_present():
-    g = Grid(10, 10)    
+    g = Grid()    
     g["a"] = ((1, 2), (3, 4))
     g["a"] = ((5, 6), (7, 8))
     assert g["a"] == ((5, 6), (7, 8))
 
 def test_delitem_when_absent():
-    g = Grid(10, 10)
+    g = Grid()
     try:
         del g["a"]
     except KeyError, e:
@@ -63,50 +63,46 @@ def test_delitem_when_absent():
         assert False
 
 def test_delitem_when_present():
-    g = Grid(10, 10)    
+    g = Grid()    
     g["a"] = ((1, 2), (3, 4))
     del g["a"]
     assert "a" not in g
     assert not g
 
 def test_contains_when_absent():
-    g = Grid(10, 10)
+    g = Grid()
     assert "a" not in g
     g["a"] = ((1, 2), (3, 4))
     assert "b" not in g
 
 def test_contains_when_present():
-    g = Grid(10, 10)
+    g = Grid()
     g["a"] = ((1, 2), (3, 4))
     assert "a" in g
 
 def test_len_when_empty():
-    g = Grid(10, 10)
+    g = Grid()
     assert not g
     assert len(g) == 0
 
 def test_len():
-    g = Grid(15, 15)
+    g = Grid()
     g["a"] = ((1, 2), (3, 4))
     g["b"] = ((5, 6), (7, 8))
     g["c"] = ((9, 10), (11, 12))
     assert g
     assert len(g) == 3
 
-def test_grid_size():
-    g = Grid(1, 2)
-    assert g.grid_size() == (1, 2)
-
 def test_default_cell_size():
-    g = Grid(1, 2)
+    g = Grid()
     assert g.cell_size() == 1
 
 def test_cell_size():
-    g = Grid(1, 2, 3)
+    g = Grid(3)
     assert g.cell_size() == 3
 
 def test_intersect():
-    g = Grid(10, 10)
+    g = Grid()
     g["a"] = ((1, 2), (3, 4))
     g["b"] = ((5, 6), (7, 8))
     assert(g.intersect(((1, 5), (2, 6))) == set())
@@ -138,7 +134,6 @@ def test():
     test_contains_when_present()
     test_len_when_empty()
     test_len()
-    test_grid_size()
     test_default_cell_size()
     test_cell_size()
     test_intersect()
