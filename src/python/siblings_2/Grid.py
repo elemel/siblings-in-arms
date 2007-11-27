@@ -31,9 +31,9 @@ class Grid(object):
                        for x in xrange(grid_width)]
         self._entries = {}
 
-    def __len__(self):
-        """return the entry count"""
-        return len(self._entries)
+    def __getitem__(self, key):
+        """return the bounds for a key"""
+        return self._entries[key].bounds
 
     def __setitem__(self, key, bounds):
         """insert or update an entry for a key"""
@@ -42,10 +42,6 @@ class Grid(object):
             self._insert(key, bounds)
         else:
             self._update(key, bounds, entry)
-
-    def __getitem__(self, key):
-        """return the bounds for a key"""
-        return self._entries[key].bounds
 
     def __delitem__(self, key):
         """delete an entry"""
@@ -57,11 +53,9 @@ class Grid(object):
         """test if there is an entry for a key"""
         return key in self._entries
 
-    def intersect(self, bounds):
-        """return all keys with bounds that intersect the given bounds"""
-        cells = (self._cells[x][y] for x, y in self._indices(bounds))
-        return set(key for key in concat(cells)
-                   if intersects(self[key], bounds))
+    def __len__(self):
+        """return the entry count"""
+        return len(self._entries)
 
     def grid_size(self):
         """return a tuple of the grid width and height"""
@@ -70,6 +64,12 @@ class Grid(object):
     def cell_size(self):
         """return the cell size"""
         return self._cell_size
+
+    def intersect(self, bounds):
+        """return all keys with bounds that intersect the given bounds"""
+        cells = (self._cells[x][y] for x, y in self._indices(bounds))
+        return set(key for key in concat(cells)
+                   if intersects(self[key], bounds))
 
     def _indices(self, bounds):
         min_p, max_p = bounds
