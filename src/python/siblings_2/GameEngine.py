@@ -6,23 +6,10 @@ from collections import deque
 
 A_STAR_SEARCH_LIMIT = 1000
 
-class Grid:
-    def __init__(self, size):
-        self.size = size
-        width, height = size
-        self._slots = [[0] * height for x in xrange(width)]
-
-    def get(self, pos):
-        x, y = pos
-        return self._slots[x][y]
-
-    def set(self, pos, num):
-        x, y = pos
-        self._slots[x][y] = num
-
 class GameEngine:
     def __init__(self):
-        self.grid = Grid((100, 100))
+        self.size = (100, 100)
+        self.reservations = {}
         self.units = {}
         self.path_queue = deque()
         
@@ -38,38 +25,40 @@ class GameEngine:
         self.path_queue.append((unit, waypoint))
 
     def add_unit(self, unit, pos):
-        self.units[unit.num] = unit
+        self.units[unit.key] = unit
         unit.old_pos = unit.new_pos = pos
-        if self.grid.get(unit.pos) == 0:
-            self.grid.set(unit.pos, unit.num)
+        if unit.pos not in self.reservations:
+            self.reservations[unit.pos] = unit.key
+            unit.cells.add(unit.pos)
 
     def remove_unit(self, unit):
-        del self.units[unit.num]
-        self.grid.set(unit.pos, 0)
+        del self.units[unit.key]
+        while unit.cells:
+            p = unit.cells.pop()
+            del self.reservations[p]
 
-    def reserve_slot(self, unit, pos):
-        if self.grid.get(pos) == 0:
-            self.grid.set(pos, unit.num)
-            print "Grid: Reserved slot %s for unit #%d." % (pos, unit.num)
-            return True
-        else:
+    def reserve_cell(self, unit, pos):
+        if pos in self.reservations:
             return False
+        else:
+            self.reservations[pos] = unit.key
+            print "Reserved cell %s for unit #%d." % (pos, unit.key)
+            return True
 
-    def release_slot(self, unit, pos):
-        assert self.grid.get(pos) == unit.num
-        self.grid.set(pos, 0)
-        print "Grid: Unit #%d released slot %s." % (unit.num, pos)
+    def release_cell(self, unit, pos):
+        assert self.reservations.get(pos) == unit.key
+        del self.reservations[pos]
+        print "Unit #%d released cell %s." % (unit.key, pos)
 
     def _find_path(self, unit, waypoint):
         def neighbors(p):
             def contains(p):
                 x, y = p
-                width, height = self.grid.size
+                width, height = self.size
                 return x >= 0 and x < width and y >= 0 and y < height
 
             def passable(p):
-                x, y = p
-                return self.grid.get((x, y)) in (0, unit.num)
+                return self.reservations.get(p, unit.key) == unit.key
 
             return (n for n in grid_neighbors(p) if contains(n) and passable(n))
 

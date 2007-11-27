@@ -11,10 +11,10 @@ START_MOVING = 4
 MOVE = 5
 
 class Unit:
-    _nums = iter(xrange(1, sys.maxint))
+    _keys = iter(xrange(1, sys.maxint))
 
     def __init__(self):
-        self.num = Unit._nums.next()
+        self.key = Unit._keys.next()
         self.old_pos = (0, 0)
         self.new_pos = self.old_pos
         self.state = IDLE
@@ -22,7 +22,7 @@ class Unit:
         self.waypoints = deque()
         self.progress = 0
         self.cost = 1
-        self.slots = set()
+        self.cells = set()
         self.speed = 5
 
     def get_pos(self):
@@ -73,8 +73,8 @@ class Unit:
 
     def _start_moving(self, dt, game):
         pos = self.path.popleft()
-        if game.reserve_slot(self, pos):
-            self.slots.add(pos)
+        if game.reserve_cell(self, pos):
+            self.cells.add(pos)
             self.new_pos = pos
             self.progress = 0
             self.cost = diagonal_distance(self.old_pos, self.new_pos)
@@ -86,8 +86,8 @@ class Unit:
     def _move(self, dt, game):
         self.progress += dt * self.speed
         if self.progress >= self.cost:
-            if self.old_pos in self.slots:
-                game.release_slot(self, self.old_pos)
-                self.slots.remove(self.old_pos)
+            if self.old_pos in self.cells:
+                game.release_cell(self, self.old_pos)
+                self.cells.remove(self.old_pos)
             self.old_pos = self.new_pos
             self.state = IDLE

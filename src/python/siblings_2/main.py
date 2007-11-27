@@ -32,14 +32,14 @@ def main():
             for e in ui.poll_events(game):
                 if isinstance(e, SelectEvent):
                     selected = e.unit
-                    print "Selected unit #%d." % selected.num
+                    print "Selected unit #%d." % selected.key
                 elif isinstance(e, MoveEvent):
                     if selected is not None:
                         x, y = e.pos
-                        pos = (int(x + 0.5), int(y + 0.5))
+                        pos = (int(round(x)), int(round(y)))
                         selected.set_waypoint(pos)
                         print ("Set waypoint %s for unit #%d."
-                               % (pos, selected.num))
+                               % (pos, selected.key))
                 elif isinstance(e, QuitEvent):
                     sys.exit(0)
             game.update(dt)
