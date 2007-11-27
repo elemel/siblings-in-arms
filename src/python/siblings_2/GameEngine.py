@@ -68,7 +68,7 @@ class GameEngine:
         path, nodes = a_star_search(unit.pos, waypoint, neighbors,
                                     diagonal_distance, heuristic,
                                     A_STAR_SEARCH_LIMIT)
-        print "A* search: Examined %d node(s)." % len(nodes)
+        print "Pathfinder searched %d node(s)." % len(nodes)
         d = deque()
         d.extendleft(node.p for node in path if node.p != unit.pos)
         return d
