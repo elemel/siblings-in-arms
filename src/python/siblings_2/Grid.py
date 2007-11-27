@@ -32,7 +32,7 @@ class Grid(object):
         self._entries = {}
 
     def __getitem__(self, key):
-        """return the bounds for a key"""
+        """return the bounding box for a key"""
         return self._entries[key].bounds
 
     def __setitem__(self, key, bounds):
@@ -66,7 +66,7 @@ class Grid(object):
         return self._cell_size
 
     def intersect(self, bounds):
-        """return all keys with bounds that intersect the given bounds"""
+        """return keys for entries that intersect the given bounding box"""
         cells = (self._cells[x][y] for x, y in self._indices(bounds))
         return set(key for key in concat(cells)
                    if intersects(self[key], bounds))
