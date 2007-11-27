@@ -26,7 +26,7 @@ def main():
         dt = new_time - old_time
         if dt >= MIN_TIME_STEP:
             if dt > MAX_TIME_STEP:
-                print "Skipping frames."
+                print "Skipping %d frame(s)." % int(dt / MAX_TIME_STEP)
                 dt = MAX_TIME_STEP
             old_time = new_time
             for e in ui.poll_events(game):
