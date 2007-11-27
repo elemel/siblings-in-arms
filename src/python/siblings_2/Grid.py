@@ -104,20 +104,3 @@ class _GridEntry(object):
     def __init__(self, bounds, indices):
         self.bounds = bounds
         self.indices = indices
-    
-
-def test():
-    grid = Grid(10, 7, 3)
-    assert grid.grid_size() == (10, 7)
-    assert grid.cell_size() == 3
-    assert len(grid) == 0
-    green_bounds = ((1.5, 2.1), (2.3, 2.7))
-    yellow_bounds = ((2.2, 2.9), (2.5, 3.4))
-    grid["green"] = green_bounds
-    grid["yellow"] = yellow_bounds
-    assert "green" in grid
-    assert grid["green"] == green_bounds
-    assert grid.intersect(((1.3, 2.3), (3.1, 2.5))) == set(["green"])
-
-if __name__ == "__main__":
-    test()

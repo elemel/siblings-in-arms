@@ -21,10 +21,10 @@ class Node(object):
         return cmp(self.f(), other.f()) or cmp(id(self), id(other))
 
     def __iter__(self):
-        node = self
-        while node is not None:
-            yield node
-            node = node.parent
+        current = self
+        while current is not None:
+            yield current
+            current = current.parent
 
     def __str__(self):
         return str([n.p for n in self])
