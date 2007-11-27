@@ -16,23 +16,23 @@ class Task:
         self._state = TaskState.CREATED
         self._progress = 0
 
-    def start(self, facade):
+    def start(self):
         if self._state != TaskState.CREATED:
             raise TaskStateError(self._state, "cannot start task")
         self._state = TaskState.STARTED
-        self._start(facade)
+        self._start()
 
-    def update(self, facade, dt):
+    def update(self):
         if self._state != TaskState.STARTED:
             raise TaskStateError(self._state, "cannot update task")
-        self._update(facade, dt)
+        self._update()
 
     def abort(self, facade):
         if self._state == TaskState.CREATED:
             self._state = TaskState.ABORTED
         elif self._state == TaskState.STARTED:
             self._state = TaskState.ABORTED
-            self._abort(facade)
+            self._abort()
         else:
             raise TaskStateError(self._state, "cannot abort task")
 
@@ -42,11 +42,11 @@ class Task:
     def progress(self):
         return self._progress
 
-    def _start(self, facade):
+    def _start(self):
         pass
 
-    def _update(self, facade, dt):
+    def _update(self):
         pass
     
-    def _abort(self, facade):
+    def _abort(self):
         pass
