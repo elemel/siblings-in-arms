@@ -36,11 +36,15 @@ def grid_neighbors(p):
     yield x - 1, y - 1; yield x + 0, y - 1; yield x + 1, y - 1
 
 def manhattan_distance(a, b):
-    return abs(a[0] - b[0]) + abs(a[1] - b[1])
+    ax, ay = a
+    bx, by = b
+    return abs(ax - bx) + abs(ay - by)
 
 def diagonal_distance(a, b):
-    dx = abs(a[0] - b[0])
-    dy = abs(a[1] - b[1])
+    ax, ay = a
+    bx, by = b
+    dx = abs(ax - bx)
+    dy = abs(ay - by)
     return min(dx, dy) * SQRT_2 + abs(dx - dy)
 
 def a_star_search(start, goal, neighbors, cost, heuristic, limit = sys.maxint):
@@ -85,3 +89,4 @@ def a_star_search(start, goal, neighbors, cost, heuristic, limit = sys.maxint):
                 else:
                     heapify(open_list) # reestablish heap invariant
     return closest, nodes # return closest path
+
