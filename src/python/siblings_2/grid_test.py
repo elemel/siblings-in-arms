@@ -1,3 +1,5 @@
+# Copyright 2007 Mikael Lind.
+
 from Grid import intersects, concat, Grid
 
 def test_intersects_when_equal():

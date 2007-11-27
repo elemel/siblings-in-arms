@@ -1,3 +1,5 @@
+# Copyright 2007 Mikael Lind.
+
 import time, sys
 from a_star_search import a_star_search, grid_neighbors, diagonal_distance
 from collections import deque

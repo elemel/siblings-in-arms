@@ -1,3 +1,5 @@
+# Copyright 2007 Mikael Lind.
+
 import sys
 from collections import deque
 from a_star_search import diagonal_distance

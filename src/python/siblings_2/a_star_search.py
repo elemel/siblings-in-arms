@@ -1,3 +1,5 @@
+# Copyright 2007 Mikael Lind.
+
 import math, sys
 from heapq import heappush, heappop, heapify
 

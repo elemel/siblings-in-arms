@@ -1,3 +1,5 @@
+# Copyright 2007 Mikael Lind.
+
 import pygame, sys, os
 from pygame.locals import *
 import math

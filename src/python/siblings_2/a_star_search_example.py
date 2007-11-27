@@ -1,3 +1,5 @@
+# Copyright 2007 Mikael Lind.
+
 from a_star_search import a_star_search, grid_neighbors, diagonal_distance
 
 def create_grid(width, height, symbol):

@@ -1,3 +1,5 @@
+# Copyright 2007 Mikael Lind.
+
 from math import floor
 
 def intersects(a, b):
