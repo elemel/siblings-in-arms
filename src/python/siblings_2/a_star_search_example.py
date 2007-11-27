@@ -28,6 +28,7 @@ def create_blocked_grid():
     paint_block(grid, (17, 2), (19, 15), "#")
     paint_block(grid, (35, 5), (38, 18), "#")
     paint_block(grid, (39, 17), (63, 18), "#")
+    paint_block(grid, (39, 5), (53, 6), "#")
     return grid
 
 def print_grid(g):
@@ -38,7 +39,7 @@ def print_grid(g):
 def main():
     grid = create_blocked_grid()
     width, height = len(grid), len(grid[0])
-    start, goal = (5, 9), (47, 14)
+    start, goal = (5, 9), (45, 12)
 
     def neighbors(p):
         def contains(p):
