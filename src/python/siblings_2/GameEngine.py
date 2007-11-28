@@ -15,21 +15,24 @@ class GameEngine:
         
     def update(self, dt):
         if self.path_queue:
-            unit, waypoint = self.path_queue.popleft()
-            path = self._find_path(unit, waypoint)
-            unit.set_path(path)
+            unit, waypoint, path_future = self.path_queue.popleft()
+            path_future[1] = self._find_path(unit, waypoint)
+            path_future[0] = True
         for t in self.units.itervalues():
             t.update(dt, self)
 
-    def request_path(self, unit, waypoint):
-        self.path_queue.append((unit, waypoint))
+    def find_path(self, unit, waypoint):
+        future = [False, None]
+        self.path_queue.append((unit, waypoint, future))
+        return future
 
     def add_unit(self, unit, pos):
         self.units[unit.key] = unit
-        unit.old_pos = unit.new_pos = pos
+        unit.pos = pos
         if unit.pos not in self.reservations:
             self.reservations[unit.pos] = unit.key
             unit.cells.add(unit.pos)
+            print "Reserved cell %s for unit #%d." % (pos, unit.key)
 
     def remove_unit(self, unit):
         del self.units[unit.key]

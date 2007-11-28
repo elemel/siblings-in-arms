@@ -7,6 +7,7 @@ import ui
 from ui import QuitEvent, MoveEvent, SelectEvent
 from GameEngine import GameEngine
 from Unit import Unit
+from Task import WaypointTask
 
 MIN_TIME_STEP = 0.01
 MAX_TIME_STEP = 0.1
@@ -37,7 +38,7 @@ def main():
                     if selected is not None:
                         x, y = e.pos
                         pos = (int(round(x)), int(round(y)))
-                        selected.set_waypoint(pos)
+                        selected.add_task(WaypointTask(pos))
                         print ("Set waypoint %s for unit #%d."
                                % (pos, selected.key))
                 elif isinstance(e, QuitEvent):
