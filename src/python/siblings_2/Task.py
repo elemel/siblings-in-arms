@@ -1,52 +1,48 @@
-class TaskState:
-    pass
+def constrain(value, interval):
+    min_v, max_v = interval
+    value = max(value, min_v)
+    value = min(value, max_v)
+    return value
 
-TaskState.CREATED = TaskState()
-TaskState.STARTED = TaskState()
-TaskState.COMPLETED = TaskState()
-TaskState.ABORTED = TaskState()
+def fraction(value):
+    return constrain(float(value), (0.0, 1.0))
 
-class TaskStateError(Exception):
-    def __init__(self, state = None, message = None):
-        self.state = state
+class TaskError(Exception):
+    def __init__(self, task, message):
+        self.task = task
         self.message = message
 
-class Task:
-    def __init__(self):
-        self._state = TaskState.CREATED
-        self._progress = 0
+class MoveTask(Task):
+    def __init__(self, pos):
+        self.pos = pos
 
-    def start(self):
-        if self._state != TaskState.CREATED:
-            raise TaskStateError(self._state, "cannot start task")
-        self._state = TaskState.STARTED
-        self._start()
-
-    def update(self):
-        if self._state != TaskState.STARTED:
-            raise TaskStateError(self._state, "cannot update task")
-        self._update()
-
-    def abort(self, facade):
-        if self._state == TaskState.CREATED:
-            self._state = TaskState.ABORTED
-        elif self._state == TaskState.STARTED:
-            self._state = TaskState.ABORTED
-            self._abort()
-        else:
-            raise TaskStateError(self._state, "cannot abort task")
-
-    def state(self):
-        return self._state
-
-    def progress(self):
-        return self._progress
-
-    def _start(self):
+    def run(self, facade):
         pass
 
-    def _update(self):
-        pass
+class FollowPathTask(Task):
+    def __init__(self, path):
+        self.path = list(path)
+
+    def run(self, facade):
+        for i, pos in zip(xrange(len(self.path)), self.path):
+            if not facade.reserve_cell(pos):
+                raise TaskError(self, "could not reserve cell %s" % pos)
+            facade.unit.cells.add(pos)
+            for progress in MoveTask(pos).run(facade):
+                yield (i + progress) / len(self.path)
+            for p in facade.unit.cells:
+                if p != pos:
+                    facade.release_cell(p)
+                    facade.unit.cells.remove(p)
+
+class WaypointTask:
+    def __init__(self, waypoint):
+        self.waypoint = waypoint
     
-    def _abort(self):
-        pass
+    def run(self, facade):
+        path_future = facade.request_path(self.waypoint)
+        while not path_future:
+            yield 0.0
+        path = path_future.value
+        for progress in FollowPathTask(path).run(facade):
+            yield progress
