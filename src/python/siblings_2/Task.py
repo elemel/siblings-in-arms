@@ -94,6 +94,7 @@ class WaypointTask(Task):
             if not self.path:
                 break
             self.follow_path_task = FollowPathTask(self.path)
+            self.path = None
             for progress in self.follow_path_task.run(facade):
                 yield progress
             result = self.follow_path_task.result
