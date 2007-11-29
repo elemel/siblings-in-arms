@@ -10,6 +10,9 @@ WAIT_FOR_PATH = 3
 START_MOVING = 4
 MOVE = 5
 
+def percentage(fraction):
+    return int(round(fraction * 100.0))
+
 class TaskFacade:
     def __init__(self, unit):
         self.unit = unit
@@ -50,12 +53,17 @@ class Unit:
             else:
                 return
         try:
+            old_progress = percentage(self.task_progress)
             self.task_progress = self.task_gen.next()
+            new_progress = percentage(self.task_progress)
+            if old_progress // 10 != new_progress // 10:
+                print ("Unit #%d is %d%% finished with its task."
+                       % (self.key, new_progress))
         except StopIteration, e:
             self.task = None
             self.task_gen = None
             self.task_progress = 0.0
-            print "Unit #%d finished a task." % self.key
+            print "Unit #%d finished its task." % self.key
 
     def add_task(self, task):
         self.task_queue.append(task)
