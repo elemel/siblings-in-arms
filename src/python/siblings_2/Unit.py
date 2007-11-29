@@ -23,10 +23,16 @@ class TaskFacade:
         return self.game.find_path(self.unit, waypoint)
 
     def reserve_cell(self, pos):
-        return self.game.reserve_cell(self.unit, pos)
+        if self.game.reserve_cell(self.unit, pos):
+            self.unit.cells.add(pos)
+            return True
+        else:
+            return False
 
     def release_cell(self, pos):
-        return self.game.release_cell(self.unit, pos)
+        if pos in self.unit.cells:
+            self.unit.cells.remove(pos)
+            self.game.release_cell(self.unit, pos)
 
 class Unit:
     _keys = iter(xrange(1, sys.maxint))

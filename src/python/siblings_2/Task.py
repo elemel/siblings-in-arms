@@ -20,10 +20,10 @@ class Task:
     later. Tasks are enqueued in units and executed in FIFO order. Tasks can
     also be created and executed by other tasks.
     
-    Tasks provide cooperative multiprocessing using Python generators. It is
-    generally simpler to implement a complex task as a generator than as a
-    state machine. For tracking purposes, tasks yield their current progress as
-    a float in the range [0.0, 1.0].
+    Tasks provide cooperative multiprocessing using generators. It is generally
+    simpler to implement a complex task as a generator than as a state machine.
+    For tracking purposes, tasks yield their current progress as a float in the
+    range [0.0, 1.0].
     """
     
     def __init__(self):
@@ -37,7 +37,7 @@ class Task:
     aborting = property(_get_aborting, doc = "Is the task aborting?")
 
     def run(self, facade):
-        """Create generator for cooperative multiprocessing.
+        """Create generator for execution.
 
         To be implemented by subclasses.
         """
@@ -54,16 +54,15 @@ class MoveTask(Task):
 
     def run(self, facade):
         old_pos = facade.unit.pos
-        required = diagonal_distance(old_pos, self.pos) / facade.unit.speed
-        elapsed = 0.0
+        distance = diagonal_distance(old_pos, self.pos)
+        progress = 0.0
         while True:
-            elapsed += facade.dt
-            if elapsed >= required:
-                facade.unit.pos = self.pos
+            progress += facade.dt * facade.unit.speed / distance
+            if progress >= 1.0:
                 break
-            progress = elapsed / required
             facade.unit.pos = interpolate_pos(old_pos, self.pos, progress)
             yield progress
+        facade.unit.pos = self.pos
 
 class FollowPathTask(Task):
     def __init__(self, path):
@@ -74,17 +73,15 @@ class FollowPathTask(Task):
     def run(self, facade):
         for i, pos in zip(xrange(len(self.path)), self.path):
             if not facade.reserve_cell(pos):
+                self._result = False
                 return
-            facade.unit.cells.add(pos)
+            old_pos = facade.unit.pos
             self.move_task = MoveTask(pos)
             for progress in self.move_task.run(facade):
                 yield (i + progress) / len(self.path)
             self.move_task = None
-            while facade.unit.cells:
-                p = facade.unit.cells.pop()
-                if p != pos:
-                    facade.release_cell(p)
-            facade.unit.cells.add(pos)
+            facade.release_cell(old_pos)
+        self._result = True
 
 class WaypointTask(Task):
     def __init__(self, waypoint):
@@ -103,6 +100,20 @@ class WaypointTask(Task):
             self.follow_path_task = FollowPathTask(path)
             for progress in self.follow_path_task.run(facade):
                 yield progress
+            result = self.follow_path_task.result
             self.follow_path_task = None
-            if facade.unit.pos == self.waypoint:
+            if result:
                 break
+
+class BuildTask(Task):
+    def __init__(self, key):
+        self.key = key
+
+    def run(self, facade):
+        progress = 0.0
+        while True:
+            progress += facade.dt / facade.get_build_time(key)
+            if progress >= 1.0:
+                break
+            yield progress
+        facade.create_unit(key)
