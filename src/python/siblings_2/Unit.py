@@ -34,26 +34,28 @@ class Unit:
         self.speed = 5
         self.cells = set()
         self.task_facade = TaskFacade(self)
-        self.tasks = deque()
-        self.current_task = None
-        self.current_task_gen = None
+        self.task_queue = deque()
+        self.task = None
+        self.task_gen = None
+        self.task_progress = 0.0
 
     def update(self, dt, game):
         self.task_facade.dt = dt
         self.task_facade.game = game
-        if self.current_task is None:
-            if self.tasks:
-                self.current_task = self.tasks.popleft()
-                self.current_task.facade = self.task_facade
-                self.current_task_gen = self.current_task.run()
+        if self.task is None:
+            if self.task_queue:
+                self.task = self.task_queue.popleft()
+                self.task_gen = self.task.run(self.task_facade)
+                self.task_progress = 0.0
             else:
                 return
         try:
-            self.current_task_gen.next()
+            self.task_progress = self.task_gen.next()
         except StopIteration, e:
-            self.current_task = None
-            self.current_task_gen = None
+            self.task = None
+            self.task_gen = None
+            self.task_progress = 0.0
             print "Unit #%d finished a task." % self.key
 
     def add_task(self, task):
-        self.tasks.append(task)
+        self.task_queue.append(task)

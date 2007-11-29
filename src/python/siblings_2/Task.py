@@ -7,74 +7,83 @@ def interpolate_pos(old_p, new_p, progress):
     y = old_y * (1.0 - progress) + new_y * progress
     return (x, y)
 
+class TaskError(Exception):
+    def __init__(self, message):
+        self.message = message
+
 class Task:
     def __init__(self):
-        self.facade = None
-        self.progress = 0.0
-        self.aborted = False
-        self.completed = False
+        self._result = None
+        self._aborting = False
 
-    def run(self):
-        raise NotImplementedError()
+    def get_result(self): return self._result
+    def is_aborting(self): return self._aborting
+
+    result = property(get_result)
+    aborting = property(is_aborting)
+
+    def run(self, facade):
+        raise NotImplementedException()
+
+    def abort(self):
+        self._aborting = True
 
 class MoveTask(Task):
     def __init__(self, pos):
         Task.__init__(self)
         self.pos = pos
 
-    def run(self):
-        old_pos = self.facade.unit.pos
-        required = (diagonal_distance(old_pos, self.pos)
-                    / self.facade.unit.speed)
+    def run(self, facade):
+        old_pos = facade.unit.pos
+        required = (diagonal_distance(old_pos, self.pos) / facade.unit.speed)
         elapsed = 0.0
         while True:
-            elapsed += self.facade.dt
+            elapsed += facade.dt
             if elapsed >= required:
-                self.facade.unit.pos = self.pos
+                facade.unit.pos = self.pos
                 break
             progress = elapsed / required
-            self.facade.unit.pos = interpolate_pos(old_pos, self.pos, progress)
-            self._progress = progress
-            yield
+            facade.unit.pos = interpolate_pos(old_pos, self.pos, progress)
+            yield progress
 
 class FollowPathTask(Task):
     def __init__(self, path):
         Task.__init__(self)
         self.path = list(path)
+        self.move_task = None
 
-    def run(self):
+    def run(self, facade):
         for i, pos in zip(xrange(len(self.path)), self.path):
-            if not self.facade.reserve_cell(pos):
+            if not facade.reserve_cell(pos):
                 return
-            self.facade.unit.cells.add(pos)
-            move_task = MoveTask(pos)
-            move_task.facade = self.facade
-            for dummy in move_task.run():
-                self._progress = (i + move_task.progress) / len(self.path)
-                yield
-            while self.facade.unit.cells:
-                p = self.facade.unit.cells.pop()
+            facade.unit.cells.add(pos)
+            self.move_task = MoveTask(pos)
+            for progress in self.move_task.run(facade):
+                yield (i + progress) / len(self.path)
+            self.move_task = None
+            while facade.unit.cells:
+                p = facade.unit.cells.pop()
                 if p != pos:
-                    self.facade.release_cell(p)
-            self.facade.unit.cells.add(pos)
+                    facade.release_cell(p)
+            facade.unit.cells.add(pos)
 
 class WaypointTask(Task):
     def __init__(self, waypoint):
         Task.__init__(self)
         self.waypoint = waypoint
+        self.follow_path_task = None
     
-    def run(self):
+    def run(self, facade):
         while True:
-            path_future = self.facade.find_path(self.waypoint)
+            path_future = facade.find_path(self.waypoint)
             while not path_future[0]:
                 yield 0.0
             path = path_future[1]
             if not path:
                 break
-            follow_path_task = FollowPathTask(path)
-            follow_path_task.facade = self.facade
-            for dummy in follow_path_task.run():
-                self._progress = follow_path_task.progress
-                yield
-            if self.facade.unit.pos == self.waypoint:
+            self.follow_path_task = FollowPathTask(path)
+            for progress in self.follow_path_task.run(facade):
+                yield progress
+            self.follow_path_task = None
+            if facade.unit.pos == self.waypoint:
                 break
