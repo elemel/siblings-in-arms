@@ -6,8 +6,8 @@ class TaskFacade:
         self.dt = 0.0
         self.game = None
 
-    def find_path(self, waypoint):
-        return self.game.find_path(self.unit, waypoint)
+    def find_path(self, waypoint, callback):
+        self.game.find_path(self.unit, waypoint, callback)
 
     def reserve_cell(self, pos):
         if self.game.reserve_cell(self.unit, pos):
