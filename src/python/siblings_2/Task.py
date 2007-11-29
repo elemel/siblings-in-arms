@@ -9,10 +9,6 @@ def interpolate_pos(old_p, new_p, progress):
     y = old_y * (1.0 - progress) + new_y * progress
     return (x, y)
 
-class TaskError(Exception):
-    def __init__(self, message):
-        self.message = message
-
 class Task:
     """Task for deferred execution by a unit.
 

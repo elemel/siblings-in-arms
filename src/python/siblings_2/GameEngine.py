@@ -63,7 +63,8 @@ class GameEngine:
             def passable(p):
                 return self.reservations.get(p, unit.key) == unit.key
 
-            return (n for n in grid_neighbors(p) if contains(n) and passable(n))
+            return (n for n in grid_neighbors(p)
+                    if contains(n) and passable(n))
 
         def heuristic(p):
             return diagonal_distance(p, waypoint)
@@ -75,6 +76,3 @@ class GameEngine:
         d = deque()
         d.extendleft(node.p for node in path if node.p != unit.pos)
         return d
-
-MIN_TIME_STEP = 0.01
-MAX_TIME_STEP = 0.1
