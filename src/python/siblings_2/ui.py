@@ -1,8 +1,8 @@
 # Copyright 2007 Mikael Lind.
 
-import pygame, sys, os
+import pygame, sys, os, math
 from pygame.locals import *
-import math
+import config
 from Event import Event, MoveEvent, QuitEvent, SelectEvent
  
 pygame.init() 
@@ -11,7 +11,7 @@ window = pygame.display.set_mode((640, 480))
 pygame.display.set_caption("Siblings in Arms")
 screen = pygame.display.get_surface() 
 
-warrior_path = os.path.join('data', 'warrior.png')
+warrior_path = os.path.join(config.root, "data", "warrior.png")
 warrior_surface = pygame.image.load(warrior_path)
 
 PIXELS_PER_METER_X = 40
