@@ -1,6 +1,6 @@
 # Copyright 2007 Mikael Lind.
 
-import time, sys
+import time, sys, random
 from a_star_search import a_star_search, grid_neighbors, diagonal_distance
 from collections import deque
 try:
@@ -18,12 +18,8 @@ MAX_TIME_STEP = 0.1
 
 def main():
     game = GameEngine()
-    game.add_unit(Unit(), (2, 3))
-    game.add_unit(Unit(), (7, 4))
-    game.add_unit(Unit(), (6, 5))
-    game.add_unit(Unit(), (3, 7))
-    game.add_unit(Unit(), (8, 2))
-    game.add_unit(Unit(), (5, 6))
+    for i in xrange(20):
+        game.add_unit(Unit(), (random.randint(1, 14), random.randint(1, 14)))
 
     if ui is None:
         unit = Unit()

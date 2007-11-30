@@ -4,7 +4,7 @@ import time, sys
 from a_star_search import a_star_search, grid_neighbors, diagonal_distance
 from collections import deque
 
-A_STAR_SEARCH_LIMIT = 1000
+A_STAR_SEARCH_LIMIT = 100
 
 class GameEngine:
     def __init__(self):
@@ -43,12 +43,13 @@ class GameEngine:
             print "Unit #%d locked cell %s." % (unit.key, pos)
             return True
         else:
-            return key == old_key
+            return unit.key == old_key
 
     def unlock_cell(self, unit, pos):
-        del self.locked_cells[pos]
-        unit.locked_cells.remove(pos)
-        print "Unit #%d unlocked cell %s." % (unit.key, pos)
+        if pos in unit.locked_cells:
+            del self.locked_cells[pos]
+            unit.locked_cells.remove(pos)
+            print "Unit #%d unlocked cell %s." % (unit.key, pos)
 
     def _find_path(self, unit, waypoint):
         def contains(p):

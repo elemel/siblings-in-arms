@@ -88,6 +88,8 @@ class WaypointTask(Task):
     
     def run(self, facade):
         while True:
+            if facade.unit.pos == self.waypoint:
+                break
             facade.find_path(self.waypoint, self._set_path)
             while self.path is None:
                 yield 0.0
@@ -97,10 +99,6 @@ class WaypointTask(Task):
             self.path = None
             for progress in self.follow_path_task.run(facade):
                 yield progress
-            result = self.follow_path_task.result
-            self.follow_path_task = None
-            if result:
-                break
 
     def _set_path(self, path):
         self.path = path
