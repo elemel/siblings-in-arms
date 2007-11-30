@@ -19,7 +19,7 @@ class GameEngine:
             path = self._find_path(unit, waypoint)
             callback(path)
         for t in self.units.itervalues():
-            t.update(dt, self)
+            t.update(self, dt)
 
     def find_path(self, unit, waypoint, callback):
         self.path_queue.append((unit, waypoint, callback))
@@ -69,7 +69,8 @@ class GameEngine:
         path, nodes = a_star_search(unit.pos, waypoint, neighbors,
                                     diagonal_distance, heuristic,
                                     A_STAR_SEARCH_LIMIT)
-        print "Found path after searching %d node(s)." % len(nodes)
+        print ("Unit #%d found a path after searching %d node(s)."
+               % (unit.key, len(nodes)))
         d = deque()
         d.extendleft(node.p for node in path if node.p != unit.pos)
         return d
