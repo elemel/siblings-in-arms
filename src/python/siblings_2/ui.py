@@ -3,6 +3,7 @@
 import pygame, sys, os
 from pygame.locals import *
 import math
+from Event import Event, MoveEvent, QuitEvent, SelectEvent
  
 pygame.init() 
 
@@ -81,20 +82,6 @@ def update_screen(game):
         top_left = get_rect_min(screen_pos, warrior_surface.get_size())
         screen.blit(warrior_surface, top_left)
     pygame.display.flip()
-
-class Event:
-    pass
-
-class QuitEvent(Event):
-    pass
-
-class SelectEvent(Event):
-    def __init__(self, unit):
-        self.unit = unit
-
-class MoveEvent(Event):
-    def __init__(self, pos):
-        self.pos = pos
 
 def transform_click_event(event, game):
     screen_size = screen.get_size()
