@@ -14,7 +14,7 @@ class Unit:
         self.key = Unit._keys.next()
         self.pos = (0, 0)
         self.speed = 5
-        self.cells = set()
+        self.locked_cells = set()
         self.task_facade = TaskFacade(self)
         self.task_queue = deque()
         self.task = None

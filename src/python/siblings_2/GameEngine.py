@@ -9,7 +9,7 @@ A_STAR_SEARCH_LIMIT = 1000
 class GameEngine:
     def __init__(self):
         self.size = (100, 100)
-        self.reservations = {}
+        self.locked_cells = {}
         self.units = {}
         self.path_queue = deque()
         
@@ -27,29 +27,28 @@ class GameEngine:
     def add_unit(self, unit, pos):
         self.units[unit.key] = unit
         unit.pos = pos
-        if unit.pos not in self.reservations:
-            self.reservations[unit.pos] = unit.key
-            unit.cells.add(unit.pos)
-            print "Reserved cell %s for unit #%d." % (pos, unit.key)
+        self.lock_cell(unit, unit.pos)
 
     def remove_unit(self, unit):
+        while unit.locked_cells:
+            p = unit.locked_cells.pop()
+            del self.locked_cells[p]
         del self.units[unit.key]
-        while unit.cells:
-            p = unit.cells.pop()
-            del self.reservations[p]
 
-    def reserve_cell(self, unit, pos):
-        if pos in self.reservations:
-            return False
-        else:
-            self.reservations[pos] = unit.key
-            print "Reserved cell %s for unit #%d." % (pos, unit.key)
+    def lock_cell(self, unit, pos):
+        old_key = self.locked_cells.get(pos, None)
+        if old_key is None:
+            self.locked_cells[pos] = unit.key
+            unit.locked_cells.add(pos)
+            print "Unit #%d locked cell %s." % (unit.key, pos)
             return True
+        else:
+            return key == old_key
 
-    def release_cell(self, unit, pos):
-        assert self.reservations.get(pos) == unit.key
-        del self.reservations[pos]
-        print "Unit #%d released cell %s." % (unit.key, pos)
+    def unlock_cell(self, unit, pos):
+        del self.locked_cells[pos]
+        unit.locked_cells.remove(pos)
+        print "Unit #%d unlocked cell %s." % (unit.key, pos)
 
     def _find_path(self, unit, waypoint):
         def contains(p):
@@ -57,12 +56,12 @@ class GameEngine:
             width, height = self.size
             return x >= 0 and x < width and y >= 0 and y < height
 
-        def passable(p):
-            return self.reservations.get(p, unit.key) == unit.key
+        def lockable(p):
+            return self.locked_cells.get(p, unit.key) == unit.key
 
         def neighbors(p):
             return (n for n in grid_neighbors(p)
-                    if contains(n) and passable(n))
+                    if contains(n) and lockable(n))
 
         def heuristic(p):
             return diagonal_distance(p, waypoint)

@@ -9,14 +9,8 @@ class TaskFacade:
     def find_path(self, waypoint, callback):
         self.game.find_path(self.unit, waypoint, callback)
 
-    def reserve_cell(self, pos):
-        if self.game.reserve_cell(self.unit, pos):
-            self.unit.cells.add(pos)
-            return True
-        else:
-            return False
+    def lock_cell(self, pos):
+        return self.game.lock_cell(self.unit, pos)
 
-    def release_cell(self, pos):
-        if pos in self.unit.cells:
-            self.unit.cells.remove(pos)
-            self.game.release_cell(self.unit, pos)
+    def unlock_cell(self, pos):
+        self.game.unlock_cell(self.unit, pos)

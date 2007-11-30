@@ -68,7 +68,7 @@ class FollowPathTask(Task):
 
     def run(self, facade):
         for i, pos in zip(xrange(len(self.path)), self.path):
-            if not facade.reserve_cell(pos):
+            if not facade.lock_cell(pos):
                 self._result = False
                 return
             old_pos = facade.unit.pos
@@ -76,7 +76,7 @@ class FollowPathTask(Task):
             for progress in self.move_task.run(facade):
                 yield (i + progress) / len(self.path)
             self.move_task = None
-            facade.release_cell(old_pos)
+            facade.unlock_cell(old_pos)
         self._result = True
 
 class WaypointTask(Task):
