@@ -4,6 +4,7 @@ import pygame, sys, os, math
 from pygame.locals import *
 import config
 from Event import Event, MoveEvent, QuitEvent, SelectEvent
+from geometry import *
  
 pygame.init() 
 
@@ -41,9 +42,6 @@ def get_rect_min(center, size):
     width, height = size
     return int(x - width / 2.0), int(y - height / 2.0)
 
-def is_x_and_y_less_or_equal(p, q):
-    return p[0] <= q[0] and p[1] <= q[1]
-
 def get_sorted_units(game):
     units = game.units.values()
     units.sort(lambda a, b: cmp(b.pos[1], a.pos[1]))
@@ -65,12 +63,8 @@ def transform_click_event(event, game):
         screen_pos = to_screen_coords(unit.pos, screen_size)
         surface = unit_surfaces[unit.spec.name]
         surface_size = surface.get_size()
-        width, height = surface_size
-        x, y = get_rect_min(screen_pos, surface_size)
-        min_p = (x, y)
-        max_p = (x + width, y + height)
-        if (is_x_and_y_less_or_equal(min_p, event.pos)
-            and is_x_and_y_less_or_equal(event.pos, max_p)
+        rect = rectangle_from_center_and_size(screen_pos, surface_size)
+        if (rectangle_contains_point(rect, event.pos)
             and (clicked_unit == None or unit.pos[1] < clicked_unit.pos[1])):
             clicked_unit = unit
 
