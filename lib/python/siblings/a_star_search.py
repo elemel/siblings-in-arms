@@ -1,9 +1,8 @@
 # Copyright 2007 Mikael Lind.
 
-import math, sys
+import sys
 from heapq import heappush, heappop, heapify
 
-SQRT_2 = math.sqrt(2)
 OPEN = 1
 CLOSED = 2
 
@@ -30,24 +29,6 @@ class Node(object):
 
     def __str__(self):
         return str([n.p for n in self])
-
-def grid_neighbors(p):
-    x, y = p
-    yield x - 1, y + 1; yield x + 0, y + 1; yield x + 1, y + 1
-    yield x - 1, y + 0;                     yield x + 1, y + 0
-    yield x - 1, y - 1; yield x + 0, y - 1; yield x + 1, y - 1
-
-def manhattan_distance(a, b):
-    ax, ay = a
-    bx, by = b
-    return abs(ax - bx) + abs(ay - by)
-
-def diagonal_distance(a, b):
-    ax, ay = a
-    bx, by = b
-    dx = abs(ax - bx)
-    dy = abs(ay - by)
-    return min(dx, dy) * SQRT_2 + abs(dx - dy)
 
 def a_star_search(start, goal, neighbors, cost, heuristic, limit = sys.maxint):
     # initialization

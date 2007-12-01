@@ -1,6 +1,7 @@
 # Copyright 2007 Mikael Lind.
 
-from a_star_search import a_star_search, grid_neighbors, diagonal_distance
+from a_star_search import a_star_search
+from geometry import grid_neighbors, diagonal_distance
 
 def paint_block(grid, min_, max_, symbol):
     for x in xrange(min_[0], max_[0] + 1):

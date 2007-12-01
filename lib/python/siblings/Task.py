@@ -1,13 +1,10 @@
 # Copyright 2007 Mikael Lind.
 
-from a_star_search import diagonal_distance
+from geometry import *
 
 def interpolate_pos(old_p, new_p, progress):
-    old_x, old_y = old_p
-    new_x, new_y = new_p
-    x = old_x * (1.0 - progress) + new_x * progress
-    y = old_y * (1.0 - progress) + new_y * progress
-    return (x, y)
+    return vector_add(vector_mul(old_p, 1 - progress),
+                      vector_mul(new_p, progress))
 
 class Task:
     """Task for deferred execution by a unit.

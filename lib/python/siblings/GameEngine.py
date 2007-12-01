@@ -1,8 +1,9 @@
 # Copyright 2007 Mikael Lind.
 
 import time, sys
-from a_star_search import a_star_search, grid_neighbors, diagonal_distance
+from a_star_search import a_star_search
 from collections import deque
+from geometry import grid_neighbors, diagonal_distance
 
 A_STAR_SEARCH_LIMIT = 100
 

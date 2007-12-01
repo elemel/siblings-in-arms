@@ -1,17 +1,17 @@
 # Copyright 2007 Mikael Lind.
 
 import time, sys, random
-from a_star_search import a_star_search, grid_neighbors, diagonal_distance
 from collections import deque
+from GameEngine import GameEngine
+from Unit import Unit, UnitSpec
+from Task import WaypointTask
+
 try:
     import gui
     from gui import QuitEvent, MoveEvent, SelectEvent
 except ImportError, e:
     print "Error when importing UI:", e
     gui = None
-from GameEngine import GameEngine
-from Unit import Unit, UnitSpec
-from Task import WaypointTask
 
 MIN_TIME_STEP = 0.01
 MAX_TIME_STEP = 0.1
@@ -27,11 +27,6 @@ def random_pos(min_p, max_p):
     min_x, min_y = min_p
     max_x, max_y = max_p
     return (random.randint(min_x, max_x), random.randint(min_y, max_y))
-
-def vector_add(a, b):
-    ax, ay = a
-    bx, by = b
-    return (ax + bx, ay + by)
 
 def main():
     game = GameEngine()
