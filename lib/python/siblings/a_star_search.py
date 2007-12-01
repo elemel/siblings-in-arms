@@ -35,6 +35,8 @@ def a_star_search(start, predicate, neighbors, cost, heuristic,
     # initialization
     start_node = Node(start, heuristic(start)) # create start node
     nodes = {start: start_node} # register start node
+    if predicate(start_node.p):
+        return start_node, nodes
     open_list = [start_node] # add start node to open list
 
     # track which node is closest to goal

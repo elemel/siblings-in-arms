@@ -29,7 +29,7 @@ def random_pos(min_p, max_p):
 
 def main():
     game = GameEngine()
-    min_p, max_p = (1, 1), (14, 14)
+    min_p, max_p = (2, 2), (14, 11)
     game.add_unit(Unit(tavern_spec), random_pos(min_p, max_p))
     for i in xrange(20):
         game.add_unit(Unit(warrior_spec), random_pos(min_p, max_p))

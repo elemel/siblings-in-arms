@@ -7,6 +7,26 @@ from geometry import grid_neighbors, diagonal_distance
 
 A_STAR_SEARCH_LIMIT = 100
 
+def find_nearest_lockable(key, pos, size, locked_cells):
+    width, height = size
+
+    def predicate(p):
+        return locked_cells.get(p, key) == key
+    
+    def contains(p):
+        x, y = p
+        return x >= 0 and x < width and y >= 0 and y < height
+    
+    def neighbors(p):
+        return (n for n in grid_neighbors(p) if contains(n))
+    
+    def heuristic(p):
+        return 0
+
+    path, nodes = a_star_search(pos, predicate, neighbors, diagonal_distance,
+                                heuristic)
+    return path.p
+
 class GameEngine:
     def __init__(self):
         self.size = (100, 100)
@@ -26,6 +46,8 @@ class GameEngine:
         self.path_queue.append((unit, waypoint, callback))
 
     def add_unit(self, unit, pos):
+        pos = find_nearest_lockable(unit.key, pos, self.size,
+                                    self.locked_cells)
         print "Adding unit #%d at %s." % (unit.key, pos)
         self.units[unit.key] = unit
         unit.pos = pos
