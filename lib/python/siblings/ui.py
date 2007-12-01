@@ -11,8 +11,15 @@ window = pygame.display.set_mode((640, 480))
 pygame.display.set_caption("Siblings in Arms")
 screen = pygame.display.get_surface() 
 
-warrior_path = os.path.join(config.root, "data", "warrior.png")
-warrior_surface = pygame.image.load(warrior_path)
+unit_surfaces = {}
+
+def load_unit_surface(name):
+    path = os.path.join(config.root, "data", name + ".png")
+    surface = pygame.image.load(path)
+    unit_surfaces[name] = surface
+
+load_unit_surface("tavern")
+load_unit_surface("warrior")
 
 PIXELS_PER_METER_X = 40
 PIXELS_PER_METER_Y = 30
@@ -37,39 +44,6 @@ def get_rect_min(center, size):
 def is_x_and_y_less_or_equal(p, q):
     return p[0] <= q[0] and p[1] <= q[1]
 
-def log_click(clicked_unit):
-    if clicked_unit != None:
-        message = "Clicked unit #%d" % clicked_unit.num
-        found_units = game.find_units(Circle2(clicked_unit.pos, 5.0))
-        if len(found_units) > 1:
-            found_units.remove(clicked_unit)
-            message += (", which is close to unit(s) %s"
-                        % (", ".join(map(lambda unit: "#" + str(unit.num),
-                                         found_units))))
-        print message + "."
-
-def handle_click(event):
-    screen_size = screen.get_size()
-    surface_size = warrior_surface.get_size()
-    clicked_unit = None
-    for unit in game.units:
-        screen_pos = to_screen_coords(unit.pos, screen_size)
-        top_left = get_rect_min(screen_pos, surface_size)
-        lower_right = (top_left[0] + surface_size[0],
-                       top_left[1] + surface_size[1])
-        if (is_x_and_y_less_or_equal(top_left, event.pos)
-            and is_x_and_y_less_or_equal(event.pos, lower_right)
-            and (clicked_unit == None or unit.pos.y < clicked_unit.pos.y)):
-            clicked_unit = unit
-    log_click(clicked_unit)
-
-def handle_events(events):
-    for event in events: 
-        if event.type == QUIT:
-            sys.exit(0)
-        elif event.type == MOUSEBUTTONDOWN:
-            handle_click(event)
-
 def get_sorted_units(game):
     units = game.units.values()
     units.sort(lambda a, b: cmp(b.pos[1], a.pos[1]))
@@ -79,27 +53,31 @@ def update_screen(game):
     screen.fill(pygame.color.Color('gold'))
     for unit in get_sorted_units(game):
         screen_pos = to_screen_coords(unit.pos, screen.get_size())
-        top_left = get_rect_min(screen_pos, warrior_surface.get_size())
-        screen.blit(warrior_surface, top_left)
+        surface = unit_surfaces[unit.spec.name]
+        min_p = get_rect_min(screen_pos, surface.get_size())
+        screen.blit(surface, min_p)
     pygame.display.flip()
 
 def transform_click_event(event, game):
     screen_size = screen.get_size()
-    surface_size = warrior_surface.get_size()
     clicked_unit = None
     for unit in game.units.itervalues():
         screen_pos = to_screen_coords(unit.pos, screen_size)
-        surface_min = get_rect_min(screen_pos, surface_size)
-        surface_max = (surface_min[0] + surface_size[0],
-                       surface_min[1] + surface_size[1])
-        if (is_x_and_y_less_or_equal(surface_min, event.pos)
-            and is_x_and_y_less_or_equal(event.pos, surface_max)
-            and (clicked_unit is None or unit.pos[1] < clicked_unit.pos[1])):
+        surface = unit_surfaces[unit.spec.name]
+        surface_size = surface.get_size()
+        width, height = surface_size
+        x, y = get_rect_min(screen_pos, surface_size)
+        min_p = (x, y)
+        max_p = (x + width, y + height)
+        if (is_x_and_y_less_or_equal(min_p, event.pos)
+            and is_x_and_y_less_or_equal(event.pos, max_p)
+            and (clicked_unit == None or unit.pos[1] < clicked_unit.pos[1])):
             clicked_unit = unit
-    if clicked_unit is not None:
-        return SelectEvent(clicked_unit)
-    else:
+
+    if clicked_unit is None:
         return MoveEvent(to_world_coords(event.pos, screen_size))
+    else:
+        return SelectEvent(clicked_unit)
 
 def transform_event(event, game):
     if event.type == QUIT:

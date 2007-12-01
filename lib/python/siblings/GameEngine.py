@@ -25,9 +25,18 @@ class GameEngine:
         self.path_queue.append((unit, waypoint, callback))
 
     def add_unit(self, unit, pos):
+        print "Adding unit #%d at %s." % (unit.key, pos)
         self.units[unit.key] = unit
         unit.pos = pos
-        self.lock_cell(unit, unit.pos)
+        x, y = unit.pos
+        width, height = unit.size
+        min_x = int(x - (width - 1) / 2)
+        min_y = int(y - (height - 1) / 2)
+        max_x = min_x + (width - 1)
+        max_y = min_y + (height - 1)
+        for x in xrange(min_x, max_x + 1):
+            for y in xrange(min_y, max_y + 1):
+                self.lock_cell(unit, (x, y))
 
     def remove_unit(self, unit):
         while unit.locked_cells:

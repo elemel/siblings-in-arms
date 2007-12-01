@@ -10,16 +10,35 @@ except ImportError, e:
     print "Error when importing UI:", e
     ui = None
 from GameEngine import GameEngine
-from Unit import Unit
+from Unit import Unit, UnitSpec
 from Task import WaypointTask
 
 MIN_TIME_STEP = 0.01
 MAX_TIME_STEP = 0.1
 
+tavern_spec = UnitSpec("tavern")
+tavern_spec.speed = 0.0
+tavern_spec.size = (3, 3)
+
+warrior_spec = UnitSpec("warrior")
+warrior_spec.speed = 5.0
+
+def random_pos(min_p, max_p):
+    min_x, min_y = min_p
+    max_x, max_y = max_p
+    return (random.randint(min_x, max_x), random.randint(min_y, max_y))
+
+def vector_add(a, b):
+    ax, ay = a
+    bx, by = b
+    return (ax + bx, ay + by)
+
 def main():
     game = GameEngine()
+    min_p, max_p = (1, 1), (14, 14)
+    game.add_unit(Unit(tavern_spec), random_pos(min_p, max_p))
     for i in xrange(20):
-        game.add_unit(Unit(), (random.randint(1, 14), random.randint(1, 14)))
+        game.add_unit(Unit(warrior_spec), random_pos(min_p, max_p))
 
     if ui is None:
         unit = Unit()
@@ -43,7 +62,7 @@ def main():
                         selected = e.unit
                         print "Selected unit #%d." % selected.key
                     elif isinstance(e, MoveEvent):
-                        if selected is not None:
+                        if selected is not None and selected.speed:
                             x, y = e.pos
                             pos = (int(round(x)), int(round(y)))
                             selected.add_task(WaypointTask(pos))
