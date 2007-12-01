@@ -42,7 +42,6 @@ def main():
         game.add_unit(unit, (4, 8))
     
     old_time = time.time()
-    selected = None
     while True:
         new_time = time.time()
         dt = new_time - old_time
@@ -54,15 +53,17 @@ def main():
             if gui is not None:
                 for e in gui.poll_events(game):
                     if isinstance(e, SelectEvent):
-                        selected = e.unit
-                        print "Selected unit #%d." % selected.key
+                        gui.selection.clear()
+                        gui.selection.add(e.unit)
+                        print "Selected unit #%d." % e.unit.key
                     elif isinstance(e, MoveEvent):
-                        if selected is not None and selected.speed:
-                            x, y = e.pos
-                            pos = (int(round(x)), int(round(y)))
-                            selected.add_task(WaypointTask(pos))
-                            print ("Set waypoint %s for unit #%d."
-                                   % (pos, selected.key))
+                        for unit in gui.selection:
+                            if unit.speed:
+                                x, y = e.pos
+                                pos = (int(round(x)), int(round(y)))
+                                unit.add_task(WaypointTask(pos))
+                                print ("Set waypoint %s for unit #%d."
+                                       % (pos, unit.key))
                     elif isinstance(e, QuitEvent):
                         sys.exit(0)
             game.update(dt)
