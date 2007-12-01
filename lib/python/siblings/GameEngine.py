@@ -62,6 +62,9 @@ class GameEngine:
             print "Unit #%d unlocked cell %s." % (unit.key, pos)
 
     def _find_path(self, unit, waypoint):
+        def predicate(p):
+            return p == waypoint
+
         def contains(p):
             x, y = p
             width, height = self.size
@@ -77,7 +80,7 @@ class GameEngine:
         def heuristic(p):
             return diagonal_distance(p, waypoint)
 
-        path, nodes = a_star_search(unit.pos, waypoint, neighbors,
+        path, nodes = a_star_search(unit.pos, predicate, neighbors,
                                     diagonal_distance, heuristic,
                                     A_STAR_SEARCH_LIMIT)
         print ("Unit #%d found a path after searching %d node(s)."

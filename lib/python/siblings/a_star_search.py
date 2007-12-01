@@ -30,7 +30,8 @@ class Node(object):
     def __str__(self):
         return str([n.p for n in self])
 
-def a_star_search(start, goal, neighbors, cost, heuristic, limit = sys.maxint):
+def a_star_search(start, predicate, neighbors, cost, heuristic,
+                  limit = sys.maxint):
     # initialization
     start_node = Node(start, heuristic(start)) # create start node
     nodes = {start: start_node} # register start node
@@ -52,7 +53,7 @@ def a_star_search(start, goal, neighbors, cost, heuristic, limit = sys.maxint):
             if neighbor is None:
                 # create node for neighbor
                 neighbor = Node(n, heuristic(n), neighbor_g, current)
-                if neighbor.p == goal:
+                if predicate(neighbor.p):
                     # found path to goal
                     return neighbor, nodes
                 nodes[n] = neighbor # register neighbor

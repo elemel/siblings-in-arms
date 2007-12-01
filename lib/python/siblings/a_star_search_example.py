@@ -35,6 +35,9 @@ def main():
     width, height = 75, 20
     start, goal = (5, 9), (45, 12)
 
+    def predicate(p):
+        return p == goal
+
     def contains(p):
         x, y = p
         return x >= 0 and x < width and y >= 0 and y < height
@@ -48,7 +51,7 @@ def main():
     def heuristic(p):
         return diagonal_distance(p, goal)
 
-    path, nodes = a_star_search(start, goal, neighbors, diagonal_distance,
+    path, nodes = a_star_search(start, predicate, neighbors, diagonal_distance,
                                 heuristic)
 
     print "Path:", path
