@@ -13,6 +13,7 @@ class TaskQueue:
         self._current = None
         self._gen = None
         self._progress = 0.0
+        self._progress_time = 0.0
 
     def __len__(self):
         return len(self._tasks)
@@ -29,15 +30,16 @@ class TaskQueue:
                 self._current = self._tasks.popleft()
                 self._gen = self._current.run(self._facade)
                 self._progress = 0.0
+                self._progress_time = 0.0
             else:
                 return
         try:
-            old_progress = percentage(self._progress)
             self._progress = self._gen.next()
-            new_progress = percentage(self._progress)
-            if old_progress // 10 != new_progress // 10:
+            self._progress_time += dt
+            if self._progress_time >= 1.0:
                 print ("Unit #%d has completed %d%% of its task."
-                       % (self._facade.unit.key, new_progress))
+                       % (self._facade.unit.key, percentage(self._progress)))
+                self._progress_time = 0.0
         except StopIteration, e:
             self._current = None
             self._gen = None

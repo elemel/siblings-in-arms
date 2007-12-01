@@ -3,9 +3,9 @@
 import pygame, sys, os, math
 from pygame.locals import *
 import config
-from Event import Event, MoveEvent, QuitEvent, SelectEvent
 from geometry import *
- 
+from Task import WaypointTask
+
 pygame.init() 
 
 window = pygame.display.set_mode((640, 480))
@@ -52,47 +52,51 @@ def get_sorted_units(game):
     units.sort(lambda a, b: cmp(b.pos[1], a.pos[1]))
     return units
 
+def update(game):
+    handle_events(game)
+    update_screen(game)
+
+def handle_events(game):
+    for event in pygame.event.get():
+        if event.type == MOUSEBUTTONDOWN:
+            handle_click_event(event, game)
+
+def handle_click_event(event, game):
+    clicked_unit = None
+    for unit in game.units.itervalues():
+        screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
+        surface = unit_surfaces[unit.spec.name]
+        surface_size = surface.get_size()
+        rect = rectangle_from_center_and_size(screen_pos, surface_size)
+        if (rectangle_contains_point(rect, event.pos)
+            and (clicked_unit is None or unit.pos[1] < clicked_unit.pos[1])):
+            clicked_unit = unit
+
+    if clicked_unit is None:
+        x, y = to_world_coords(event.pos, map_surface.get_size())
+        pos = (int(round(x)), int(round(y)))
+        for unit in selection:
+            if unit.speed:
+                unit.add_task(WaypointTask(pos))
+                print ("Set waypoint %s for unit #%d." % (pos, unit.key))
+    else:
+        if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
+            selection.clear()
+        selection.add(clicked_unit)
+        print "Selected unit #%d." % clicked_unit.key
+
 def update_screen(game):
     update_map_surface(game)
     update_control_surface(game)
     pygame.display.flip()
 
 def update_map_surface(game):
-    map_surface.fill(pygame.color.Color('gold'))
+    map_surface.fill(pygame.color.Color("gold"))
     for unit in get_sorted_units(game):
-        screen_pos = to_screen_coords(unit.pos, screen.get_size())
+        screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
         surface = unit_surfaces[unit.spec.name]
         min_p = get_rect_min(screen_pos, surface.get_size())
         map_surface.blit(surface, min_p)
 
 def update_control_surface(game):
-    control_surface.fill(pygame.color.Color('black'))
-
-def transform_click_event(event, game):
-    screen_size = screen.get_size()
-    clicked_unit = None
-    for unit in game.units.itervalues():
-        screen_pos = to_screen_coords(unit.pos, screen_size)
-        surface = unit_surfaces[unit.spec.name]
-        surface_size = surface.get_size()
-        rect = rectangle_from_center_and_size(screen_pos, surface_size)
-        if (rectangle_contains_point(rect, event.pos)
-            and (clicked_unit == None or unit.pos[1] < clicked_unit.pos[1])):
-            clicked_unit = unit
-
-    if clicked_unit is None:
-        return MoveEvent(to_world_coords(event.pos, screen_size))
-    else:
-        return SelectEvent(clicked_unit)
-
-def transform_event(event, game):
-    if event.type == QUIT:
-        return QuitEvent()
-    elif event.type == MOUSEBUTTONDOWN:
-        return transform_click_event(event, game)
-    else:
-        return None
-
-def poll_events(game):
-    transformed = (transform_event(e, game) for e in pygame.event.get())
-    return (e for e in transformed if e is not None)
+    control_surface.fill(pygame.color.Color("black"))

@@ -8,7 +8,6 @@ from Task import WaypointTask
 
 try:
     import gui
-    from gui import QuitEvent, MoveEvent, SelectEvent
 except ImportError, e:
     print "Error when importing UI:", e
     gui = None
@@ -36,10 +35,10 @@ def main():
         game.add_unit(Unit(warrior_spec), random_pos(min_p, max_p))
 
     if gui is None:
-        unit = Unit()
+        unit = Unit(warrior_spec)
         unit.add_task(WaypointTask((1, 1)))
         unit.add_task(WaypointTask((9, 9)))
-        game.add_unit(unit, (4, 8))
+        game.add_unit(unit, random_pos(min_p, max_p))
     
     old_time = time.time()
     while True:
@@ -50,25 +49,9 @@ def main():
                 print "Skipping %d frame(s)." % int(dt / MAX_TIME_STEP)
                 dt = MAX_TIME_STEP
             old_time = new_time
-            if gui is not None:
-                for e in gui.poll_events(game):
-                    if isinstance(e, SelectEvent):
-                        gui.selection.clear()
-                        gui.selection.add(e.unit)
-                        print "Selected unit #%d." % e.unit.key
-                    elif isinstance(e, MoveEvent):
-                        for unit in gui.selection:
-                            if unit.speed:
-                                x, y = e.pos
-                                pos = (int(round(x)), int(round(y)))
-                                unit.add_task(WaypointTask(pos))
-                                print ("Set waypoint %s for unit #%d."
-                                       % (pos, unit.key))
-                    elif isinstance(e, QuitEvent):
-                        sys.exit(0)
             game.update(dt)
             if gui is not None:
-                gui.update_screen(game)
+                gui.update(game)
 
 if __name__ == "__main__":
     main()
