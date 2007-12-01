@@ -12,6 +12,9 @@ window = pygame.display.set_mode((640, 480))
 pygame.display.set_caption("Siblings in Arms")
 screen = pygame.display.get_surface() 
 
+map_rect = pygame.Rect((0, 0), (640, 400))
+control_rect = pygame.Rect((0, 400), (640, 80))
+
 unit_surfaces = {}
 
 def load_unit_surface(name):
@@ -48,12 +51,15 @@ def get_sorted_units(game):
     return units
 
 def update_screen(game):
-    screen.fill(pygame.color.Color('gold'))
+    screen.fill(pygame.color.Color('gold'), map_rect)
     for unit in get_sorted_units(game):
         screen_pos = to_screen_coords(unit.pos, screen.get_size())
         surface = unit_surfaces[unit.spec.name]
         min_p = get_rect_min(screen_pos, surface.get_size())
         screen.blit(surface, min_p)
+
+    screen.fill(pygame.color.Color('black'), control_rect)
+
     pygame.display.flip()
 
 def transform_click_event(event, game):
