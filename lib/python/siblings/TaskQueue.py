@@ -36,10 +36,10 @@ class TaskQueue:
             self._progress = self._gen.next()
             new_progress = percentage(self._progress)
             if old_progress // 10 != new_progress // 10:
-                print ("Unit #%d is %d%% finished with its task."
+                print ("Unit #%d has completed %d%% of its task."
                        % (self._facade.unit.key, new_progress))
         except StopIteration, e:
             self._current = None
             self._gen = None
             self._progress = 0.0
-            print "Unit #%d finished its task." % self._facade.unit.key
+            print "Unit #%d completed its task." % self._facade.unit.key
