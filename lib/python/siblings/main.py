@@ -4,11 +4,11 @@ import time, sys, random
 from a_star_search import a_star_search, grid_neighbors, diagonal_distance
 from collections import deque
 try:
-    import ui
-    from ui import QuitEvent, MoveEvent, SelectEvent
+    import gui
+    from gui import QuitEvent, MoveEvent, SelectEvent
 except ImportError, e:
     print "Error when importing UI:", e
-    ui = None
+    gui = None
 from GameEngine import GameEngine
 from Unit import Unit, UnitSpec
 from Task import WaypointTask
@@ -40,7 +40,7 @@ def main():
     for i in xrange(20):
         game.add_unit(Unit(warrior_spec), random_pos(min_p, max_p))
 
-    if ui is None:
+    if gui is None:
         unit = Unit()
         unit.add_task(WaypointTask((1, 1)))
         unit.add_task(WaypointTask((9, 9)))
@@ -56,8 +56,8 @@ def main():
                 print "Skipping %d frame(s)." % int(dt / MAX_TIME_STEP)
                 dt = MAX_TIME_STEP
             old_time = new_time
-            if ui is not None:
-                for e in ui.poll_events(game):
+            if gui is not None:
+                for e in gui.poll_events(game):
                     if isinstance(e, SelectEvent):
                         selected = e.unit
                         print "Selected unit #%d." % selected.key
@@ -71,8 +71,8 @@ def main():
                     elif isinstance(e, QuitEvent):
                         sys.exit(0)
             game.update(dt)
-            if ui is not None:
-                ui.update_screen(game)
+            if gui is not None:
+                gui.update_screen(game)
 
 if __name__ == "__main__":
     main()
