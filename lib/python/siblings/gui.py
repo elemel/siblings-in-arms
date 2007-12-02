@@ -64,7 +64,8 @@ def handle_events(game):
         if event.type == MOUSEBUTTONDOWN:
             mouse_button_down_pos = event.pos
         elif event.type == MOUSEBUTTONUP:
-            if event.pos == mouse_button_down_pos:
+            if (mouse_button_down_pos is not None
+                and manhattan_distance(event.pos, mouse_button_down_pos) <= 6):
                 handle_click_event(event, game)
             else:
                 handle_rectangle_event(mouse_button_down_pos, event, game)
@@ -127,7 +128,14 @@ def update_screen(game):
     pygame.display.flip()
 
 def paint_map_surface(game):
-    map_surface.fill(pygame.color.Color("gold"))
+    map_surface.fill(pygame.color.Color("#886644"))
+    for unit in selection:
+        surface = unit_surfaces[unit.spec.name]
+        x, y = to_screen_coords(unit.pos, map_surface.get_size())
+        width, height = surface.get_size()
+        width = height = max(width, height) - 6
+        rect = pygame.Rect(x - width / 2.0, y - height / 2.0, width, height)
+        pygame.draw.ellipse(map_surface, pygame.color.Color("green"), rect, 1)
     for unit in get_sorted_units(game):
         screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
         surface = unit_surfaces[unit.spec.name]
@@ -143,7 +151,7 @@ def paint_selection_rectangle(game):
         y = min(old_y, new_y)
         width = abs(old_x - new_x)
         height = abs(old_y - new_y)
-        pygame.draw.rect(map_surface, pygame.color.Color("white"),
+        pygame.draw.rect(map_surface, pygame.color.Color("green"),
                          pygame.Rect(x, y, width, height), 1)
 
 def paint_control_surface(game):
