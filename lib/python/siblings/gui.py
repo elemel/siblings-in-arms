@@ -56,10 +56,19 @@ def update(game):
     handle_events(game)
     update_screen(game)
 
+mouse_button_down_pos = None
+
 def handle_events(game):
+    global mouse_button_down_pos
     for event in pygame.event.get():
         if event.type == MOUSEBUTTONDOWN:
-            handle_click_event(event, game)
+            mouse_button_down_pos = event.pos
+        elif event.type == MOUSEBUTTONUP:
+            if event.pos == mouse_button_down_pos:
+                handle_click_event(event, game)
+            else:
+                handle_rectangle_event(mouse_button_down_pos, event, game)
+            mouse_button_down_pos = None
 
 def handle_click_event(event, game):
     clicked_unit = None
@@ -78,12 +87,39 @@ def handle_click_event(event, game):
         for unit in selection:
             if unit.speed:
                 unit.add_task(WaypointTask(pos))
-                print ("Set waypoint %s for unit #%d." % (pos, unit.key))
+                print ("Added waypoint %s to unit #%d." % (pos, unit.key))
     else:
-        if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
+        if pygame.key.get_mods() & pygame.KMOD_SHIFT:
+            if clicked_unit in selection:
+                selection.remove(clicked_unit)
+                print "Removed unit #%d from selection." % clicked_unit.key
+            else:
+                selection.add(clicked_unit)
+                print "Added unit #%d to selection." % clicked_unit.key
+        else:
             selection.clear()
-        selection.add(clicked_unit)
-        print "Selected unit #%d." % clicked_unit.key
+            selection.add(clicked_unit)
+            print "Selected unit #%d." % clicked_unit.key
+
+def handle_rectangle_event(old_pos, event, game):
+    selection_rect = normalize_rectangle((old_pos, event.pos))
+    new_selection = set()
+    for unit in game.units.itervalues():
+        screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
+        surface = unit_surfaces[unit.spec.name]
+        surface_size = surface.get_size()
+        surface_rect = rectangle_from_center_and_size(screen_pos, surface_size)
+        if rectangle_intersects_rectangle(selection_rect, surface_rect):
+            new_selection.add(unit)
+
+    if pygame.key.get_mods() & pygame.KMOD_SHIFT:
+        old_size = len(selection)
+        selection |= new_selection
+        print "Added %d unit(s) to selection." % (len(selection) - old_size)
+    else:
+        global selection
+        selection = new_selection
+        print "Selected %d unit(s)." % len(selection)
 
 def update_screen(game):
     update_map_surface(game)
@@ -97,6 +133,15 @@ def update_map_surface(game):
         surface = unit_surfaces[unit.spec.name]
         min_p = get_rect_min(screen_pos, surface.get_size())
         map_surface.blit(surface, min_p)
+    if mouse_button_down_pos is not None:
+        old_x, old_y = mouse_button_down_pos
+        new_x, new_y = pygame.mouse.get_pos()
+        x = min(old_x, new_x)
+        y = min(old_y, new_y)
+        width = abs(old_x - new_x)
+        height = abs(old_y - new_y)
+        pygame.draw.rect(map_surface, pygame.color.Color("white"),
+                         pygame.Rect(x, y, width, height), 1)
 
 def update_control_surface(game):
     control_surface.fill(pygame.color.Color("black"))
