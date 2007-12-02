@@ -122,17 +122,20 @@ def handle_rectangle_event(old_pos, event, game):
         print "Selected %d unit(s)." % len(selection)
 
 def update_screen(game):
-    update_map_surface(game)
-    update_control_surface(game)
+    paint_map_surface(game)
+    paint_control_surface(game)
     pygame.display.flip()
 
-def update_map_surface(game):
+def paint_map_surface(game):
     map_surface.fill(pygame.color.Color("gold"))
     for unit in get_sorted_units(game):
         screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
         surface = unit_surfaces[unit.spec.name]
         min_p = get_rect_min(screen_pos, surface.get_size())
         map_surface.blit(surface, min_p)
+    paint_selection_rectangle(game)
+
+def paint_selection_rectangle(game):
     if mouse_button_down_pos is not None:
         old_x, old_y = mouse_button_down_pos
         new_x, new_y = pygame.mouse.get_pos()
@@ -143,5 +146,9 @@ def update_map_surface(game):
         pygame.draw.rect(map_surface, pygame.color.Color("white"),
                          pygame.Rect(x, y, width, height), 1)
 
-def update_control_surface(game):
-    control_surface.fill(pygame.color.Color("black"))
+def paint_control_surface(game):
+    control_surface.fill(pygame.color.Color("gray"))
+    if len(selection) == 1:
+        unit = iter(selection).next()
+        if unit.spec.name == "tavern":
+            control_surface.blit(unit_surfaces["warrior"], (8, 8))
