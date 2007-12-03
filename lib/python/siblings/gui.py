@@ -4,7 +4,7 @@ import pygame, sys, os, math
 from pygame.locals import *
 import config
 from geometry import *
-from Task import WaypointTask
+from Task import *
 
 pygame.init() 
 
@@ -12,8 +12,10 @@ window = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("Siblings in Arms")
 screen = pygame.display.get_surface()
 
-map_surface = screen.subsurface(pygame.Rect((0, 0), (800, 550)))
-control_panel = screen.subsurface(pygame.Rect((0, 550), (800, 50)))
+map_rect = pygame.Rect((0, 0), (800, 550))
+control_rect = pygame.Rect((0, 550), (800, 50))
+map_surface = screen.subsurface(map_rect)
+control_panel = screen.subsurface(control_rect)
 
 def load_image(name):
     path = os.path.join(config.root, "data", name + ".png")
@@ -81,6 +83,13 @@ def handle_events(game):
             mouse_button_down_pos = None
 
 def handle_click_event(event, game):
+    x, y = event.pos
+    if map_rect.collidepoint(x, y):
+        handle_map_click_event(event, game)
+    else:
+        handle_control_click_event(event, game)
+
+def handle_map_click_event(event, game):
     clicked_unit = None
     for unit in game.units.itervalues():
         screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
@@ -110,6 +119,15 @@ def handle_click_event(event, game):
             selection.clear()
             selection.add(clicked_unit)
             print "Selected unit #%d." % clicked_unit.key
+
+def handle_control_click_event(event, game):
+    x, y = event.pos
+    button = x // 50
+    if len(selection) == 1:
+        unit = iter(selection).next()
+        if unit.spec.name == "tavern":
+            if button == 0:
+                unit.add_task(BuildTask("warrior"))
 
 def handle_rectangle_event(old_pos, event, game):
     global selection

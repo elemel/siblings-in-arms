@@ -2,8 +2,8 @@
 
 import time, sys, random
 from collections import deque
-from GameEngine import GameEngine
-from Unit import Unit, UnitSpec
+from GameEngine import GameEngine, tavern_spec, warrior_spec
+from Unit import Unit
 from Task import WaypointTask
 
 try:
@@ -14,13 +14,6 @@ except ImportError, e:
 
 MIN_TIME_STEP = 0.01
 MAX_TIME_STEP = 0.1
-
-tavern_spec = UnitSpec("tavern")
-tavern_spec.speed = 0.0
-tavern_spec.size = (3, 3)
-
-warrior_spec = UnitSpec("warrior")
-warrior_spec.speed = 5.0
 
 def random_pos(min_p, max_p):
     min_x, min_y = min_p

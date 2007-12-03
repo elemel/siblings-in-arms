@@ -101,14 +101,15 @@ class WaypointTask(Task):
         self.path = path
 
 class BuildTask(Task):
-    def __init__(self, key):
-        self.key = key
+    def __init__(self, name):
+        self.name = name
 
     def run(self, facade):
         progress = 0.0
+        time = facade.get_build_time(self.name)
         while True:
-            progress += facade.dt / facade.get_build_time(key)
+            progress += facade.dt / time
             if progress >= 1.0:
                 break
             yield progress
-        facade.create_unit(key)
+        facade.create_unit(self.name)

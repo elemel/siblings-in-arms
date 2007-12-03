@@ -4,8 +4,16 @@ import time, sys
 from a_star_search import a_star_search
 from collections import deque
 from geometry import grid_neighbors, diagonal_distance
+from Unit import Unit, UnitSpec
 
 A_STAR_SEARCH_LIMIT = 100
+
+tavern_spec = UnitSpec("tavern")
+tavern_spec.speed = 0.0
+tavern_spec.size = (3, 3)
+
+warrior_spec = UnitSpec("warrior")
+warrior_spec.speed = 5.0
 
 def find_nearest_lockable(key, pos, size, locked_cells):
     width, height = size
@@ -33,8 +41,13 @@ class GameEngine:
         self.locked_cells = {}
         self.units = {}
         self.path_queue = deque()
+        self.new_units = []
         
     def update(self, dt):
+        if self.new_units:
+            for unit, pos in self.new_units:
+                self._add_unit(unit, pos)
+            self.new_units = []
         if self.path_queue:
             unit, waypoint, callback = self.path_queue.popleft()
             path = self._find_path(unit, waypoint)
@@ -46,6 +59,9 @@ class GameEngine:
         self.path_queue.append((unit, waypoint, callback))
 
     def add_unit(self, unit, pos):
+        self.new_units.append((unit, pos))
+
+    def _add_unit(self, unit, pos):
         pos = find_nearest_lockable(unit.key, pos, self.size,
                                     self.locked_cells)
         print "Adding unit #%d at %s." % (unit.key, pos)
@@ -82,6 +98,13 @@ class GameEngine:
             del self.locked_cells[pos]
             unit.locked_cells.remove(pos)
             print "Unit #%d unlocked cell %s." % (unit.key, pos)
+
+    def get_build_time(self, name):
+        return 10.0
+
+    def create_unit(self, name, pos):
+        unit = Unit(warrior_spec)
+        self.add_unit(unit, pos)
 
     def _find_path(self, unit, waypoint):
         def predicate(p):

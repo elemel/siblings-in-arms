@@ -14,3 +14,9 @@ class TaskFacade:
 
     def unlock_cell(self, pos):
         self.game.unlock_cell(self.unit, pos)
+
+    def get_build_time(self, name):
+        return self.game.get_build_time(name)
+
+    def create_unit(self, name):
+        self.game.create_unit(name, self.unit.pos)
