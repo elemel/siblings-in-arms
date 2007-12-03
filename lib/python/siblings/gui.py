@@ -105,8 +105,11 @@ def handle_map_click_event(event, game):
         pos = (int(round(x)), int(round(y)))
         for unit in selection:
             if unit.speed:
+                if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
+                    unit.clear_tasks()
+                    print "Cleared tasks for unit #%d." % unit.key
                 unit.add_task(WaypointTask(pos))
-                print ("Added waypoint %s to unit #%d." % (pos, unit.key))
+                print "Added waypoint %s to unit #%d." % (pos, unit.key)
     else:
         if pygame.key.get_mods() & pygame.KMOD_SHIFT:
             if clicked_unit in selection:

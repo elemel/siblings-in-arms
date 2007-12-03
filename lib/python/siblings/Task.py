@@ -65,7 +65,7 @@ class FollowPathTask(Task):
 
     def run(self, facade):
         for i, pos in zip(xrange(len(self.path)), self.path):
-            if not facade.lock_cell(pos):
+            if self.aborting or not facade.lock_cell(pos):
                 self._result = False
                 return
             old_pos = facade.unit.pos
@@ -84,7 +84,7 @@ class WaypointTask(Task):
         self.path = None
     
     def run(self, facade):
-        while True:
+        while not self.aborting:
             if facade.unit.pos == self.waypoint:
                 break
             facade.find_path(self.waypoint, self._set_path)
@@ -92,10 +92,13 @@ class WaypointTask(Task):
                 yield 0.0
             if not self.path:
                 break
-            self.follow_path_task = FollowPathTask(self.path)
-            self.path = None
-            for progress in self.follow_path_task.run(facade):
-                yield progress
+            if not self.aborting:
+                self.follow_path_task = FollowPathTask(self.path)
+                self.path = None
+                for progress in self.follow_path_task.run(facade):
+                    yield progress
+                    if self.aborting:
+                        self.follow_path_task.abort()
 
     def _set_path(self, path):
         self.path = path

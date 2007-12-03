@@ -30,3 +30,6 @@ class Unit:
 
     def add_task(self, task):
         self.task_queue.append(task)
+
+    def clear_tasks(self):
+        self.task_queue.clear()

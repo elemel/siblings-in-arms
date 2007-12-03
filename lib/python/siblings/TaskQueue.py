@@ -45,3 +45,9 @@ class TaskQueue:
             self._gen = None
             self._progress = 0.0
             print "Unit #%d completed its task." % self._facade.unit.key
+
+    def clear(self):
+        if self._tasks:
+            self._tasks.clear()
+        if self._current:
+            self._current.abort()

@@ -100,7 +100,7 @@ class GameEngine:
             print "Unit #%d unlocked cell %s." % (unit.key, pos)
 
     def get_build_time(self, name):
-        return 10.0
+        return 3.0
 
     def create_unit(self, name, pos):
         unit = Unit(warrior_spec)
