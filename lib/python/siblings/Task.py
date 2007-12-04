@@ -86,10 +86,10 @@ class BuildTask(Task):
     def __init__(self, name):
         self.name = name
 
-    def run(self, facade):
+    def run(self, facade, abort):
         progress = 0.0
         time = facade.get_build_time(self.name)
-        while True:
+        while not abort:
             progress += facade.dt / time
             if progress >= 1.0:
                 break
