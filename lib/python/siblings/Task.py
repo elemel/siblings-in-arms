@@ -19,9 +19,6 @@ class Task:
     range [0.0, 1.0].
     """
     
-    def __init__(self):
-        pass
-
     def run(self, facade, abort):
         """Create generator for execution.
 
@@ -31,7 +28,6 @@ class Task:
 
 class MoveTask(Task):
     def __init__(self, pos):
-        Task.__init__(self)
         self.pos = pos
 
     def run(self, facade, abort):
@@ -48,7 +44,6 @@ class MoveTask(Task):
 
 class FollowPathTask(Task):
     def __init__(self, path):
-        Task.__init__(self)
         self.path = list(path)
         self.move_task = None
 
@@ -65,7 +60,6 @@ class FollowPathTask(Task):
 
 class WaypointTask(Task):
     def __init__(self, waypoint):
-        Task.__init__(self)
         self.waypoint = waypoint
         self.follow_path_task = None
         self.path = None
