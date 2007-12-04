@@ -7,8 +7,8 @@ from geometry import grid_neighbors, diagonal_distance
 A_STAR_SEARCH_LIMIT = 100
 
 class Pathfinder:
-    def __init__(self, game_engine):
-        self._game_engine = game_engine
+    def __init__(self, gridlocker):
+        self._gridlocker = gridlocker
         self._path_queue = deque()
         
     def update(self):
@@ -21,7 +21,7 @@ class Pathfinder:
         self._path_queue.append((unit, waypoint, callback))
 
     def _find_path(self, unit, waypoint):
-        width, height = self._game_engine.gridlocker.size
+        width, height = self._gridlocker.size
 
         def predicate(p):
             return p == waypoint
@@ -31,8 +31,7 @@ class Pathfinder:
             return x >= 0 and x < width and y >= 0 and y < height
 
         def lockable(p):
-            return (self._game_engine.gridlocker.locked_cells.get(p, unit.key)
-                    == unit.key)
+            return self._gridlocker.locked_cells.get(p, unit.key) == unit.key
 
         def neighbors(p):
             return (n for n in grid_neighbors(p)

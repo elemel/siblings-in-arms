@@ -43,8 +43,8 @@ class GameEngine:
         self.tasks = {}
         self.task_facade = TaskFacade()
         self.task_facade.game_engine = self
-        self.pathfinder = Pathfinder(self)
         self.gridlocker = Gridlocker()
+        self.pathfinder = Pathfinder(self.gridlocker)
         
     def update(self, dt):
         self.task_facade.dt = dt
