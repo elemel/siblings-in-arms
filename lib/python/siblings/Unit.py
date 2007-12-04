@@ -25,8 +25,9 @@ class Unit:
     speed = property(_get_speed)
     size = property(_get_size)
 
-    def update(self, game, dt):
-        self.task_queue.update(game, dt)
+    def update(self, facade):
+        facade.unit = self
+        self.task_queue.update(facade)
 
     def add_task(self, task):
         self.task_queue.append(task)

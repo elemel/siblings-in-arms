@@ -8,46 +8,46 @@ def percentage(fraction):
 
 class TaskQueue:
     def __init__(self, unit):
-        self._facade = TaskFacade(unit)
-        self._tasks = deque()
-        self._current = None
+        self._running = None
+        self._waiting = deque()
         self._gen = None
         self._progress = 0.0
         self._progress_time = 0.0
-
-    def __len__(self):
-        return len(self._tasks)
+        self._last_progress = 0
 
     def append(self, task):
-        self._tasks.append(task)
+        self._waiting.append(task)
 
-    def update(self, game, dt):
-        self._facade.dt = dt
-        self._facade.game = game
-        if self._current is None:
-            if self._tasks:
-                print "Unit #%d is starting a task." % self._facade.unit.key
-                self._current = self._tasks.popleft()
-                self._gen = self._current.run(self._facade)
+    def update(self, facade):
+        if self._running is None:
+            if self._waiting:
+                print "Unit #%d is starting a task." % facade.unit.key
+                self._running = self._waiting.popleft()
+                self._gen = self._running.run(facade)
                 self._progress = 0.0
                 self._progress_time = 0.0
+                self._last_progress = 0
             else:
                 return
         try:
             self._progress = self._gen.next()
-            self._progress_time += dt
-            if self._progress_time >= 1.0:
+            self._progress_time += facade.dt
+            perc = percentage(self._progress)
+            if perc != self._last_progress and self._progress_time >= 1.0:
                 print ("Unit #%d has completed %d%% of its task."
-                       % (self._facade.unit.key, percentage(self._progress)))
+                       % (facade.unit.key, perc))
                 self._progress_time = 0.0
+                self._last_progress = perc
         except StopIteration, e:
-            self._current = None
+            self._running = None
             self._gen = None
             self._progress = 0.0
-            print "Unit #%d completed its task." % self._facade.unit.key
+            self._progress_time = 0.0
+            self._last_progress = 0
+            print "Unit #%d completed its task." % facade.unit.key
 
     def clear(self):
-        if self._tasks:
-            self._tasks.clear()
-        if self._current:
-            self._current.abort()
+        if self._waiting:
+            self._waiting.clear()
+        if self._running is not None:
+            self._running.abort()

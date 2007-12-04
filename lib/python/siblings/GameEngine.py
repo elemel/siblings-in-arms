@@ -5,6 +5,7 @@ from a_star_search import a_star_search
 from collections import deque
 from geometry import grid_neighbors, diagonal_distance
 from Unit import Unit, UnitSpec
+from TaskFacade import TaskFacade
 
 A_STAR_SEARCH_LIMIT = 100
 
@@ -42,18 +43,21 @@ class GameEngine:
         self.units = {}
         self.path_queue = deque()
         self.new_units = []
+        self.task_facade = TaskFacade()
+        self.task_facade.game_engine = self
         
     def update(self, dt):
+        self.task_facade.dt = dt
         if self.new_units:
             for unit, pos in self.new_units:
                 self._add_unit(unit, pos)
-            self.new_units = []
+            del self.new_units[:]
         if self.path_queue:
             unit, waypoint, callback = self.path_queue.popleft()
             path = self._find_path(unit, waypoint)
             callback(path)
-        for t in self.units.itervalues():
-            t.update(self, dt)
+        for unit in self.units.itervalues():
+            unit.update(self.task_facade)
 
     def find_path(self, unit, waypoint, callback):
         self.path_queue.append((unit, waypoint, callback))

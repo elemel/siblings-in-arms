@@ -56,7 +56,8 @@ def main():
             if headless:
                 if new_time - last_fps_time >= 1.0:
                     last_fps_time = new_time
-                    print "FPS:", frame_counter.fps
+                    print ("Running at %d frame(s) per second."
+                           % frame_counter.fps)
             else:
                 gui.update(game, frame_counter.fps)
         else:
