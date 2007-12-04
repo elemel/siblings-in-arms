@@ -20,29 +20,21 @@ class Task:
     """
     
     def __init__(self):
-        self._aborting = False
+        pass
 
-    def _get_aborting(self): return self._aborting
-
-    aborting = property(_get_aborting, doc = "Is the task aborting?")
-
-    def run(self, facade):
+    def run(self, facade, abort):
         """Create generator for execution.
 
         To be implemented by subclasses.
         """
         raise NotImplementedException()
 
-    def abort(self):
-        """Request the task to abort."""
-        self._aborting = True
-
 class MoveTask(Task):
     def __init__(self, pos):
         Task.__init__(self)
         self.pos = pos
 
-    def run(self, facade):
+    def run(self, facade, abort):
         old_pos = facade.unit.pos
         distance = diagonal_distance(old_pos, self.pos)
         progress = 0.0
@@ -60,13 +52,13 @@ class FollowPathTask(Task):
         self.path = list(path)
         self.move_task = None
 
-    def run(self, facade):
+    def run(self, facade, abort):
         for i, pos in zip(xrange(len(self.path)), self.path):
-            if self.aborting or not facade.lock_cell(pos):
+            if abort or not facade.lock_cell(pos):
                 return
             old_pos = facade.unit.pos
             self.move_task = MoveTask(pos)
-            for progress in self.move_task.run(facade):
+            for progress in self.move_task.run(facade, abort):
                 yield (i + progress) / len(self.path)
             self.move_task = None
             facade.unlock_cell(old_pos)
@@ -78,8 +70,8 @@ class WaypointTask(Task):
         self.follow_path_task = None
         self.path = None
     
-    def run(self, facade):
-        while not self.aborting:
+    def run(self, facade, abort):
+        while not abort:
             if facade.unit.pos == self.waypoint:
                 break
             facade.find_path(self.waypoint, self._set_path)
@@ -87,13 +79,11 @@ class WaypointTask(Task):
                 yield 0.0
             if not self.path:
                 break
-            if not self.aborting:
+            if not abort:
                 self.follow_path_task = FollowPathTask(self.path)
                 self.path = None
-                for progress in self.follow_path_task.run(facade):
+                for progress in self.follow_path_task.run(facade, abort):
                     yield progress
-                    if self.aborting:
-                        self.follow_path_task.abort()
 
     def _set_path(self, path):
         self.path = path
