@@ -22,10 +22,8 @@ def random_pos(min_p, max_p):
     return (random.randint(min_x, max_x), random.randint(min_y, max_y))
 
 def main():
-    global gui
-    if "--headless" in sys.argv:
-        gui = None
-    elif gui == None:
+    headless = ("--headless" in sys.argv)
+    if not headless and gui == None:
         print ("No GUI available. Specify the --headless option for a test "
                "run in text mode.")
         sys.exit(1)
@@ -34,7 +32,7 @@ def main():
     min_p, max_p = (2, 2), (18, 16)
     game.add_unit(Unit(tavern_spec), random_pos(min_p, max_p))
 
-    if gui is None:
+    if headless:
         for i in xrange(100):
             unit = Unit(warrior_spec)
             for i in xrange(3):
@@ -55,7 +53,7 @@ def main():
             old_time = new_time
             game.update(dt)
 
-            if gui is None:
+            if headless:
                 if new_time - last_fps_time >= 1.0:
                     last_fps_time = new_time
                     print "FPS:", frame_counter.fps
