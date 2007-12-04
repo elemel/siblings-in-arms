@@ -22,7 +22,7 @@ def random_pos(min_p, max_p):
     return (random.randint(min_x, max_x), random.randint(min_y, max_y))
 
 def main():
-    headless = ("--headless" in sys.argv)
+    headless = ("-H" in sys.argv or "--headless" in sys.argv)
     if not headless and gui == None:
         print ("No GUI available. Specify the --headless option for a test "
                "run in text mode.")
