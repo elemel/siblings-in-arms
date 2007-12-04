@@ -10,10 +10,10 @@ class TaskFacade:
         self._game_engine.find_path(self.unit, waypoint, callback)
 
     def lock_cell(self, pos):
-        return self._game_engine.lock_cell(self.unit, pos)
+        return self._game_engine.gridlocker.lock_cell(self.unit, pos)
 
     def unlock_cell(self, pos):
-        self._game_engine.unlock_cell(self.unit, pos)
+        self._game_engine.gridlocker.unlock_cell(self.unit, pos)
 
     def get_build_time(self, name):
         return self._game_engine.get_build_time(name)

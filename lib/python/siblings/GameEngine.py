@@ -83,7 +83,7 @@ class GameEngine:
         max_y = min_y + (height - 1)
         for x in xrange(min_x, max_x + 1):
             for y in xrange(min_y, max_y + 1):
-                self.lock_cell(unit, (x, y))
+                self.gridlocker.lock_cell(unit, (x, y))
         self.tasks[unit.key] = TaskQueue()
 
     def remove_unit(self, unit):
@@ -91,12 +91,6 @@ class GameEngine:
             p = unit.locked_cells.pop()
             del self.locked_cells[p]
         del self.units[unit.key]
-
-    def lock_cell(self, unit, pos):
-        return self.gridlocker.lock_cell(unit, pos)
-
-    def unlock_cell(self, unit, pos):
-        self.gridlocker.unlock_cell(unit, pos)
 
     def get_build_time(self, name):
         return 3.0
