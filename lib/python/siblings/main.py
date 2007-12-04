@@ -10,7 +10,7 @@ from FrameCounter import FrameCounter
 try:
     import gui
 except ImportError, e:
-    print "Error when importing UI:", e
+    print "Error when importing GUI:", e
     gui = None
 
 MIN_TIME_STEP = 0.01
