@@ -20,13 +20,10 @@ class Task:
     """
     
     def __init__(self):
-        self._result = None
         self._aborting = False
 
-    def _get_result(self): return self._result
     def _get_aborting(self): return self._aborting
 
-    result = property(_get_result, doc = "The result of the task.")
     aborting = property(_get_aborting, doc = "Is the task aborting?")
 
     def run(self, facade):
@@ -66,7 +63,6 @@ class FollowPathTask(Task):
     def run(self, facade):
         for i, pos in zip(xrange(len(self.path)), self.path):
             if self.aborting or not facade.lock_cell(pos):
-                self._result = False
                 return
             old_pos = facade.unit.pos
             self.move_task = MoveTask(pos)
@@ -74,7 +70,6 @@ class FollowPathTask(Task):
                 yield (i + progress) / len(self.path)
             self.move_task = None
             facade.unlock_cell(old_pos)
-        self._result = True
 
 class WaypointTask(Task):
     def __init__(self, waypoint):
