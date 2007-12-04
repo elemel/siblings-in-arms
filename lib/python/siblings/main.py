@@ -5,6 +5,7 @@ from collections import deque
 from GameEngine import GameEngine, tavern_spec, warrior_spec
 from Unit import Unit
 from Task import WaypointTask
+from FrameCounter import FrameCounter
 
 try:
     import gui
@@ -32,25 +33,19 @@ def main():
         game.add_unit(unit, random_pos(min_p, max_p))
     
     old_time = time.time()
-    total_time = 0.0
-    frame_count = 0.0
-    fps = 0.0
-
+    frame_counter = FrameCounter()
     while True:
         new_time = time.time()
         dt = new_time - old_time
         if dt >= MIN_TIME_STEP:
-            total_time = total_time * 0.99 + dt
-            frame_count = frame_count * 0.99 + 1.0
-            fps = frame_count / total_time
-
+            frame_counter.tick(dt)
             if dt > MAX_TIME_STEP:
                 print "Skipping %d frame(s)." % int(dt / MAX_TIME_STEP)
                 dt = MAX_TIME_STEP
             old_time = new_time
             game.update(dt)
             if gui is not None:
-                gui.update(game, fps)
+                gui.update(game, frame_counter.fps)
         else:
             time.sleep(MIN_TIME_STEP - dt)
 
