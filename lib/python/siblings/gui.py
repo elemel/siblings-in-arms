@@ -63,7 +63,7 @@ def paint_image(surface, image, pos):
     width, height = image.get_size()
     surface.blit(image, (x - width / 2, y - height / 2))
 
-def update(game):
+def update(game, fps):
     handle_events(game)
     update_screen(game)
 

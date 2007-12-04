@@ -32,17 +32,27 @@ def main():
         game.add_unit(unit, random_pos(min_p, max_p))
     
     old_time = time.time()
+    total_time = 0.0
+    frame_count = 0.0
+    fps = 0.0
+
     while True:
         new_time = time.time()
         dt = new_time - old_time
         if dt >= MIN_TIME_STEP:
+            total_time = total_time * 0.99 + dt
+            frame_count = frame_count * 0.99 + 1.0
+            fps = frame_count / total_time
+
             if dt > MAX_TIME_STEP:
                 print "Skipping %d frame(s)." % int(dt / MAX_TIME_STEP)
                 dt = MAX_TIME_STEP
             old_time = new_time
             game.update(dt)
             if gui is not None:
-                gui.update(game)
+                gui.update(game, fps)
+        else:
+            time.sleep(MIN_TIME_STEP - dt)
 
 if __name__ == "__main__":
     main()
