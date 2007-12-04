@@ -28,16 +28,17 @@ def main():
                "run in text mode.")
         sys.exit(1)
         
-    game = GameEngine()
+    game_engine = GameEngine()
     min_p, max_p = (2, 2), (18, 16)
-    game.add_unit(Unit(tavern_spec), random_pos(min_p, max_p))
+    game_engine.add_unit(Unit(tavern_spec), random_pos(min_p, max_p))
 
     if headless:
         for i in xrange(100):
             unit = Unit(warrior_spec)
+            game_engine._add_unit(unit, random_pos(min_p, max_p))
             for i in xrange(3):
-                unit.add_task(WaypointTask(random_pos(min_p, max_p)))
-            game.add_unit(unit, random_pos(min_p, max_p))
+                game_engine.append_task(unit,
+                                        WaypointTask(random_pos(min_p, max_p)))
     
     old_time = time.time()
     frame_counter = FrameCounter()
@@ -51,7 +52,7 @@ def main():
                 print "Skipping %d frame(s)." % int(dt / MAX_TIME_STEP)
                 dt = MAX_TIME_STEP
             old_time = new_time
-            game.update(dt)
+            game_engine.update(dt)
 
             if headless:
                 if new_time - last_fps_time >= 1.0:
@@ -59,7 +60,7 @@ def main():
                     print ("Running at %d frame(s) per second."
                            % frame_counter.fps)
             else:
-                gui.update(game, frame_counter.fps)
+                gui.update(game_engine, frame_counter.fps)
         else:
             time.sleep(MIN_TIME_STEP - dt)
 

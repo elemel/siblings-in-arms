@@ -7,7 +7,7 @@ def percentage(fraction):
     return int(round(fraction * 100.0))
 
 class TaskQueue:
-    def __init__(self, unit):
+    def __init__(self):
         self._running = None
         self._waiting = deque()
         self._abort = []

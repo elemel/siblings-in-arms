@@ -5,6 +5,7 @@ from a_star_search import a_star_search
 from collections import deque
 from geometry import grid_neighbors, diagonal_distance
 from Unit import Unit, UnitSpec
+from TaskQueue import TaskQueue
 from TaskFacade import TaskFacade
 
 A_STAR_SEARCH_LIMIT = 100
@@ -43,6 +44,7 @@ class GameEngine:
         self.units = {}
         self.path_queue = deque()
         self.new_units = []
+        self.tasks = {}
         self.task_facade = TaskFacade()
         self.task_facade.game_engine = self
         
@@ -57,13 +59,21 @@ class GameEngine:
             path = self._find_path(unit, waypoint)
             callback(path)
         for unit in self.units.itervalues():
-            unit.update(self.task_facade)
+            tasks = self.tasks[unit.key]
+            self.task_facade.unit = unit
+            tasks.update(self.task_facade)
 
     def find_path(self, unit, waypoint, callback):
         self.path_queue.append((unit, waypoint, callback))
 
     def add_unit(self, unit, pos):
         self.new_units.append((unit, pos))
+
+    def append_task(self, unit, task):
+        self.tasks[unit.key].append(task)
+
+    def clear_tasks(self, unit):
+        self.tasks[unit.key].clear()
 
     def _add_unit(self, unit, pos):
         pos = find_nearest_lockable(unit.key, pos, self.size,
@@ -80,6 +90,7 @@ class GameEngine:
         for x in xrange(min_x, max_x + 1):
             for y in xrange(min_y, max_y + 1):
                 self.lock_cell(unit, (x, y))
+        self.tasks[unit.key] = TaskQueue()
 
     def remove_unit(self, unit):
         while unit.locked_cells:

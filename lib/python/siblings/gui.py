@@ -53,8 +53,8 @@ def get_rect_min(center, size):
     width, height = size
     return int(x - width / 2.0), int(y - height / 2.0)
 
-def get_sorted_units(game):
-    units = game.units.values()
+def get_sorted_units(game_engine):
+    units = game_engine.units.values()
     units.sort(lambda a, b: cmp(b.pos[1], a.pos[1]))
     return units
 
@@ -63,13 +63,13 @@ def paint_image(surface, image, pos):
     width, height = image.get_size()
     surface.blit(image, (x - width / 2, y - height / 2))
 
-def update(game, fps):
-    handle_events(game)
-    update_screen(game)
+def update(game_engine, fps):
+    handle_events(game_engine)
+    update_screen(game_engine)
 
 mouse_button_down_pos = None
 
-def handle_events(game):
+def handle_events(game_engine):
     global mouse_button_down_pos
     for event in pygame.event.get():
         if event.type == MOUSEBUTTONDOWN:
@@ -77,21 +77,22 @@ def handle_events(game):
         elif event.type == MOUSEBUTTONUP:
             if (mouse_button_down_pos is not None
                 and manhattan_distance(event.pos, mouse_button_down_pos) <= 6):
-                handle_click_event(event, game)
+                handle_click_event(event, game_engine)
             else:
-                handle_rectangle_event(mouse_button_down_pos, event, game)
+                handle_rectangle_event(mouse_button_down_pos, event,
+                                       game_engine)
             mouse_button_down_pos = None
 
-def handle_click_event(event, game):
+def handle_click_event(event, game_engine):
     x, y = event.pos
     if map_rect.collidepoint(x, y):
-        handle_map_click_event(event, game)
+        handle_map_click_event(event, game_engine)
     else:
-        handle_control_click_event(event, game)
+        handle_control_click_event(event, game_engine)
 
-def handle_map_click_event(event, game):
+def handle_map_click_event(event, game_engine):
     clicked_unit = None
-    for unit in game.units.itervalues():
+    for unit in game_engine.units.itervalues():
         screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
         surface = unit_images[unit.spec.name]
         surface_size = surface.get_size()
@@ -106,9 +107,9 @@ def handle_map_click_event(event, game):
         for unit in selection:
             if unit.speed:
                 if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
-                    unit.clear_tasks()
+                    game_engine.clear_tasks(unit)
                     print "Cleared tasks for unit #%d." % unit.key
-                unit.add_task(WaypointTask(pos))
+                game_engine.append_task(unit, WaypointTask(pos))
                 print "Added waypoint %s to unit #%d." % (pos, unit.key)
     else:
         if pygame.key.get_mods() & pygame.KMOD_SHIFT:
@@ -123,20 +124,20 @@ def handle_map_click_event(event, game):
             selection.add(clicked_unit)
             print "Selected unit #%d." % clicked_unit.key
 
-def handle_control_click_event(event, game):
+def handle_control_click_event(event, game_engine):
     x, y = event.pos
     button = x // 50
     if len(selection) == 1:
         unit = iter(selection).next()
         if unit.spec.name == "tavern":
             if button == 0:
-                unit.add_task(BuildTask("warrior"))
+                game_engine.append_task(unit, BuildTask("warrior"))
 
-def handle_rectangle_event(old_pos, event, game):
+def handle_rectangle_event(old_pos, event, game_engine):
     global selection
     selection_rect = normalize_rectangle((old_pos, event.pos))
     new_selection = set()
-    for unit in game.units.itervalues():
+    for unit in game_engine.units.itervalues():
         screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
         surface = unit_images[unit.spec.name]
         surface_size = surface.get_size()
@@ -152,14 +153,14 @@ def handle_rectangle_event(old_pos, event, game):
         selection = new_selection
         print "Selected %d unit(s)." % len(selection)
 
-def update_screen(game):
-    paint_map_surface(game)
-    paint_control_panel(game)
+def update_screen(game_engine):
+    paint_map_surface(game_engine)
+    paint_control_panel(game_engine)
     pygame.display.flip()
 
-def paint_map_surface(game):
+def paint_map_surface(game_engine):
     map_surface.fill(pygame.color.Color("#886644"))
-    for unit in get_sorted_units(game):
+    for unit in get_sorted_units(game_engine):
         screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
         image = unit_images[unit.spec.name]
         width, height = image.get_size()
@@ -168,9 +169,9 @@ def paint_map_surface(game):
             pygame.draw.circle(map_surface, pygame.color.Color("green"),
                                screen_pos, radius, 1)
         paint_image(map_surface, image, screen_pos)
-    paint_selection_rectangle(game)
+    paint_selection_rectangle(game_engine)
 
-def paint_selection_rectangle(game):
+def paint_selection_rectangle(game_engine):
     if mouse_button_down_pos is not None:
         old_x, old_y = mouse_button_down_pos
         new_x, new_y = pygame.mouse.get_pos()
@@ -181,7 +182,7 @@ def paint_selection_rectangle(game):
         pygame.draw.rect(map_surface, pygame.color.Color("green"),
                          pygame.Rect(x, y, width, height), 1)
 
-def paint_control_panel(game):
+def paint_control_panel(game_engine):
     control_panel.fill(pygame.color.Color("gray"))
     if len(selection) == 1:
         unit = iter(selection).next()

@@ -1,7 +1,6 @@
 # Copyright 2007 Mikael Lind.
 
 import sys
-from TaskQueue import TaskQueue
 
 class UnitSpec:
     def __init__(self, name):
@@ -17,20 +16,9 @@ class Unit:
         self.key = Unit._keys.next()
         self.pos = (0, 0)
         self.locked_cells = set()
-        self.task_queue = TaskQueue(self)
 
     def _get_speed(self): return self.spec.speed
     def _get_size(self): return self.spec.size
 
     speed = property(_get_speed)
     size = property(_get_size)
-
-    def update(self, facade):
-        facade.unit = self
-        self.task_queue.update(facade)
-
-    def add_task(self, task):
-        self.task_queue.append(task)
-
-    def clear_tasks(self):
-        self.task_queue.clear()
