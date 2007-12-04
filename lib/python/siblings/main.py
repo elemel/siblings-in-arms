@@ -25,15 +25,16 @@ def main():
     game = GameEngine()
     min_p, max_p = (2, 2), (18, 16)
     game.add_unit(Unit(tavern_spec), random_pos(min_p, max_p))
-
     if gui is None:
-        unit = Unit(warrior_spec)
-        unit.add_task(WaypointTask((1, 1)))
-        unit.add_task(WaypointTask((9, 9)))
-        game.add_unit(unit, random_pos(min_p, max_p))
+        for i in xrange(100):
+            unit = Unit(warrior_spec)
+            for i in xrange(3):
+                unit.add_task(WaypointTask(random_pos(min_p, max_p)))
+            game.add_unit(unit, random_pos(min_p, max_p))
     
     old_time = time.time()
     frame_counter = FrameCounter()
+    last_fps_time = old_time
     while True:
         new_time = time.time()
         dt = new_time - old_time
@@ -44,7 +45,11 @@ def main():
                 dt = MAX_TIME_STEP
             old_time = new_time
             game.update(dt)
-            if gui is not None:
+            if gui is None:
+                if new_time - last_fps_time >= 1.0:
+                    last_fps_time = new_time
+                    print "FPS:", frame_counter.fps
+            else:
                 gui.update(game, frame_counter.fps)
         else:
             time.sleep(MIN_TIME_STEP - dt)
