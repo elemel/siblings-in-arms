@@ -21,16 +21,18 @@ class Pathfinder:
         self._path_queue.append((unit, waypoint, callback))
 
     def _find_path(self, unit, waypoint):
+        width, height = self._game_engine.gridlocker.size
+
         def predicate(p):
             return p == waypoint
 
         def contains(p):
             x, y = p
-            width, height = self._game_engine.size
             return x >= 0 and x < width and y >= 0 and y < height
 
         def lockable(p):
-            return self._game_engine.locked_cells.get(p, unit.key) == unit.key
+            return (self._game_engine.gridlocker.locked_cells.get(p, unit.key)
+                    == unit.key)
 
         def neighbors(p):
             return (n for n in grid_neighbors(p)

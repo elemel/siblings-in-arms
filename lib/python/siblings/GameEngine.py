@@ -7,6 +7,7 @@ from Unit import Unit, UnitSpec
 from TaskQueue import TaskQueue
 from TaskFacade import TaskFacade
 from Pathfinder import Pathfinder
+from Gridlocker import Gridlocker
 
 tavern_spec = UnitSpec("tavern")
 tavern_spec.speed = 0.0
@@ -37,14 +38,13 @@ def find_nearest_lockable(key, pos, size, locked_cells):
 
 class GameEngine:
     def __init__(self):
-        self.size = (100, 100)
-        self.locked_cells = {}
         self.units = {}
         self.new_units = []
         self.tasks = {}
         self.task_facade = TaskFacade()
         self.task_facade.game_engine = self
         self.pathfinder = Pathfinder(self)
+        self.gridlocker = Gridlocker()
         
     def update(self, dt):
         self.task_facade.dt = dt
@@ -71,8 +71,8 @@ class GameEngine:
         self.tasks[unit.key].clear()
 
     def _add_unit(self, unit, pos):
-        pos = find_nearest_lockable(unit.key, pos, self.size,
-                                    self.locked_cells)
+        pos = find_nearest_lockable(unit.key, pos, self.gridlocker.size,
+                                    self.gridlocker.locked_cells)
         print "Adding unit #%d at %s." % (unit.key, pos)
         self.units[unit.key] = unit
         unit.pos = pos
@@ -94,20 +94,10 @@ class GameEngine:
         del self.units[unit.key]
 
     def lock_cell(self, unit, pos):
-        old_key = self.locked_cells.get(pos, None)
-        if old_key is None:
-            self.locked_cells[pos] = unit.key
-            unit.locked_cells.add(pos)
-            print "Unit #%d locked cell %s." % (unit.key, pos)
-            return True
-        else:
-            return unit.key == old_key
+        return self.gridlocker.lock_cell(unit, pos)
 
     def unlock_cell(self, unit, pos):
-        if pos in unit.locked_cells:
-            del self.locked_cells[pos]
-            unit.locked_cells.remove(pos)
-            print "Unit #%d unlocked cell %s." % (unit.key, pos)
+        self.gridlocker.unlock_cell(unit, pos)
 
     def get_build_time(self, name):
         return 3.0
