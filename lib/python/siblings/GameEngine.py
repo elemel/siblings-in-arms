@@ -41,8 +41,7 @@ class GameEngine:
         self.units = {}
         self.new_units = []
         self.tasks = {}
-        self.task_facade = TaskFacade()
-        self.task_facade.game_engine = self
+        self.task_facade = TaskFacade(self)
         self.gridlocker = Gridlocker()
         self.pathfinder = Pathfinder(self.gridlocker)
         
