@@ -2,13 +2,11 @@
 
 import time, sys
 from a_star_search import a_star_search
-from collections import deque
 from geometry import grid_neighbors, diagonal_distance
 from Unit import Unit, UnitSpec
 from TaskQueue import TaskQueue
 from TaskFacade import TaskFacade
-
-A_STAR_SEARCH_LIMIT = 100
+from Pathfinder import Pathfinder
 
 tavern_spec = UnitSpec("tavern")
 tavern_spec.speed = 0.0
@@ -42,29 +40,26 @@ class GameEngine:
         self.size = (100, 100)
         self.locked_cells = {}
         self.units = {}
-        self.path_queue = deque()
         self.new_units = []
         self.tasks = {}
         self.task_facade = TaskFacade()
         self.task_facade.game_engine = self
+        self.pathfinder = Pathfinder(self)
         
     def update(self, dt):
         self.task_facade.dt = dt
-        if self.new_units:
-            for unit, pos in self.new_units:
-                self._add_unit(unit, pos)
-            del self.new_units[:]
-        if self.path_queue:
-            unit, waypoint, callback = self.path_queue.popleft()
-            path = self._find_path(unit, waypoint)
-            callback(path)
+        self.pathfinder.update()
         for unit in self.units.itervalues():
             tasks = self.tasks[unit.key]
             self.task_facade.unit = unit
             tasks.update(self.task_facade)
+        if self.new_units:
+            for unit, pos in self.new_units:
+                self._add_unit(unit, pos)
+            del self.new_units[:]
 
     def find_path(self, unit, waypoint, callback):
-        self.path_queue.append((unit, waypoint, callback))
+        self.pathfinder.find_path(unit, waypoint, callback)
 
     def add_unit(self, unit, pos):
         self.new_units.append((unit, pos))
@@ -120,31 +115,3 @@ class GameEngine:
     def create_unit(self, name, pos):
         unit = Unit(warrior_spec)
         self.add_unit(unit, pos)
-
-    def _find_path(self, unit, waypoint):
-        def predicate(p):
-            return p == waypoint
-
-        def contains(p):
-            x, y = p
-            width, height = self.size
-            return x >= 0 and x < width and y >= 0 and y < height
-
-        def lockable(p):
-            return self.locked_cells.get(p, unit.key) == unit.key
-
-        def neighbors(p):
-            return (n for n in grid_neighbors(p)
-                    if contains(n) and lockable(n))
-
-        def heuristic(p):
-            return diagonal_distance(p, waypoint)
-
-        path, nodes = a_star_search(unit.pos, predicate, neighbors,
-                                    diagonal_distance, heuristic,
-                                    A_STAR_SEARCH_LIMIT)
-        print ("Unit #%d found a path after searching %d node(s)."
-               % (unit.key, len(nodes)))
-        d = deque()
-        d.extendleft(node.p for node in path if node.p != unit.pos)
-        return d
