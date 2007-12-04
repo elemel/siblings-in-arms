@@ -29,9 +29,11 @@ def main():
         print ("No GUI available. Specify the --headless option for a test "
                "run in text mode.")
         sys.exit(1)
+        
     game = GameEngine()
     min_p, max_p = (2, 2), (18, 16)
     game.add_unit(Unit(tavern_spec), random_pos(min_p, max_p))
+
     if gui is None:
         for i in xrange(100):
             unit = Unit(warrior_spec)
@@ -52,6 +54,7 @@ def main():
                 dt = MAX_TIME_STEP
             old_time = new_time
             game.update(dt)
+
             if gui is None:
                 if new_time - last_fps_time >= 1.0:
                     last_fps_time = new_time
