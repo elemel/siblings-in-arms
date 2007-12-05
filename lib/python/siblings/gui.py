@@ -4,7 +4,8 @@ import pygame, sys, os, math
 from pygame.locals import *
 import config
 from geometry import *
-from tasks.Task import *
+from tasks.BuildTask import BuildTask
+from tasks.WaypointTask import WaypointTask
 
 pygame.init() 
 
