@@ -19,4 +19,4 @@ class TaskFacade:
         return self._game_engine.get_build_time(name)
 
     def create_unit(self, name):
-        self._game_engine.create_unit(name, self.unit.pos)
+        self._game_engine.unit_manager.create_unit(name, self.unit.pos)

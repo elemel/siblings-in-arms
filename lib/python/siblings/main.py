@@ -2,7 +2,8 @@
 
 import time, sys, random
 from collections import deque
-from GameEngine import GameEngine, tavern_spec, warrior_spec
+from GameEngine import GameEngine
+from UnitManager import tavern_spec, warrior_spec
 from Unit import Unit
 from Task import WaypointTask
 from FrameCounter import FrameCounter
@@ -30,12 +31,13 @@ def main():
         
     game_engine = GameEngine()
     min_p, max_p = (2, 2), (18, 16)
-    game_engine.add_unit(Unit(tavern_spec), random_pos(min_p, max_p))
+    game_engine.unit_manager.add_unit(Unit(tavern_spec),
+                                      random_pos(min_p, max_p))
 
     if headless:
         for i in xrange(100):
             unit = Unit(warrior_spec)
-            game_engine.add_unit(unit, random_pos(min_p, max_p))
+            game_engine.unit_manager.add_unit(unit, random_pos(min_p, max_p))
             for i in xrange(3):
                 task = WaypointTask(random_pos(min_p, max_p))
                 game_engine.taskmaster.append_task(unit, task)
