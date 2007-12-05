@@ -48,15 +48,6 @@ class GameEngine:
         self.pathfinder.update()
         self.taskmaster.update(dt)
 
-    def find_path(self, unit, waypoint, callback):
-        self.pathfinder.find_path(unit, waypoint, callback)
-
-    def append_task(self, unit, task):
-        self.taskmaster.append_task(unit, task)
-
-    def clear_tasks(self, unit):
-        self.taskmaster.clear_tasks(unit)
-
     def add_unit(self, unit, pos):
         pos = find_nearest_lockable(unit.key, pos, self.gridlocker.size,
                                     self.gridlocker.locked_cells)

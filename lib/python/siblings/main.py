@@ -37,8 +37,8 @@ def main():
             unit = Unit(warrior_spec)
             game_engine.add_unit(unit, random_pos(min_p, max_p))
             for i in xrange(3):
-                game_engine.append_task(unit,
-                                        WaypointTask(random_pos(min_p, max_p)))
+                task = WaypointTask(random_pos(min_p, max_p))
+                game_engine.taskmaster.append_task(unit, task)
     
     old_time = time.time()
     frame_counter = FrameCounter()

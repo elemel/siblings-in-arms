@@ -107,9 +107,9 @@ def handle_map_click_event(event, game_engine):
         for unit in selection:
             if unit.speed:
                 if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
-                    game_engine.clear_tasks(unit)
+                    game_engine.taskmaster.clear_tasks(unit)
                     print "Cleared tasks for unit #%d." % unit.key
-                game_engine.append_task(unit, WaypointTask(pos))
+                game_engine.taskmaster.append_task(unit, WaypointTask(pos))
                 print "Added waypoint %s to unit #%d." % (pos, unit.key)
     else:
         if pygame.key.get_mods() & pygame.KMOD_SHIFT:
@@ -131,7 +131,7 @@ def handle_control_click_event(event, game_engine):
         unit = iter(selection).next()
         if unit.spec.name == "tavern":
             if button == 0:
-                game_engine.append_task(unit, BuildTask("warrior"))
+                game_engine.taskmaster.append_task(unit, BuildTask("warrior"))
 
 def handle_rectangle_event(old_pos, event, game_engine):
     global selection

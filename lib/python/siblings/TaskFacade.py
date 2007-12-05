@@ -7,7 +7,7 @@ class TaskFacade:
         self.unit = None
 
     def find_path(self, waypoint, callback):
-        self._game_engine.find_path(self.unit, waypoint, callback)
+        self._game_engine.pathfinder.find_path(self.unit, waypoint, callback)
 
     def lock_cell(self, pos):
         return self._game_engine.gridlocker.lock_cell(self.unit, pos)

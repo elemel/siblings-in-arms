@@ -23,4 +23,5 @@ class Taskmaster:
         self.new_tasks.append((unit, task))
 
     def clear_tasks(self, unit):
-        self.tasks[unit.key].clear()
+        if unit.key in self.tasks:
+            self.tasks[unit.key].clear()
