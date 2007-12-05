@@ -16,7 +16,7 @@ class TaskFacade:
         self._game_engine.gridlocker.unlock_cell(self.unit, pos)
 
     def get_build_time(self, name):
-        return self._game_engine.get_build_time(name)
+        return self._game_engine.unit_manager.get_build_time(name)
 
     def create_unit(self, name):
         self._game_engine.unit_manager.create_unit(name, self.unit.pos)

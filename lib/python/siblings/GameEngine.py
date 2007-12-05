@@ -10,7 +10,6 @@ from UnitManager import UnitManager
 
 class GameEngine:
     def __init__(self):
-        self.units = {}
         self.task_facade = TaskFacade(self)
         self.taskmaster = Taskmaster(self.task_facade)
         self.gridlocker = Gridlocker()

@@ -55,7 +55,7 @@ def get_rect_min(center, size):
     return int(x - width / 2.0), int(y - height / 2.0)
 
 def get_sorted_units(game_engine):
-    units = game_engine.units.values()
+    units = game_engine.unit_manager.units.values()
     units.sort(lambda a, b: cmp(b.pos[1], a.pos[1]))
     return units
 
@@ -93,7 +93,7 @@ def handle_click_event(event, game_engine):
 
 def handle_map_click_event(event, game_engine):
     clicked_unit = None
-    for unit in game_engine.units.itervalues():
+    for unit in game_engine.unit_manager.units.itervalues():
         screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
         surface = unit_images[unit.spec.name]
         surface_size = surface.get_size()
@@ -138,7 +138,7 @@ def handle_rectangle_event(old_pos, event, game_engine):
     global selection
     selection_rect = normalize_rectangle((old_pos, event.pos))
     new_selection = set()
-    for unit in game_engine.units.itervalues():
+    for unit in game_engine.unit_manager.units.itervalues():
         screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
         surface = unit_images[unit.spec.name]
         surface_size = surface.get_size()
