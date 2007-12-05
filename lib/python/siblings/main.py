@@ -27,9 +27,9 @@ def main():
             sys.exit(1)
         
     game_engine = GameEngine()
+    game_engine.unit_manager.add_unit(Unit(tavern_spec), (6, 9))
+    game_engine.unit_manager.add_unit(Unit(tavern_spec), (13, 7))
     min_p, max_p = (2, 2), (18, 16)
-    game_engine.unit_manager.add_unit(Unit(tavern_spec),
-                                      random_pos(min_p, max_p))
     for i in xrange(50):
         unit = Unit(warrior_spec)
         game_engine.unit_manager.add_unit(unit, random_pos(min_p, max_p))
