@@ -2,6 +2,7 @@
 
 import sys
 from heapq import heappush, heappop, heapify
+from geometry import diagonal_distance
 
 OPEN = 1
 CLOSED = 2
@@ -14,12 +15,10 @@ class Node(object):
         self.parent = parent
         self.state = OPEN
 
-    def f(self):
-        return self.g + self.h
-
     def __cmp__(self, other):
         # break ties with object ID
-        return cmp(self.f(), other.f()) or cmp(id(self), id(other))
+        return (cmp(self.g + self.h, other.g + other.h)
+                or cmp(id(self), id(other)))
 
     def __iter__(self):
         current = self
@@ -76,3 +75,20 @@ def a_star_search(start, predicate, neighbors, cost, heuristic,
                     heapify(open_list) # reestablish heap invariant
     return closest, nodes # return closest path
 
+def breadth_first_search(start, predicate, neighbors, cost,
+                         limit = sys.maxint):
+    def heuristic(p):
+        return 0
+    
+    return a_star_search(start, predicate, neighbors, diagonal_distance,
+                         heuristic, limit)
+
+def depth_first_search(start, predicate, neighbors, cost, limit = sys.maxint):
+    def negative_cost(a, b):
+        return -cost(a, b)
+
+    def heuristic(p):
+        return 0
+
+    return a_star_search(start, predicate, neighbors, negative_cost, heuristic,
+                         limit)

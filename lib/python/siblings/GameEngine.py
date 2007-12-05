@@ -1,8 +1,6 @@
 # Copyright 2007 Mikael Lind.
 
 import time, sys
-from a_star_search import a_star_search
-from geometry import grid_neighbors, diagonal_distance
 from Unit import Unit, UnitSpec
 from TaskFacade import TaskFacade
 from Pathfinder import Pathfinder
@@ -15,26 +13,6 @@ tavern_spec.size = (3, 3)
 
 warrior_spec = UnitSpec("warrior")
 warrior_spec.speed = 5.0
-
-def find_nearest_lockable(key, pos, size, locked_cells):
-    width, height = size
-
-    def predicate(p):
-        return locked_cells.get(p, key) == key
-    
-    def contains(p):
-        x, y = p
-        return x >= 0 and x < width and y >= 0 and y < height
-    
-    def neighbors(p):
-        return (n for n in grid_neighbors(p) if contains(n))
-    
-    def heuristic(p):
-        return 0
-
-    path, nodes = a_star_search(pos, predicate, neighbors, diagonal_distance,
-                                heuristic)
-    return path.p
 
 class GameEngine:
     def __init__(self):
@@ -49,8 +27,7 @@ class GameEngine:
         self.taskmaster.update(dt)
 
     def add_unit(self, unit, pos):
-        pos = find_nearest_lockable(unit.key, pos, self.gridlocker.size,
-                                    self.gridlocker.locked_cells)
+        pos = self.gridlocker.find_unlocked_cell(pos)
         print "Adding unit #%d at %s." % (unit.key, pos)
         self.units[unit.key] = unit
         unit.pos = pos
