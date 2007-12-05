@@ -17,6 +17,9 @@ class TaskQueue:
         self._progress_time = 0.0
         self._last_progress = 0
 
+    def __len__(self):
+        return int(self._running is not None) + len(self._waiting)
+
     def append(self, task):
         self._waiting.append(task)
 
