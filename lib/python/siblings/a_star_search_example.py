@@ -55,7 +55,7 @@ def main():
                                 heuristic)
 
     print "Path:", path
-    print "Path cost:", path.f()
+    print "Path cost:", path.g + path.h
     print "Examined nodes:", len(nodes)
     paint_nodes(grid, nodes, ".")
     paint_path(grid, path, "@")
