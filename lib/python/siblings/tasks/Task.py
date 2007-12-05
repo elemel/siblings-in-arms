@@ -6,27 +6,7 @@ def interpolate_pos(old_p, new_p, progress):
     return vector_add(vector_mul(old_p, 1 - progress),
                       vector_mul(new_p, progress))
 
-class Task:
-    """Task for deferred execution by a unit.
-
-    Tasks follow the Command pattern; their execution can be deferred until
-    later. Tasks are enqueued in units and executed in FIFO order. Tasks can
-    also be created and executed by other tasks.
-    
-    Tasks provide cooperative multiprocessing using generators. It is generally
-    simpler to implement a complex task as a generator than as a state machine.
-    For tracking purposes, tasks yield their current progress as a float in the
-    range [0.0, 1.0].
-    """
-    
-    def run(self, facade, abort):
-        """Create generator for execution.
-
-        To be implemented by subclasses.
-        """
-        raise NotImplementedException()
-
-class MoveTask(Task):
+class MoveTask:
     def __init__(self, pos):
         self.pos = pos
 
@@ -42,7 +22,7 @@ class MoveTask(Task):
             yield progress
         facade.unit.pos = self.pos
 
-class FollowPathTask(Task):
+class FollowPathTask:
     def __init__(self, path):
         self.path = list(path)
         self.move_task = None
@@ -58,7 +38,7 @@ class FollowPathTask(Task):
             self.move_task = None
             facade.unlock_cell(old_pos)
 
-class WaypointTask(Task):
+class WaypointTask:
     def __init__(self, waypoint):
         self.waypoint = waypoint
         self.follow_path_task = None
@@ -82,7 +62,7 @@ class WaypointTask(Task):
     def _set_path(self, path):
         self.path = path
 
-class BuildTask(Task):
+class BuildTask:
     def __init__(self, name):
         self.name = name
 
