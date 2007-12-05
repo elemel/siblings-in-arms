@@ -4,10 +4,10 @@ import time, sys
 from a_star_search import a_star_search
 from geometry import grid_neighbors, diagonal_distance
 from Unit import Unit, UnitSpec
-from TaskQueue import TaskQueue
 from TaskFacade import TaskFacade
 from Pathfinder import Pathfinder
 from Gridlocker import Gridlocker
+from Taskmaster import Taskmaster
 
 tavern_spec = UnitSpec("tavern")
 tavern_spec.speed = 0.0
@@ -39,33 +39,23 @@ def find_nearest_lockable(key, pos, size, locked_cells):
 class GameEngine:
     def __init__(self):
         self.units = {}
-        self.tasks = {}
-        self.new_tasks = []
         self.task_facade = TaskFacade(self)
+        self.taskmaster = Taskmaster(self.task_facade)
         self.gridlocker = Gridlocker()
         self.pathfinder = Pathfinder(self.gridlocker)
         
     def update(self, dt):
-        self.task_facade.dt = dt
         self.pathfinder.update()
-        for key, tasks in self.tasks.iteritems():
-            self.task_facade.unit = self.units[key]
-            tasks.update(self.task_facade)
-        if self.new_tasks:
-            for unit, task in self.new_tasks:
-                if unit.key not in self.tasks:
-                    self.tasks[unit.key] = TaskQueue()
-                self.tasks[unit.key].append(task)
-            del self.new_tasks[:]
+        self.taskmaster.update(dt)
 
     def find_path(self, unit, waypoint, callback):
         self.pathfinder.find_path(unit, waypoint, callback)
 
     def append_task(self, unit, task):
-        self.new_tasks.append((unit, task))
+        self.taskmaster.append_task(unit, task)
 
     def clear_tasks(self, unit):
-        self.tasks[unit.key].clear()
+        self.taskmaster.clear_tasks(unit)
 
     def add_unit(self, unit, pos):
         pos = find_nearest_lockable(unit.key, pos, self.gridlocker.size,
@@ -82,7 +72,6 @@ class GameEngine:
         for x in xrange(min_x, max_x + 1):
             for y in xrange(min_y, max_y + 1):
                 self.gridlocker.lock_cell(unit, (x, y))
-        self.tasks[unit.key] = TaskQueue()
 
     def remove_unit(self, unit):
         while unit.locked_cells:

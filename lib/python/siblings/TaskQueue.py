@@ -7,7 +7,8 @@ def percentage(fraction):
     return int(round(fraction * 100.0))
 
 class TaskQueue:
-    def __init__(self):
+    def __init__(self, unit):
+        self._unit = unit
         self._running = None
         self._waiting = deque()
         self._abort = []
@@ -20,6 +21,7 @@ class TaskQueue:
         self._waiting.append(task)
 
     def update(self, facade):
+        facade.unit = self._unit
         if self._running is None:
             if self._waiting:
                 print "Unit #%d is starting a task." % facade.unit.key
