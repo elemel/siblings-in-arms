@@ -39,8 +39,8 @@ def find_nearest_lockable(key, pos, size, locked_cells):
 class GameEngine:
     def __init__(self):
         self.units = {}
-        self.new_units = []
         self.tasks = {}
+        self.new_tasks = []
         self.task_facade = TaskFacade(self)
         self.gridlocker = Gridlocker()
         self.pathfinder = Pathfinder(self.gridlocker)
@@ -48,28 +48,26 @@ class GameEngine:
     def update(self, dt):
         self.task_facade.dt = dt
         self.pathfinder.update()
-        for unit in self.units.itervalues():
-            tasks = self.tasks[unit.key]
-            self.task_facade.unit = unit
+        for key, tasks in self.tasks.iteritems():
+            self.task_facade.unit = self.units[key]
             tasks.update(self.task_facade)
-        if self.new_units:
-            for unit, pos in self.new_units:
-                self._add_unit(unit, pos)
-            del self.new_units[:]
+        if self.new_tasks:
+            for unit, task in self.new_tasks:
+                if unit.key not in self.tasks:
+                    self.tasks[unit.key] = TaskQueue()
+                self.tasks[unit.key].append(task)
+            del self.new_tasks[:]
 
     def find_path(self, unit, waypoint, callback):
         self.pathfinder.find_path(unit, waypoint, callback)
 
-    def add_unit(self, unit, pos):
-        self.new_units.append((unit, pos))
-
     def append_task(self, unit, task):
-        self.tasks[unit.key].append(task)
+        self.new_tasks.append((unit, task))
 
     def clear_tasks(self, unit):
         self.tasks[unit.key].clear()
 
-    def _add_unit(self, unit, pos):
+    def add_unit(self, unit, pos):
         pos = find_nearest_lockable(unit.key, pos, self.gridlocker.size,
                                     self.gridlocker.locked_cells)
         print "Adding unit #%d at %s." % (unit.key, pos)

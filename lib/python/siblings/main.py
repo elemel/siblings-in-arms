@@ -35,7 +35,7 @@ def main():
     if headless:
         for i in xrange(100):
             unit = Unit(warrior_spec)
-            game_engine._add_unit(unit, random_pos(min_p, max_p))
+            game_engine.add_unit(unit, random_pos(min_p, max_p))
             for i in xrange(3):
                 game_engine.append_task(unit,
                                         WaypointTask(random_pos(min_p, max_p)))
