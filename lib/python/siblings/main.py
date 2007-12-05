@@ -18,26 +18,24 @@ def random_pos(min_p, max_p):
 
 def main():
     headless = ("-H" in sys.argv or "--headless" in sys.argv)
+    if not headless:
+        try:
+            import gui
+        except ImportError, e:
+            print "Error when importing GUI:", e
+            print "Specify the --headless option for a test run in text mode."
+            sys.exit(1)
         
     game_engine = GameEngine()
     min_p, max_p = (2, 2), (18, 16)
     game_engine.unit_manager.add_unit(Unit(tavern_spec),
                                       random_pos(min_p, max_p))
-
-    if headless:
-        for i in xrange(100):
-            unit = Unit(warrior_spec)
-            game_engine.unit_manager.add_unit(unit, random_pos(min_p, max_p))
-            for i in xrange(3):
-                task = WaypointTask(random_pos(min_p, max_p))
-                game_engine.taskmaster.append_task(unit, task)
-    else:
-        try:
-            import gui
-        except ImportError, e:
-            print "Error when importing GUI:", e
-            print ("Specify the --headless option for a test run in text mode.")
-            sys.exit(1)
+    for i in xrange(50):
+        unit = Unit(warrior_spec)
+        game_engine.unit_manager.add_unit(unit, random_pos(min_p, max_p))
+        for i in xrange(3):
+            task = WaypointTask(random_pos(min_p, max_p))
+            game_engine.taskmaster.append_task(unit, task)
     
     old_time = time.time()
     frame_counter = FrameCounter()
