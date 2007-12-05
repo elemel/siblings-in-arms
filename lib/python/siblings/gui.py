@@ -4,7 +4,7 @@ import pygame, sys, os, math
 from pygame.locals import *
 import config
 from geometry import *
-from Task import *
+from tasks.Task import *
 
 pygame.init() 
 

@@ -5,7 +5,7 @@ from collections import deque
 from GameEngine import GameEngine
 from UnitManager import tavern_spec, warrior_spec
 from Unit import Unit
-from Task import WaypointTask
+from tasks.Task import WaypointTask
 from FrameCounter import FrameCounter
 
 try:
