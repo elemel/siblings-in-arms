@@ -8,12 +8,6 @@ from Unit import Unit
 from tasks.WaypointTask import WaypointTask
 from FrameCounter import FrameCounter
 
-try:
-    import gui
-except ImportError, e:
-    print "Error when importing GUI:", e
-    gui = None
-
 MIN_TIME_STEP = 0.01
 MAX_TIME_STEP = 0.1
 
@@ -24,10 +18,6 @@ def random_pos(min_p, max_p):
 
 def main():
     headless = ("-H" in sys.argv or "--headless" in sys.argv)
-    if not headless and gui is None:
-        print ("No GUI available. Specify the --headless option for a test "
-               "run in text mode.")
-        sys.exit(1)
         
     game_engine = GameEngine()
     min_p, max_p = (2, 2), (18, 16)
@@ -41,6 +31,13 @@ def main():
             for i in xrange(3):
                 task = WaypointTask(random_pos(min_p, max_p))
                 game_engine.taskmaster.append_task(unit, task)
+    else:
+        try:
+            import gui
+        except ImportError, e:
+            print "Error when importing GUI:", e
+            print ("Specify the --headless option for a test run in text mode.")
+            sys.exit(1)
     
     old_time = time.time()
     frame_counter = FrameCounter()
