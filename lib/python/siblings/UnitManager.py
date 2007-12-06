@@ -8,7 +8,7 @@ tavern_spec.size = (3, 3)
 
 warrior_spec = UnitSpec("warrior")
 warrior_spec.speed = 5.0
-warrior_spec.damage = 0.3
+warrior_spec.damage = 1.0
 
 class UnitManager:
     def __init__(self, path_grid):

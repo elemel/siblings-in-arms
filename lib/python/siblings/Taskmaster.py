@@ -34,3 +34,7 @@ class Taskmaster:
     def clear_tasks(self, unit):
         if unit.key in self._queues:
             self._queues[unit.key].clear()
+
+    def remove_unit(self, unit):
+        if unit.key in self._queues:
+            del self._queues[unit.key]

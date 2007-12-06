@@ -8,6 +8,7 @@ class UnitSpec:
         self.speed = 0.0
         self.size = (1, 1)
         self.damage = 0.0
+        self.range = 1.0
 
 class Unit:
     _keys = iter(xrange(1, sys.maxint))
@@ -24,9 +25,11 @@ class Unit:
     def _get_speed(self): return self._spec.speed
     def _get_size(self): return self._spec.size
     def _get_damage(self): return self._spec.damage
+    def _get_range(self): return self._spec.range
 
     spec = property(_get_spec)
     key = property(_get_key)
     speed = property(_get_speed)
     size = property(_get_size)
     damage = property(_get_damage)
+    range = property(_get_range)
