@@ -10,14 +10,14 @@ warrior_spec = UnitSpec("warrior")
 warrior_spec.speed = 5.0
 
 class UnitManager:
-    def __init__(self, gridlocker):
-        self.gridlocker = gridlocker
-        self.units = {}
+    def __init__(self, path_grid):
+        self._path_grid = path_grid
+        self._units = {}
         
     def add_unit(self, unit, pos):
-        pos = self.gridlocker.find_unlocked(pos)
+        pos = self._path_grid.find_unlocked_cell(pos)
         print "Adding unit #%d at %s." % (unit.key, pos)
-        self.units[unit.key] = unit
+        self._units[unit.key] = unit
         unit.pos = pos
         x, y = unit.pos
         width, height = unit.size
@@ -27,14 +27,15 @@ class UnitManager:
         max_y = min_y + (height - 1)
         for x in xrange(min_x, max_x + 1):
             for y in xrange(min_y, max_y + 1):
-                self.gridlocker.lock(unit.key, (x, y))
+                self._path_grid.lock_cell(unit.key, (x, y))
 
     def remove_unit(self, unit):
-        self.gridlocker.unlock_all_cells(unit)
+        self._path_grid.remove_cell_locker(unit.key)
+        del self._units[unit.key]
 
     def get_build_time(self, name):
         return 3.0
 
     def create_unit(self, name, pos):
         unit = Unit(warrior_spec)
-        self.add_unit(unit, pos)
+        self._add_unit(unit, pos)
