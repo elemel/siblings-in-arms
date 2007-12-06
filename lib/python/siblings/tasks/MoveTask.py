@@ -10,7 +10,7 @@ class MoveTask:
     def __init__(self, pos):
         self.pos = pos
 
-    def run(self, facade, abort):
+    def run(self, facade):
         old_pos = facade.actor.pos
         distance = diagonal_distance(old_pos, self.pos)
         progress = 0.0

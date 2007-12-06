@@ -8,8 +8,8 @@ class WaypointTask:
         self.follow_path_task = None
         self.path = None
     
-    def run(self, facade, abort):
-        while not abort:
+    def run(self, facade):
+        while not facade.aborting:
             if facade.actor.pos == self.waypoint:
                 break
             facade.find_path(self.waypoint, self._set_path)
@@ -17,10 +17,10 @@ class WaypointTask:
                 yield 0.0
             if not self.path:
                 break
-            if not abort:
+            if not facade.aborting:
                 self.follow_path_task = FollowPathTask(self.path)
                 self.path = None
-                for progress in self.follow_path_task.run(facade, abort):
+                for progress in self.follow_path_task.run(facade):
                     yield progress
 
     def _set_path(self, path):

@@ -11,7 +11,7 @@ class TaskQueue:
         self._actor = actor
         self._running = None
         self._waiting = deque()
-        self._abort = []
+        self._aborting = False
         self._gen = None
         self._progress = 0.0
         self._progress_time = 0.0
@@ -25,12 +25,13 @@ class TaskQueue:
 
     def update(self, facade):
         facade.actor = self._actor
+        facade.aborting = self._aborting
         if self._running is None:
             if self._waiting:
                 print "Unit #%d is starting a task." % facade.actor.key
                 self._running = self._waiting.popleft()
-                del self._abort[:]
-                self._gen = self._running.run(facade, self._abort)
+                self._aborting = False
+                self._gen = self._running.run(facade)
                 self._progress = 0.0
                 self._progress_time = 0.0
                 self._last_progress = 0
@@ -47,6 +48,7 @@ class TaskQueue:
                 self._last_progress = perc
         except StopIteration, e:
             self._running = None
+            self._aborting = False
             self._gen = None
             self._progress = 0.0
             self._progress_time = 0.0
@@ -56,5 +58,5 @@ class TaskQueue:
     def clear(self):
         if self._waiting:
             self._waiting.clear()
-        if self._running is not None and not self._abort:
-            self._abort.append(None)
+        if self._running is not None and not self._aborting:
+            self._aborting = True

@@ -5,6 +5,7 @@ class TaskFacade:
         self._game_engine = game_engine
         self.dt = 0.0
         self.actor = None
+        self.aborting = False
 
     def find_path(self, waypoint, callback):
         self._game_engine.pathfinder.find_path(self.actor, waypoint, callback)
