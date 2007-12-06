@@ -88,7 +88,7 @@ def handle_click_event(event, game_engine):
         else:
             handle_command_event(event, game_engine)
     else:
-        handle_control_click_event(event, game_engine)
+        handle_control_event(event, game_engine)
 
 def handle_select_event(event, game_engine):
     clicked_unit = None
@@ -146,7 +146,7 @@ def handle_command_event(event, game_engine):
                 print ("Added target #%d to unit #%d."
                        % (clicked_unit.key, unit.key))
 
-def handle_control_click_event(event, game_engine):
+def handle_control_event(event, game_engine):
     x, y = event.pos
     button = x // 50
     if len(selection) == 1:
