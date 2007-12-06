@@ -12,5 +12,5 @@ class BuildTask:
             if progress >= 1.0:
                 break
             yield progress
-        product = facade.create_unit(self.name, self.actor.player)
+        product = facade.create_unit(self.name, facade.actor.player)
         facade.add_unit(product, facade.actor.pos)
