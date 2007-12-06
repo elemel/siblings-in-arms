@@ -12,7 +12,7 @@ class WaypointTask:
         while not facade.aborting:
             if facade.actor.pos == self.waypoint:
                 break
-            facade.find_path(self.waypoint, self._set_path)
+            facade.find_path(facade.actor, self.waypoint, self._set_path)
             while self.path is None:
                 yield 0.0
             if not self.path:
