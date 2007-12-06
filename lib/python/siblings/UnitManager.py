@@ -30,10 +30,7 @@ class UnitManager:
                 self.gridlocker.lock_cell(unit, (x, y))
 
     def remove_unit(self, unit):
-        while unit.locked_cells:
-            p = unit.locked_cells.pop()
-            del self.locked_cells[p]
-        del self.units[unit.key]
+        self.gridlocker.unlock_all_cells(unit)
 
     def get_build_time(self, name):
         return 3.0

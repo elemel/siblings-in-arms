@@ -31,7 +31,7 @@ class Pathfinder:
             return x >= 0 and x < width and y >= 0 and y < height
 
         def lockable(p):
-            return self._gridlocker.locked_cells.get(p, unit.key) == unit.key
+            return self._gridlocker.get_locking_unit(p) in (0, unit.key)
 
         def neighbors(p):
             return (n for n in grid_neighbors(p)
