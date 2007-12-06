@@ -10,7 +10,7 @@ class WaypointTask:
     
     def run(self, facade, abort):
         while not abort:
-            if facade.unit.pos == self.waypoint:
+            if facade.actor.pos == self.waypoint:
                 break
             facade.find_path(self.waypoint, self._set_path)
             while self.path is None:

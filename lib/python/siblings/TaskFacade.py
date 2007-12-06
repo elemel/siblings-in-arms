@@ -4,19 +4,19 @@ class TaskFacade:
     def __init__(self, game_engine):
         self._game_engine = game_engine
         self.dt = 0.0
-        self.unit = None
+        self.actor = None
 
     def find_path(self, waypoint, callback):
-        self._game_engine.pathfinder.find_path(self.unit, waypoint, callback)
+        self._game_engine.pathfinder.find_path(self.actor, waypoint, callback)
 
     def lock_cell(self, pos):
-        return self._game_engine.gridlocker.lock(self.unit.key, pos)
+        return self._game_engine.gridlocker.lock(self.actor.key, pos)
 
     def unlock_cell(self, pos):
-        self._game_engine.gridlocker.unlock(self.unit.key, pos)
+        self._game_engine.gridlocker.unlock(self.actor.key, pos)
 
     def get_build_time(self, name):
         return self._game_engine.unit_manager.get_build_time(name)
 
     def create_unit(self, name):
-        self._game_engine.unit_manager.create_unit(name, self.unit.pos)
+        self._game_engine.unit_manager.create_unit(name, self.actor.pos)

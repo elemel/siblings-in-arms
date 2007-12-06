@@ -11,13 +11,13 @@ class MoveTask:
         self.pos = pos
 
     def run(self, facade, abort):
-        old_pos = facade.unit.pos
+        old_pos = facade.actor.pos
         distance = diagonal_distance(old_pos, self.pos)
         progress = 0.0
         while True:
-            progress += facade.dt * facade.unit.speed / distance
+            progress += facade.dt * facade.actor.speed / distance
             if progress >= 1.0:
                 break
-            facade.unit.pos = interpolate_pos(old_pos, self.pos, progress)
+            facade.actor.pos = interpolate_pos(old_pos, self.pos, progress)
             yield progress
-        facade.unit.pos = self.pos
+        facade.actor.pos = self.pos

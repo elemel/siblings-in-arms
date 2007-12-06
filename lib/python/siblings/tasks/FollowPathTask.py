@@ -11,7 +11,7 @@ class FollowPathTask:
         for i, pos in zip(xrange(len(self.path)), self.path):
             if abort or not facade.lock_cell(pos):
                 return
-            old_pos = facade.unit.pos
+            old_pos = facade.actor.pos
             self.move_task = MoveTask(pos)
             for progress in self.move_task.run(facade, abort):
                 yield (i + progress) / len(self.path)
