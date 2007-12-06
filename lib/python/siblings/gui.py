@@ -160,10 +160,12 @@ def paint_map_surface(game_engine):
         screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
         image = unit_images[unit.spec.name]
         width, height = image.get_size()
-        radius = max(width, height) // 2 - 3
+        radius = max(width, height) // 2
         if unit in selection:
             pygame.draw.circle(map_surface, pygame.color.Color("green"),
-                               screen_pos, radius, 1)
+                               screen_pos, radius - 2, 3)
+        pygame.draw.circle(map_surface, pygame.color.Color(unit.player),
+                           screen_pos, radius - 3, 1)
         paint_image(map_surface, image, screen_pos)
     paint_selection_rectangle(game_engine)
 

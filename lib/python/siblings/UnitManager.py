@@ -36,6 +36,5 @@ class UnitManager:
     def get_build_time(self, name):
         return 3.0
 
-    def create_unit(self, name, pos):
-        unit = Unit(warrior_spec)
-        self.add_unit(unit, pos)
+    def create_unit(self, name, player):
+        return Unit(warrior_spec, player)

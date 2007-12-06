@@ -11,10 +11,10 @@ class UnitSpec:
 class Unit:
     _keys = iter(xrange(1, sys.maxint))
 
-    def __init__(self, spec):
+    def __init__(self, spec, player = None):
         self._spec = spec
         self._key = Unit._keys.next()
-        self.player = None
+        self.player = player
         self.pos = None
 
     def _get_spec(self): return self._spec
