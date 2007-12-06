@@ -4,6 +4,7 @@ import pygame, sys, os, math
 from pygame.locals import *
 import config
 from geometry import *
+from tasks.AttackTask import AttackTask
 from tasks.BuildTask import BuildTask
 from tasks.WaypointTask import WaypointTask
 
@@ -82,11 +83,38 @@ def handle_events(game_engine):
 def handle_click_event(event, game_engine):
     x, y = event.pos
     if map_rect.collidepoint(x, y):
-        handle_map_click_event(event, game_engine)
+        if event.button == 1:
+            handle_select_event(event, game_engine)
+        else:
+            handle_command_event(event, game_engine)
     else:
         handle_control_click_event(event, game_engine)
 
-def handle_map_click_event(event, game_engine):
+def handle_select_event(event, game_engine):
+    clicked_unit = None
+    for unit in game_engine.unit_manager._units.itervalues():
+        screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
+        surface = unit_images[unit.spec.name]
+        surface_size = surface.get_size()
+        rect = rectangle_from_center_and_size(screen_pos, surface_size)
+        if (rectangle_contains_point(rect, event.pos)
+            and (clicked_unit is None or unit.pos[1] < clicked_unit.pos[1])):
+            clicked_unit = unit
+
+    if clicked_unit is not None:
+        if pygame.key.get_mods() & pygame.KMOD_SHIFT:
+            if clicked_unit in selection:
+                selection.remove(clicked_unit)
+                print "Removed unit #%d from selection." % clicked_unit.key
+            else:
+                selection.add(clicked_unit)
+                print "Added unit #%d to selection." % clicked_unit.key
+        else:
+            selection.clear()
+            selection.add(clicked_unit)
+            print "Selected unit #%d." % clicked_unit.key
+
+def handle_command_event(event, game_engine):
     clicked_unit = None
     for unit in game_engine.unit_manager._units.itervalues():
         screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
@@ -108,17 +136,15 @@ def handle_map_click_event(event, game_engine):
                 game_engine.taskmaster.append_task(unit, WaypointTask(pos))
                 print "Added waypoint %s to unit #%d." % (pos, unit.key)
     else:
-        if pygame.key.get_mods() & pygame.KMOD_SHIFT:
-            if clicked_unit in selection:
-                selection.remove(clicked_unit)
-                print "Removed unit #%d from selection." % clicked_unit.key
-            else:
-                selection.add(clicked_unit)
-                print "Added unit #%d to selection." % clicked_unit.key
-        else:
-            selection.clear()
-            selection.add(clicked_unit)
-            print "Selected unit #%d." % clicked_unit.key
+        for unit in selection:
+            if unit.damage and unit.player != clicked_unit.player:
+                if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
+                    game_engine.taskmaster.clear_tasks(unit)
+                    print "Cleared tasks for unit #%d." % unit.key
+                game_engine.taskmaster.append_task(unit,
+                                                   AttackTask(clicked_unit))
+                print ("Added target #%d to unit #%d."
+                       % (clicked_unit.key, unit.key))
 
 def handle_control_click_event(event, game_engine):
     x, y = event.pos
