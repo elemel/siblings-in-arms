@@ -38,4 +38,4 @@ class UnitManager:
 
     def create_unit(self, name, pos):
         unit = Unit(warrior_spec)
-        self._add_unit(unit, pos)
+        self.add_unit(unit, pos)

@@ -15,24 +15,20 @@ class PathGrid:
     size = property(_get_size)
         
     def lock_cell(self, key, pos):
-        old_key = self._locks.get(pos, None)
-        if old_key is None:
-            self._locks[pos] = key
-            if not key in self._lockers:
-                self._lockers[key] = set()
-            self._lockers[key].add(pos)
-            print "Unit #%d locked cell %s." % (key, pos)
-            return True
-        else:
-            return key == old_key
+        if pos in self._locks:
+            raise RuntimeError("already locked")
+        self._locks[pos] = key
+        if not key in self._lockers:
+            self._lockers[key] = set()
+        self._lockers[key].add(pos)
+        print "Unit #%d locked cell %s." % (key, pos)
 
     def unlock_cell(self, key, pos):
-        if pos in self._locks:
-            del self._locks[pos]
-            self._lockers[key].remove(pos)
-            if not self._lockers[key]:
-                del self._lockers[key]
-            print "Unit #%d unlocked cell %s." % (key, pos)
+        del self._locks[pos]
+        self._lockers[key].remove(pos)
+        if not self._lockers[key]:
+            del self._lockers[key]
+        print "Unit #%d unlocked cell %s." % (key, pos)
 
     def find_unlocked_cell(self, start):
         width, height = self.size

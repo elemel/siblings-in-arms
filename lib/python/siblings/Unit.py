@@ -14,7 +14,8 @@ class Unit:
     def __init__(self, spec):
         self._spec = spec
         self._key = Unit._keys.next()
-        self.pos = (0, 0)
+        self.player = None
+        self.pos = None
 
     def _get_spec(self): return self._spec
     def _get_key(self): return self._key

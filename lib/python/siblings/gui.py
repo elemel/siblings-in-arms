@@ -49,11 +49,6 @@ def to_world_coords(point, screen_size):
     return (float(x) / PIXELS_PER_METER_X,
             float(height - y) / PIXELS_PER_METER_Y)
 
-def get_rect_min(center, size):
-    x, y = center
-    width, height = size
-    return int(x - width / 2.0), int(y - height / 2.0)
-
 def get_sorted_units(game_engine):
     units = game_engine.unit_manager._units.values()
     units.sort(lambda a, b: cmp(b.pos[1], a.pos[1]))
@@ -62,7 +57,7 @@ def get_sorted_units(game_engine):
 def paint_image(surface, image, pos):
     x, y = pos
     width, height = image.get_size()
-    surface.blit(image, (x - width / 2, y - height / 2))
+    surface.blit(image, (x - width // 2, y - height // 2))
 
 def update(game_engine, fps):
     handle_events(game_engine)
@@ -165,7 +160,7 @@ def paint_map_surface(game_engine):
         screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
         image = unit_images[unit.spec.name]
         width, height = image.get_size()
-        radius = max(width, height) / 2 - 3
+        radius = max(width, height) // 2 - 3
         if unit in selection:
             pygame.draw.circle(map_surface, pygame.color.Color("green"),
                                screen_pos, radius, 1)
