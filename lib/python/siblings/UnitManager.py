@@ -15,7 +15,7 @@ class UnitManager:
         self.units = {}
         
     def add_unit(self, unit, pos):
-        pos = self.gridlocker.find_unlocked_cell(pos)
+        pos = self.gridlocker.find_unlocked(pos)
         print "Adding unit #%d at %s." % (unit.key, pos)
         self.units[unit.key] = unit
         unit.pos = pos
@@ -27,7 +27,7 @@ class UnitManager:
         max_y = min_y + (height - 1)
         for x in xrange(min_x, max_x + 1):
             for y in xrange(min_y, max_y + 1):
-                self.gridlocker.lock_cell(unit, (x, y))
+                self.gridlocker.lock(unit.key, (x, y))
 
     def remove_unit(self, unit):
         self.gridlocker.unlock_all_cells(unit)

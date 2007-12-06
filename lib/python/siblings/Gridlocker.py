@@ -14,32 +14,32 @@ class Gridlocker:
 
     size = property(_get_size)
         
-    def lock_cell(self, unit, pos):
+    def lock(self, key, pos):
         old_key = self._locks.get(pos, None)
         if old_key is None:
-            self._locks[pos] = unit.key
-            if not unit.key in self._lockers:
-                self._lockers[unit.key] = set()
-            self._lockers[unit.key].add(pos)
-            print "Unit #%d locked cell %s." % (unit.key, pos)
+            self._locks[pos] = key
+            if not key in self._lockers:
+                self._lockers[key] = set()
+            self._lockers[key].add(pos)
+            print "Unit #%d locked cell %s." % (key, pos)
             return True
         else:
-            return unit.key == old_key
+            return key == old_key
 
-    def unlock_cell(self, unit, pos):
+    def unlock(self, key, pos):
         if pos in self._locks:
             del self._locks[pos]
-            self._lockers[unit.key].remove(pos)
-            if not self._lockers[unit.key]:
-                del self._lockers[unit.key]
-            print "Unit #%d unlocked cell %s." % (unit.key, pos)
+            self._lockers[key].remove(pos)
+            if not self._lockers[key]:
+                del self._lockers[key]
+            print "Unit #%d unlocked cell %s." % (key, pos)
 
-    def unlock_all_cells(self, unit):
-        if unit.key in self._lockers:
-            for pos in list(self._lockers[unit.key]):
-                self.unlock_cell(unit, pos)
+    def unlock_all(self, key):
+        if key in self._lockers:
+            for pos in list(self._lockers[key]):
+                self.unlock_cell(key, pos)
 
-    def find_unlocked_cell(self, start):
+    def find_unlocked(self, start):
         def predicate(pos):
             return pos not in self._locks
     
@@ -56,5 +56,5 @@ class Gridlocker:
         print "Found an unlocked cell after searching %d node(s)." % len(nodes)
         return path.p
 
-    def get_locking_unit(self, pos):
+    def get_locker(self, pos):
         return self._locks.get(pos, 0)
