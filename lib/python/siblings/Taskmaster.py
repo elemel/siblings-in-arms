@@ -21,20 +21,20 @@ class Taskmaster:
                 print "Unit #%d fell asleep." % key
             del self._empty_queues[:]
         if self._new_tasks:
-            for unit, task in self._new_tasks:
-                if unit.key not in self._queues:
-                    self._queues[unit.key] = TaskQueue(unit)
-                    print "Unit #%d woke up." % unit.key
-                self._queues[unit.key].append(task)
+            for actor, task in self._new_tasks:
+                if actor.key not in self._queues:
+                    self._queues[actor.key] = TaskQueue(actor)
+                    print "Unit #%d woke up." % actor.key
+                self._queues[actor.key].append(task)
             del self._new_tasks[:]
 
-    def append_task(self, unit, task):
-        self._new_tasks.append((unit, task))
+    def append_task(self, actor, task):
+        self._new_tasks.append((actor, task))
 
-    def clear_tasks(self, unit):
-        if unit.key in self._queues:
-            self._queues[unit.key].clear()
+    def clear_tasks(self, actor):
+        if actor.key in self._queues:
+            self._queues[actor.key].clear()
 
-    def remove_unit(self, unit):
-        if unit.key in self._queues:
-            del self._queues[unit.key]
+    def remove_actor(self, unit):
+        if actor.key in self._queues:
+            del self._queues[actor.key]

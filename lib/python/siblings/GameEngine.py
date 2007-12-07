@@ -25,7 +25,7 @@ class GameEngine:
                 self._dead.append(unit)
         if self._dead:
             for unit in self._dead:
-                self.taskmaster.remove_unit(unit)
+                self.taskmaster.remove_actor(unit)
                 self.unit_manager.remove_unit(unit)
                 print "Unit #%d died." % unit.key
             del self._dead[:]
