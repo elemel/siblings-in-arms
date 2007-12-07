@@ -6,7 +6,7 @@ import config
 from geometry import *
 from tasks.AttackTask import AttackTask
 from tasks.BuildTask import BuildTask
-from tasks.WaypointTask import WaypointTask
+from tasks.MoveTask import MoveTask
 
 pygame.init() 
 
@@ -133,7 +133,7 @@ def handle_command_event(event, game_engine):
                 if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
                     game_engine.taskmaster.clear_tasks(unit)
                     print "Cleared tasks for unit #%d." % unit.key
-                game_engine.taskmaster.append_task(unit, WaypointTask(pos))
+                game_engine.taskmaster.append_task(unit, MoveTask(pos))
                 print "Added waypoint %s to unit #%d." % (pos, unit.key)
     else:
         for unit in selection:

@@ -5,7 +5,7 @@ from collections import deque
 from GameEngine import GameEngine
 from UnitManager import tavern_spec, warrior_spec
 from Unit import Unit
-from tasks.WaypointTask import WaypointTask
+from tasks.MoveTask import MoveTask
 from FrameCounter import FrameCounter
 
 MIN_TIME_STEP = 0.01
@@ -36,7 +36,7 @@ def main():
             unit = Unit(warrior_spec, random.choice(["cyan", "yellow"]))
             game_engine.add_unit(unit, random_pos(min_p, max_p))
             for i in xrange(3):
-                task = WaypointTask(random_pos(min_p, max_p))
+                task = MoveTask(random_pos(min_p, max_p))
                 game_engine.taskmaster.append_task(unit, task)
     
     old_time = time.time()

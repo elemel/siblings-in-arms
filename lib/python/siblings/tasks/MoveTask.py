@@ -2,7 +2,7 @@
 
 from FollowPathTask import FollowPathTask
 
-class WaypointTask:
+class MoveTask:
     def __init__(self, waypoint):
         self.waypoint = waypoint
         self.follow_path_task = None
