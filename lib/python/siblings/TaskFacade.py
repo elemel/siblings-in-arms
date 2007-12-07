@@ -7,8 +7,8 @@ class TaskFacade:
         self.actor = None
         self.aborting = False
 
-    def find_path(self, unit, waypoint, callback):
-        self._game_engine.pathfinder.find_path(unit, waypoint, callback)
+    def request_path(self, unit, waypoint, callback):
+        self._game_engine.pathfinder.request_path(unit, waypoint, callback)
 
     def lock_cell(self, key, pos):
         return self._game_engine.path_grid.lock_cell(key, pos)

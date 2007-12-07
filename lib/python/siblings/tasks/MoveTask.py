@@ -12,7 +12,7 @@ class MoveTask:
         while not facade.aborting:
             if facade.actor.pos == self.waypoint:
                 break
-            facade.find_path(facade.actor, self.waypoint, self._set_path)
+            facade.request_path(facade.actor, self.waypoint, self._set_path)
             while self.path is None:
                 yield 0.0
             if not self.path:

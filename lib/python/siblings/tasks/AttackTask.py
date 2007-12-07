@@ -1,7 +1,7 @@
 # Copyright 2007 Mikael Lind.
 
 from geometry import diagonal_distance
-from WaypointTask import WaypointTask
+from MoveTask import MoveTask
 
 def in_range(attacker, target):
     distance = (diagonal_distance(attacker.pos, target.pos)
@@ -18,5 +18,5 @@ class AttackTask:
                 self.target.health -= facade.actor.damage * facade.dt
                 yield 1.0 - min(max(self.target.health, 1.0), 0.0)
             else:
-                for progress in WaypointTask(self.target.pos).run(facade):
+                for progress in MoveTask(self.target.pos).run(facade):
                     yield progress

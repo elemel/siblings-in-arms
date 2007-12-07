@@ -9,16 +9,16 @@ A_STAR_SEARCH_LIMIT = 100
 class Pathfinder:
     def __init__(self, path_grid):
         self._path_grid = path_grid
-        self._path_queue = deque()
+        self._path_requests = deque()
         
     def update(self):
-        if self._path_queue:
-            unit, waypoint, callback = self._path_queue.popleft()
+        if self._path_requests:
+            unit, waypoint, callback = self._path_requests.popleft()
             path = self._find_path(unit, waypoint)
             callback(path)
 
-    def find_path(self, unit, waypoint, callback):
-        self._path_queue.append((unit, waypoint, callback))
+    def request_path(self, unit, waypoint, callback):
+        self._path_requests.append((unit, waypoint, callback))
 
     def _find_path(self, unit, waypoint):
         def predicate(pos):
