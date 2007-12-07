@@ -27,14 +27,14 @@ def main():
             sys.exit(1)
         
     game_engine = GameEngine()
-    game_engine.unit_manager.add_unit(Unit(tavern_spec, "cyan"), (6, 9))
-    game_engine.unit_manager.add_unit(Unit(tavern_spec, "yellow"), (13, 7))
+    game_engine.add_unit(Unit(tavern_spec, "cyan"), (6, 9))
+    game_engine.add_unit(Unit(tavern_spec, "yellow"), (13, 7))
 
     if headless:
         min_p, max_p = (2, 2), (18, 16)
         for i in xrange(50):
             unit = Unit(warrior_spec, random.choice(["cyan", "yellow"]))
-            game_engine.unit_manager.add_unit(unit, random_pos(min_p, max_p))
+            game_engine.add_unit(unit, random_pos(min_p, max_p))
             for i in xrange(3):
                 task = WaypointTask(random_pos(min_p, max_p))
                 game_engine.taskmaster.append_task(unit, task)

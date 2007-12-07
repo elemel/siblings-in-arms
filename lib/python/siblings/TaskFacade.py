@@ -26,4 +26,4 @@ class TaskFacade:
         return self._game_engine.unit_manager.create_unit(name, player)
 
     def add_unit(self, unit, pos):
-        self._game_engine.unit_manager.add_unit(unit, pos)
+        self._game_engine.add_unit(unit, pos)

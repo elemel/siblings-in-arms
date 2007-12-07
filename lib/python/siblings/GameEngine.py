@@ -14,18 +14,28 @@ class GameEngine:
         self.taskmaster = Taskmaster(self.task_facade)
         self.path_grid = PathGrid()
         self.pathfinder = Pathfinder(self.path_grid)
-        self.unit_manager = UnitManager(self.path_grid)
-        self._dead = []
+        self.unit_manager = UnitManager()
+        self.dead_units = []
         
     def update(self, dt):
         self.pathfinder.update()
         self.taskmaster.update(dt)
         for unit in self.unit_manager._units.itervalues():
             if unit.health <= 0:
-                self._dead.append(unit)
-        if self._dead:
-            for unit in self._dead:
-                self.taskmaster.remove_actor(unit)
-                self.unit_manager.remove_unit(unit)
-                print "Unit #%d died." % unit.key
-            del self._dead[:]
+                self.dead_units.append(unit)
+        if self.dead_units:
+            for unit in self.dead_units:
+                self.remove_unit(unit)
+            del self.dead_units[:]
+
+    def add_unit(self, unit, pos):
+        self.unit_manager.add_unit(unit)
+        self.path_grid.add_unit(unit, pos)
+        print "Added unit #%d at %s." % (unit.key, unit.pos)
+
+    def remove_unit(self, unit):
+        self.taskmaster.remove_actor(unit)
+        self.path_grid.remove_unit(unit)
+        self.unit_manager.remove_unit(unit)
+        print "Removed unit #%d." % unit.key
+        
