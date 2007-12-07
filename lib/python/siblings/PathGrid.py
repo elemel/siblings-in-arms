@@ -48,10 +48,23 @@ class PathGrid:
         print "Found an unlocked cell after searching %d node(s)." % len(nodes)
         return path.p
 
-    def get_cell_locker(self, pos):
-        return self._locks.get(pos, 0)
+    def is_cell_locked(self, pos):
+        return pos in self._locks
 
-    def remove_cell_locker(self, key):
-        if key in self._lockers:
+    def add_unit(self, unit, pos):
+        pos = self.find_unlocked_cell(pos)
+        unit.pos = pos
+        x, y = unit.pos
+        width, height = unit.size
+        min_x = int(x - (width - 1) / 2)
+        min_y = int(y - (height - 1) / 2)
+        max_x = min_x + (width - 1)
+        max_y = min_y + (height - 1)
+        for x in xrange(min_x, max_x + 1):
+            for y in xrange(min_y, max_y + 1):
+                self.lock_cell(unit.key, (x, y))
+
+    def remove_unit(self, unit):
+        if unit.key in self._lockers:
             for pos in list(self._lockers[key]):
                 self.unlock_cell(key, pos)

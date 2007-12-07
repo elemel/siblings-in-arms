@@ -16,8 +16,8 @@ class TaskFacade:
     def unlock_cell(self, key, pos):
         self._game_engine.path_grid.unlock_cell(key, pos)
 
-    def get_cell_locker(self, pos):
-        return self._game_engine.path_grid.get_cell_locker(pos)
+    def is_cell_locked(self, pos):
+        return self._game_engine.path_grid.is_cell_locked(pos)
 
     def get_build_time(self, name):
         return self._game_engine.unit_manager.get_build_time(name)

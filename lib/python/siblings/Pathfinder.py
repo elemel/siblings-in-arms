@@ -23,22 +23,22 @@ class Pathfinder:
     def _find_path(self, unit, waypoint):
         width, height = self._path_grid.size
 
-        def predicate(p):
-            return p == waypoint
+        def predicate(pos):
+            return pos == waypoint
 
-        def contains(p):
-            x, y = p
+        def contains(pos):
+            x, y = pos
             return x >= 0 and x < width and y >= 0 and y < height
 
-        def lockable(p):
-            return self._path_grid.get_cell_locker(p) in (0, unit.key)
+        def lockable(pos):
+            return not self._path_grid.is_cell_locked(pos)
 
         def neighbors(p):
             return (n for n in grid_neighbors(p)
                     if contains(n) and lockable(n))
 
-        def heuristic(p):
-            return diagonal_distance(p, waypoint)
+        def heuristic(pos):
+            return diagonal_distance(pos, waypoint)
 
         path, nodes = a_star_search(unit.pos, predicate, neighbors,
                                     diagonal_distance, heuristic,

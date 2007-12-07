@@ -9,7 +9,7 @@ class FollowPathTask:
 
     def run(self, facade):
         for i, pos in zip(xrange(len(self.path)), self.path):
-            if facade.aborting or facade.get_cell_locker(pos):
+            if facade.aborting or facade.is_cell_locked(pos):
                 return
             facade.lock_cell(facade.actor.key, pos)
             old_pos = facade.actor.pos
