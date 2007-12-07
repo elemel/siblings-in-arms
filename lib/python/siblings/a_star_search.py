@@ -16,7 +16,7 @@ class Node(object):
         self.state = OPEN
 
     def __cmp__(self, other):
-        # Break ties with object ID.
+        # Break ties using object ID.
         return (cmp(self.g + self.h, other.g + other.h)
                 or cmp(id(self), id(other)))
 
@@ -78,7 +78,7 @@ def a_star_search(start, predicate, neighbors, cost, heuristic,
 
 def breadth_first_search(start, predicate, neighbors, cost,
                          limit = sys.maxint):
-    def heuristic(p):
+    def heuristic(pos):
         return 0
     
     return a_star_search(start, predicate, neighbors, diagonal_distance,
