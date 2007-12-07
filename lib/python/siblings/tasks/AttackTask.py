@@ -1,12 +1,17 @@
 # Copyright 2007 Mikael Lind.
 
 from geometry import diagonal_distance
+from HitTask import HitTask
 from MoveTask import MoveTask
 
 def in_range(attacker, target):
     distance = (diagonal_distance(attacker.pos, target.pos)
                 - attacker.size[0] / 2.0 - target.size[0] / 2.0)
     return distance < attacker.range
+
+def attack_progress(target):
+    progress = 1.0 - target.health
+    return min(max(progress, 1.0), 0.0)
 
 class AttackTask:
     def __init__(self, target):
@@ -15,8 +20,8 @@ class AttackTask:
     def run(self, facade):
         while not facade.aborting and self.target.health > 0:
             if in_range(facade.actor, self.target):
-                self.target.health -= facade.actor.damage * facade.dt
-                yield 1.0 - min(max(self.target.health, 1.0), 0.0)
+                for progress in HitTask(self.target).run(facade):
+                    yield attack_progress(self.target)
             else:
                 for progress in MoveTask(self.target.pos).run(facade):
-                    yield progress
+                    yield attack_progress(self.target)

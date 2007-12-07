@@ -66,5 +66,5 @@ class PathGrid:
 
     def remove_unit(self, unit):
         if unit.key in self._lockers:
-            for pos in list(self._lockers[key]):
-                self.unlock_cell(key, pos)
+            for pos in list(self._lockers[unit.key]):
+                self.unlock_cell(unit.key, pos)

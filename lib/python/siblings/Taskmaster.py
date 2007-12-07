@@ -35,6 +35,6 @@ class Taskmaster:
         if actor.key in self._queues:
             self._queues[actor.key].clear()
 
-    def remove_actor(self, unit):
+    def remove_actor(self, actor):
         if actor.key in self._queues:
             del self._queues[actor.key]
