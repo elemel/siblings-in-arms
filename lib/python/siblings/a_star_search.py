@@ -16,7 +16,7 @@ class Node(object):
         self.state = OPEN
 
     def __cmp__(self, other):
-        # break ties with object ID
+        # Break ties with object ID.
         return (cmp(self.g + self.h, other.g + other.h)
                 or cmp(id(self), id(other)))
 
@@ -31,49 +31,50 @@ class Node(object):
 
 def a_star_search(start, predicate, neighbors, cost, heuristic,
                   limit = sys.maxint):
-    # initialization
-    start_node = Node(start, heuristic(start)) # create start node
-    nodes = {start: start_node} # register start node
+    start_node = Node(start, heuristic(start))
+    nodes = {start: start_node}
     if predicate(start_node.p):
         return start_node, nodes
-    open_list = [start_node] # add start node to open list
+    open_list = [start_node]
 
-    # track which node is closest to goal
+    # Track which node is closest to goal.
     closest = start_node 
     closest_h = start_node.h
 
     while open_list and len(nodes) < limit:
-        # continue search from node with lowest f
+        # Continue search from node with lowest f.
         current = heappop(open_list)
         current.state = CLOSED
 
-        # process neighbors of current node
+        # Process neighbors of current node.
         for n in neighbors(current.p):
-            neighbor_g = current.g + cost(current.p, n) # total cost of path
-            neighbor = nodes.get(n, None) # find neighbor if registered
+            neighbor_g = current.g + cost(current.p, n)
+            neighbor = nodes.get(n, None)
             if neighbor is None:
-                # create node for neighbor
                 neighbor = Node(n, heuristic(n), neighbor_g, current)
                 if predicate(neighbor.p):
-                    # found path to goal
+                    # Found path to goal.
                     return neighbor, nodes
-                nodes[n] = neighbor # register neighbor
-                heappush(open_list, neighbor) # add neighbor to open list
+                nodes[n] = neighbor
+                heappush(open_list, neighbor)
                 if neighbor.h < closest_h:
-                    # neighbor is closest to goal so far
+                    # Neighbor is closest to goal so far.
                     closest = neighbor
                     closest_h = neighbor.h
             elif neighbor_g < neighbor.g:
-                # update neighbor with shorter path
+                # Update neighbor with shorter path.
                 neighbor.parent = current
-                neighbor.g = neighbor_g # may break heap invariant
+                neighbor.g = neighbor_g  # May break heap invariant.
                 if neighbor.state == CLOSED:
-                    # reopen neighbor
+                    # Reopen neighbor.
                     neighbor.state = OPEN
-                    heappush(open_list, neighbor) # add neighbor to open list
+                    heappush(open_list, neighbor)
                 else:
-                    heapify(open_list) # reestablish heap invariant
-    return closest, nodes # return closest path
+                    # Reestablish heap invariant.
+                    heapify(open_list)
+
+    # No path to goal; return closest path.
+    return closest, nodes
 
 def breadth_first_search(start, predicate, neighbors, cost,
                          limit = sys.maxint):

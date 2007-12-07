@@ -21,21 +21,17 @@ class Pathfinder:
         self._path_queue.append((unit, waypoint, callback))
 
     def _find_path(self, unit, waypoint):
-        width, height = self._path_grid.size
-
         def predicate(pos):
             return pos == waypoint
 
-        def contains(pos):
-            x, y = pos
-            return x >= 0 and x < width and y >= 0 and y < height
-
-        def lockable(pos):
-            return not self._path_grid.is_cell_locked(pos)
-
-        def neighbors(p):
-            return (n for n in grid_neighbors(p)
-                    if contains(n) and lockable(n))
+        def neighbors(pos):
+            width, height = self._path_grid.size
+            is_locked = self._path_grid.is_cell_locked
+            for n in grid_neighbors(pos):
+                x, y = n
+                if (x >= 0 and x < width and y >= 0 and y < height
+                    and not is_locked(n)):
+                    yield n
 
         def heuristic(pos):
             return diagonal_distance(pos, waypoint)
