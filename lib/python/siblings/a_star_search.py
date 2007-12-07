@@ -52,10 +52,10 @@ def a_star_search(start, predicate, neighbors, cost, heuristic,
             neighbor = nodes.get(n, None)
             if neighbor is None:
                 neighbor = Node(n, heuristic(n), neighbor_g, current)
+                nodes[n] = neighbor
                 if predicate(neighbor.p):
                     # Found path to goal.
                     return neighbor, nodes
-                nodes[n] = neighbor
                 heappush(open_list, neighbor)
                 if neighbor.h < closest_h:
                     # Neighbor is closest to goal so far.
