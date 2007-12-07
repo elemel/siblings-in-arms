@@ -6,7 +6,7 @@ def interpolate_pos(old_p, new_p, progress):
     return vector_add(vector_mul(old_p, 1 - progress),
                       vector_mul(new_p, progress))
 
-class MoveTask:
+class StepTask:
     def __init__(self, pos):
         self.pos = pos
 

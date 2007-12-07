@@ -1,6 +1,6 @@
 # Copyright 2007 Mikael Lind.
 
-from MoveTask import MoveTask
+from StepTask import StepTask
 
 class FollowPathTask:
     def __init__(self, path):
@@ -13,7 +13,7 @@ class FollowPathTask:
                 return
             facade.lock_cell(facade.actor.key, pos)
             old_pos = facade.actor.pos
-            self.move_task = MoveTask(pos)
+            self.move_task = StepTask(pos)
             for progress in self.move_task.run(facade):
                 yield (i + progress) / len(self.path)
             self.move_task = None
