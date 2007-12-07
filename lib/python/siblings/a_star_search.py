@@ -83,13 +83,3 @@ def breadth_first_search(start, predicate, neighbors, cost,
     
     return a_star_search(start, predicate, neighbors, diagonal_distance,
                          heuristic, limit)
-
-def depth_first_search(start, predicate, neighbors, cost, limit = sys.maxint):
-    def negative_cost(a, b):
-        return -cost(a, b)
-
-    def heuristic(p):
-        return 0
-
-    return a_star_search(start, predicate, neighbors, negative_cost, heuristic,
-                         limit)
