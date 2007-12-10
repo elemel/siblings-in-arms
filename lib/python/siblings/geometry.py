@@ -5,8 +5,8 @@ SQRT_2 = math.sqrt(2)
 def rectangle_from_center_and_size(center, size):
     x, y = center
     width, height = size
-    min_p = (x - width / 2, y - height / 2)
-    max_p = (x + width / 2, y + height / 2)
+    min_p = (x - width / 2.0, y - height / 2.0)
+    max_p = (x + width / 2.0, y + height / 2.0)
     return (min_p, max_p)
     
 def rectangle_contains_point(r, p):

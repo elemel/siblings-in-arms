@@ -51,7 +51,7 @@ class GameEngine:
             del self.dead_units[:]
 
     def _on_idle(self, unit):
-        rect = rectangle_from_center_and_size(unit.pos, (5, 5))
+        rect = rectangle_from_center_and_size(unit.pos, (10, 10))
         for key in self.grid.intersect(rect):
             other_unit = self.unit_manager.find_unit(key)
             if unit.player != other_unit.player:
