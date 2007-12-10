@@ -62,8 +62,7 @@ class Grid(object):
 
     def intersect(self, bounds):
         """return keys for entries that intersect the given bounding box"""
-        empty = set()
-        cells = (self._cells.get(p, empty) for p in self._indices(bounds))
+        cells = (self._cells.get(p, ()) for p in self._indices(bounds))
         return set(key for key in concat(cells)
                    if intersects(self[key], bounds))
 

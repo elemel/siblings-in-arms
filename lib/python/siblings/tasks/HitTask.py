@@ -13,6 +13,7 @@ class HitTask:
             yield 0.0
 
         self.target.health -= facade.actor.damage
+        print "%s hit %s." % (facade.actor, self.target)
         yield 0.0
 
         time = 0.0

@@ -18,6 +18,7 @@ class StepTask:
             progress += facade.dt * facade.actor.speed / distance
             if progress >= 1.0:
                 break
-            facade.actor.pos = interpolate_pos(old_pos, self.pos, progress)
+            facade.set_pos(facade.actor,
+                           interpolate_pos(old_pos, self.pos, progress))
             yield progress
-        facade.actor.pos = self.pos
+        facade.set_pos(facade.actor, self.pos)

@@ -41,4 +41,5 @@ class Unit:
     postattack_time = property(_get_postattack_time)
 
     def __str__(self):
-        return "%s #%d" % (self._spec.name.capitalize(), self._key)
+        return "%s %s #%d" % (self.player.capitalize(),
+                              self._spec.name.capitalize(), self._key)
