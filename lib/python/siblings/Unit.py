@@ -8,9 +8,20 @@ class UnitSpec:
         self.speed = 0.0
         self.size = (1, 1)
         self.damage = 0.0
-        self.range = 1.0
+        self.min_range = 0.0
+        self.max_range = 1.0
         self.preattack_time = 0.5
         self.postattack_time = 0.5
+        self.max_health = 1.0
+
+    def _set_attack_time(self, time):
+        self.preattack_time = time / 2.0
+        self.postattack_time = time / 2.0
+
+    def _get_attack_time(self):
+        return self.preattack_time + self.postattack_time
+
+    attack_time = property(_set_attack_time, _get_attack_time)
 
 class Unit:
     _keys = iter(xrange(1, sys.maxint))
@@ -27,7 +38,8 @@ class Unit:
     def _get_speed(self): return self._spec.speed
     def _get_size(self): return self._spec.size
     def _get_damage(self): return self._spec.damage
-    def _get_range(self): return self._spec.range
+    def _get_min_range(self): return self._spec.min_range
+    def _get_max_range(self): return self._spec.max_range
     def _get_preattack_time(self): return self._spec.preattack_time
     def _get_postattack_time(self): return self._spec.postattack_time
 
@@ -36,7 +48,8 @@ class Unit:
     speed = property(_get_speed)
     size = property(_get_size)
     damage = property(_get_damage)
-    range = property(_get_range)
+    min_range = property(_get_min_range)
+    max_range = property(_get_max_range)
     preattack_time = property(_get_preattack_time)
     postattack_time = property(_get_postattack_time)
 

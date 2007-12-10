@@ -7,7 +7,7 @@ from MoveTask import MoveTask
 def in_range(attacker, target):
     distance = (diagonal_distance(attacker.pos, target.pos)
                 - attacker.size[0] / 2.0 - target.size[0] / 2.0)
-    return distance < attacker.range
+    return distance >= attacker.min_range and distance <= attacker.max_range
 
 def attack_progress(target):
     progress = 1.0 - target.health
