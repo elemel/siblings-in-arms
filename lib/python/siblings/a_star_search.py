@@ -8,8 +8,8 @@ OPEN = 1
 CLOSED = 2
 
 class Node(object):
-    def __init__(self, p, h, g = 0.0, parent = None, state = OPEN):
-        self.p = p
+    def __init__(self, pos, h, g = 0.0, parent = None, state = OPEN):
+        self.pos = pos
         self.h = h
         self.g = g
         self.parent = parent
@@ -27,13 +27,13 @@ class Node(object):
             current = current.parent
 
     def __str__(self):
-        return str([n.p for n in self])
+        return str([n.pos for n in self])
 
 def a_star_search(start, predicate, neighbors, cost, heuristic,
                   limit = sys.maxint):
     start_node = Node(start, heuristic(start))
     nodes = {start: start_node}
-    if predicate(start_node.p):
+    if predicate(start_node.pos):
         return start_node, nodes
     open_list = [start_node]
 
@@ -47,13 +47,13 @@ def a_star_search(start, predicate, neighbors, cost, heuristic,
         current.state = CLOSED
 
         # Process neighbors of current node.
-        for n in neighbors(current.p):
-            neighbor_g = current.g + cost(current.p, n)
+        for n in neighbors(current.pos):
+            neighbor_g = current.g + cost(current.pos, n)
             neighbor = nodes.get(n, None)
             if neighbor is None:
                 neighbor = Node(n, heuristic(n), neighbor_g, current)
                 nodes[n] = neighbor
-                if predicate(neighbor.p):
+                if predicate(neighbor.pos):
                     # Found path to goal.
                     return neighbor, nodes
                 heappush(open_list, neighbor)

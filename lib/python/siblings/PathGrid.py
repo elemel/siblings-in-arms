@@ -46,7 +46,7 @@ class PathGrid:
         path, nodes = breadth_first_search(start, predicate, neighbors,
                                            diagonal_distance)
         print "Found an unlocked cell after searching %d node(s)." % len(nodes)
-        return path.p
+        return path.pos
 
     def is_cell_locked(self, pos):
         return pos in self._locks

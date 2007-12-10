@@ -42,5 +42,5 @@ class Pathfinder:
         print ("%s found a path after searching %d node(s)."
                % (unit, len(nodes)))
         d = deque()
-        d.extendleft(node.p for node in path if node.p != unit.pos)
+        d.extendleft(node.pos for node in path if node.pos != unit.pos)
         return d
