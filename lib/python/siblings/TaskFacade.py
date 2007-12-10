@@ -10,11 +10,11 @@ class TaskFacade:
     def request_path(self, unit, waypoint, callback):
         self._game_engine.pathfinder.request_path(unit, waypoint, callback)
 
-    def lock_cell(self, key, pos):
-        return self._game_engine.path_grid.lock_cell(key, pos)
+    def lock_cell(self, unit, pos):
+        return self._game_engine.path_grid.lock_cell(unit, pos)
 
-    def unlock_cell(self, key, pos):
-        self._game_engine.path_grid.unlock_cell(key, pos)
+    def unlock_cell(self, unit, pos):
+        self._game_engine.path_grid.unlock_cell(unit, pos)
 
     def is_cell_locked(self, pos):
         return self._game_engine.path_grid.is_cell_locked(pos)

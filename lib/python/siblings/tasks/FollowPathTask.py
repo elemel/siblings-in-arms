@@ -11,10 +11,10 @@ class FollowPathTask:
         for i, pos in zip(xrange(len(self.path)), self.path):
             if facade.aborting or facade.is_cell_locked(pos):
                 return
-            facade.lock_cell(facade.actor.key, pos)
+            facade.lock_cell(facade.actor, pos)
             old_pos = facade.actor.pos
             self.move_task = StepTask(pos)
             for progress in self.move_task.run(facade):
                 yield (i + progress) / len(self.path)
             self.move_task = None
-            facade.unlock_cell(facade.actor.key, old_pos)
+            facade.unlock_cell(facade.actor, old_pos)

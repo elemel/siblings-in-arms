@@ -14,21 +14,21 @@ class PathGrid:
 
     size = property(_get_size)
         
-    def lock_cell(self, key, pos):
+    def lock_cell(self, unit, pos):
         if pos in self._locks:
             raise RuntimeError("already locked")
-        self._locks[pos] = key
-        if not key in self._lockers:
-            self._lockers[key] = set()
-        self._lockers[key].add(pos)
-        print "Unit #%d locked cell %s." % (key, pos)
+        self._locks[pos] = unit.key
+        if not unit.key in self._lockers:
+            self._lockers[unit.key] = set()
+        self._lockers[unit.key].add(pos)
+        print "%s locked cell %s." % (unit, pos)
 
-    def unlock_cell(self, key, pos):
+    def unlock_cell(self, unit, pos):
         del self._locks[pos]
-        self._lockers[key].remove(pos)
-        if not self._lockers[key]:
-            del self._lockers[key]
-        print "Unit #%d unlocked cell %s." % (key, pos)
+        self._lockers[unit.key].remove(pos)
+        if not self._lockers[unit.key]:
+            del self._lockers[unit.key]
+        print "%s unlocked cell %s." % (unit, pos)
 
     def find_unlocked_cell(self, start):
         width, height = self.size
@@ -62,9 +62,9 @@ class PathGrid:
         max_y = min_y + (height - 1)
         for x in xrange(min_x, max_x + 1):
             for y in xrange(min_y, max_y + 1):
-                self.lock_cell(unit.key, (x, y))
+                self.lock_cell(unit, (x, y))
 
     def remove_unit(self, unit):
         if unit.key in self._lockers:
             for pos in list(self._lockers[unit.key]):
-                self.unlock_cell(unit.key, pos)
+                self.unlock_cell(unit, pos)
