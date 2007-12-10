@@ -1,3 +1,5 @@
+# Copyright 2007 Mikael Lind.
+
 import math
 
 SQRT_2 = math.sqrt(2)
