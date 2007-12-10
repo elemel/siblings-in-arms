@@ -28,7 +28,7 @@ class TaskQueue:
         facade.aborting = self._aborting
         if self._running is None:
             if self._waiting:
-                print "Unit #%d is starting a task." % facade.actor.key
+                print "%s is starting a task." % facade.actor
                 self._running = self._waiting.popleft()
                 self._aborting = False
                 self._gen = self._running.run(facade)
@@ -42,8 +42,8 @@ class TaskQueue:
             self._progress_time += facade.dt
             perc = percentage(self._progress)
             if perc != self._last_progress and self._progress_time >= 1.0:
-                print ("Unit #%d has completed %d%% of its task."
-                       % (facade.actor.key, perc))
+                print ("%s has completed %d%% of its task."
+                       % (facade.actor, perc))
                 self._progress_time = 0.0
                 self._last_progress = perc
         except StopIteration, e:
@@ -53,7 +53,7 @@ class TaskQueue:
             self._progress = 0.0
             self._progress_time = 0.0
             self._last_progress = 0
-            print "Unit #%d completed its task." % facade.actor.key
+            print "%s completed its task." % facade.actor
 
     def clear(self):
         if self._waiting:

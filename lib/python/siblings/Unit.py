@@ -39,3 +39,6 @@ class Unit:
     range = property(_get_range)
     preattack_time = property(_get_preattack_time)
     postattack_time = property(_get_postattack_time)
+
+    def __str__(self):
+        return "%s #%d" % (self._spec.name.capitalize(), self._key)

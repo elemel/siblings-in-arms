@@ -25,13 +25,13 @@ class GameEngine:
     def add_unit(self, unit, pos):
         self.unit_manager.add_unit(unit)
         self.path_grid.add_unit(unit, pos)
-        print "Added unit #%d at %s." % (unit.key, unit.pos)
+        print "Added %s at %s." % (unit, unit.pos)
 
     def remove_unit(self, unit):
         self.taskmaster.remove_actor(unit)
         self.path_grid.remove_unit(unit)
         self.unit_manager.remove_unit(unit)
-        print "Removed unit #%d." % unit.key
+        print "Removed %s." % unit
 
     def _remove_dead_units(self):
         for unit in self.unit_manager._units.itervalues():

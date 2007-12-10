@@ -17,14 +17,15 @@ class Taskmaster:
                 self._empty_queues.append(key)
         if self._empty_queues:
             for key in self._empty_queues:
+                actor = self._queues[key]._actor
                 del self._queues[key]
-                print "Unit #%d fell asleep." % key
+                print "%s fell asleep." % actor
             del self._empty_queues[:]
         if self._new_tasks:
             for actor, task in self._new_tasks:
                 if actor.key not in self._queues:
                     self._queues[actor.key] = TaskQueue(actor)
-                    print "Unit #%d woke up." % actor.key
+                    print "%s woke up." % actor
                 self._queues[actor.key].append(task)
             del self._new_tasks[:]
 

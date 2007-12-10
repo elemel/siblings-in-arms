@@ -39,8 +39,8 @@ class Pathfinder:
         path, nodes = a_star_search(unit.pos, predicate, neighbors,
                                     diagonal_distance, heuristic,
                                     A_STAR_SEARCH_LIMIT)
-        print ("Unit #%d found a path after searching %d node(s)."
-               % (unit.key, len(nodes)))
+        print ("%s found a path after searching %d node(s)."
+               % (unit, len(nodes)))
         d = deque()
         d.extendleft(node.p for node in path if node.p != unit.pos)
         return d
