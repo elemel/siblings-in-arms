@@ -8,7 +8,7 @@ from Taskmaster import Taskmaster
 from Unit import Unit, UnitSpec
 from UnitManager import UnitManager
 from Grid import Grid
-from geometry import rectangle_from_center_and_size
+from geometry import rectangle_from_center_and_size, squared_distance
 from tasks.AttackTask import AttackTask
 
 class GameEngine:
@@ -39,6 +39,7 @@ class GameEngine:
         del self.grid[unit.key]
         self.path_grid.remove_unit(unit)
         self.unit_manager.remove_unit(unit)
+        unit.pos = None
         print "Removed %s." % unit
 
     def _remove_dead_units(self):
@@ -52,9 +53,12 @@ class GameEngine:
 
     def _on_idle(self, unit):
         rect = rectangle_from_center_and_size(unit.pos, (10, 10))
-        for key in self.grid.intersect(rect):
-            other_unit = self.unit_manager.find_unit(key)
-            if unit.player != other_unit.player:
-                print "%s found an enemy in %s." % (unit, other_unit)
-                self.taskmaster.append_task(unit, AttackTask(other_unit))
-                break
+        enemies = [self.unit_manager.find_unit(key)
+                   for key in self.grid.intersect(rect) if key != unit.key]
+        enemies = [enemy for enemy in enemies if enemy.player != unit.player]
+        if enemies:
+            def key_func(a):
+                return squared_distance(a.pos, unit.pos)
+            enemy = min(enemies, key=key_func)
+            print "%s found an enemy in %s." % (unit, enemy)
+            self.taskmaster.append_task(unit, AttackTask(enemy))

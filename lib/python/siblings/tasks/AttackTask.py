@@ -18,7 +18,7 @@ class AttackTask:
         self.target = target
 
     def run(self, facade):
-        while not facade.aborting and self.target.health > 0:
+        while not facade.aborting and self.target.pos is not None:
             if in_range(facade.actor, self.target):
                 for progress in HitTask(self.target).run(facade):
                     yield attack_progress(self.target)

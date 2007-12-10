@@ -62,6 +62,10 @@ def paint_image(surface, image, pos):
     surface.blit(image, (x - width // 2, y - height // 2))
 
 def update(game_engine, fps):
+    new_selection = set(unit for unit in selection if unit.pos)
+    if new_selection != selection:
+        selection.clear()
+        selection.update(new_selection)
     handle_events(game_engine)
     update_screen(game_engine)
 

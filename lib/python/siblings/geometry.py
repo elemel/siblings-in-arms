@@ -36,6 +36,11 @@ def grid_neighbors(p):
     yield x - 1, y + 0;                     yield x + 1, y + 0
     yield x - 1, y - 1; yield x + 0, y - 1; yield x + 1, y - 1
 
+def squared_distance(a, b):
+    ax, ay = a
+    bx, by = b
+    return (ax - bx) ** 2 + (ay - by) ** 2
+
 def manhattan_distance(a, b):
     ax, ay = a
     bx, by = b

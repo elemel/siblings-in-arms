@@ -45,6 +45,7 @@ class Taskmaster:
         if unit.key in self._queues:
             del self._queues[unit.key]
         self._idle_units.remove(unit)
+        self._new_tasks = [(u, t) for u, t in self._new_tasks if u != unit]
 
     def append_task(self, unit, task):
         self._new_tasks.append((unit, task))

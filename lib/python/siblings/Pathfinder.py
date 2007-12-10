@@ -14,8 +14,9 @@ class Pathfinder:
     def update(self):
         if self._path_requests:
             unit, waypoint, callback = self._path_requests.popleft()
-            path = self._find_path(unit, waypoint)
-            callback(path)
+            if unit.pos is not None:
+                path = self._find_path(unit, waypoint)
+                callback(path)
 
     def request_path(self, unit, waypoint, callback):
         self._path_requests.append((unit, waypoint, callback))
