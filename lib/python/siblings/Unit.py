@@ -5,9 +5,9 @@ import sys
 class UnitSpec:
     def __init__(self, name):
         self.name = name
-        self.speed = 0.0
+        self.speed = None
         self.size = (1, 1)
-        self.damage = 0.0
+        self.damage = None
         self.min_range = 0.0
         self.max_range = 1.0
         self.preattack_time = 0.5

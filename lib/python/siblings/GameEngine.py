@@ -14,7 +14,7 @@ from tasks.AttackTask import AttackTask
 class GameEngine:
     def __init__(self):
         self.task_facade = TaskFacade(self)
-        self.taskmaster = Taskmaster(self.task_facade, self._on_idle)
+        self.taskmaster = Taskmaster(self.task_facade, self._idle_callback)
         self.path_grid = PathGrid()
         self.pathfinder = Pathfinder(self.path_grid)
         self.unit_manager = UnitManager()
@@ -51,7 +51,9 @@ class GameEngine:
                 self.remove_unit(unit)
             del self.dead_units[:]
 
-    def _on_idle(self, unit):
+    def _idle_callback(self, unit):
+        if not unit.damage:
+            return
         rect = rectangle_from_center_and_size(unit.pos, (10, 10))
         enemies = [self.unit_manager.find_unit(key)
                    for key in self.grid.intersect(rect) if key != unit.key]
