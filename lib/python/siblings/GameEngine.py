@@ -10,6 +10,7 @@ from UnitManager import UnitManager
 from Grid import Grid
 from geometry import rectangle_from_center_and_size, squared_distance
 from tasks.AttackTask import AttackTask
+from config import damage_factors
 
 class GameEngine:
     def __init__(self):
@@ -41,6 +42,10 @@ class GameEngine:
         self.unit_manager.remove_unit(unit)
         unit.pos = None
         print "Removed %s." % unit
+
+    def get_damage_factor(self, attacker, defender):
+        return damage_factors.get((attacker.spec.name,
+                                   defender.spec.name), 1.0)
 
     def _remove_dead_units(self):
         for unit in self.unit_manager._units.itervalues():

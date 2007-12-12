@@ -43,3 +43,6 @@ class TaskFacade:
 
     def remove_task_request(self, unit):
         pass
+
+    def get_damage_factor(self, attacker, defender):
+        return self._game_engine.get_damage_factor(attacker, defender)

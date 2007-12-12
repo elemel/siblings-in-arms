@@ -28,10 +28,10 @@ def main():
             sys.exit(1)
         
     game_engine = GameEngine()
-    game_engine.add_unit(Unit(tavern_spec, "cyan"), (6, 9))
-    game_engine.add_unit(Unit(tavern_spec, "yellow"), (13, 7))
+    game_engine.add_unit(Unit(tavern_spec, "cyan"), (5, 14))
+    game_engine.add_unit(Unit(tavern_spec, "yellow"), (15, 5))
 
-    if True or headless:
+    if headless:
         min_p, max_p = (2, 2), (18, 16)
         specs = [knight_spec, monk_spec, priest_spec, ranger_spec, thief_spec,
                  warrior_spec, wizard_spec]

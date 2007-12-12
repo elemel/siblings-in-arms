@@ -12,7 +12,8 @@ class HitTask:
                 break
             yield 0.0
 
-        self.target.health -= facade.actor.damage
+        damage_factor = facade.get_damage_factor(facade.actor, self.target)
+        self.target.health -= facade.actor.damage * damage_factor
         print "%s hit %s." % (facade.actor, self.target)
         yield 0.0
 
