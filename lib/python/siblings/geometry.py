@@ -3,6 +3,7 @@
 import math
 
 SQRT_2 = math.sqrt(2)
+COS_30 = math.cos(math.pi / 6.0)
 
 def rectangle_from_center_and_size(center, size):
     x, y = center
@@ -66,3 +67,15 @@ def vector_mul(a, b):
 
 def vector_rmul(a, b):
     return vector_mul(b, a)
+
+def pos_to_hex(pos, hex_dist = 1.0):
+    x, y = pos
+    hex_x = int(round(x / (hex_dist * COS_30)))
+    hex_y = int(round(y / hex_dist - 0.5 * (hex_x % 2)))
+    return (hex_x, hex_y)
+
+def hex_to_pos(hex, hex_dist = 1.0):
+    hex_x, hex_y = hex
+    x = hex_x * hex_dist * COS_30
+    y = (hex_y + 0.5 * (hex_x % 2)) * hex_dist
+    return (x, y)
