@@ -23,5 +23,6 @@ class AttackTask:
                 for progress in HitTask(self.target).run(facade):
                     yield attack_progress(self.target)
             else:
+                old_pos = self.target.pos
                 for progress in MoveTask(self.target.pos).run(facade):
                     yield attack_progress(self.target)
