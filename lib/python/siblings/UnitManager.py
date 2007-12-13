@@ -1,6 +1,7 @@
 # Copyright 2007 Mikael Lind.
 
-from Unit import Unit, UnitSpec
+from Unit import Unit
+from UnitSpec import UnitSpec
 
 knight_spec = UnitSpec("knight")
 knight_spec.speed = 6.0
