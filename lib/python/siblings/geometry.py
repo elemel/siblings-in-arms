@@ -33,8 +33,8 @@ def normalize_rectangle(r):
     min_y, max_y = min(min_y, max_y), max(min_y, max_y)
     return ((min_x, min_y), (max_x, max_y))
 
-def grid_neighbors(p):
-    x, y = p
+def grid_neighbors(pos):
+    x, y = pos
     yield x - 1, y + 1; yield x + 0, y + 1; yield x + 1, y + 1
     yield x - 1, y + 0;                     yield x + 1, y + 0
     yield x - 1, y - 1; yield x + 0, y - 1; yield x + 1, y - 1
@@ -79,3 +79,12 @@ def hex_to_pos(hex, hex_dist = 1.0):
     x = hex_x * hex_dist * COS_30
     y = (hex_y + 0.5 * (hex_x % 2)) * hex_dist
     return (x, y)
+
+def hex_neighbors(pos):
+    x, y = pos
+    if x % 2:
+        yield x - 1, y + 1; yield x + 0, y + 1; yield x + 1, y + 1
+        yield x - 1, y + 0; yield x + 0, y - 1; yield x + 1, y + 0
+    else:
+        yield x - 1, y + 0; yield x + 0, y + 1; yield x + 1, y + 0
+        yield x - 1, y - 1; yield x + 0, y - 1; yield x + 1, y - 1
