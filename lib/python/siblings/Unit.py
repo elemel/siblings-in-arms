@@ -10,7 +10,7 @@ class Unit:
         self._key = Unit._keys.next()
         self.player = player
         self.pos = None
-        self.health = 1.0
+        self.health = self._spec.max_health
 
     def _get_spec(self): return self._spec
     def _get_key(self): return self._key
