@@ -4,7 +4,7 @@ import time, sys, random
 from collections import deque
 from GameEngine import GameEngine
 from UnitManager import (knight_spec, monk_spec, priest_spec, ranger_spec,
-                         tavern_spec, thief_spec, warrior_spec, wizard_spec)
+                         rogue_spec, tavern_spec, warrior_spec, wizard_spec)
 from Unit import Unit
 from tasks.MoveTask import MoveTask
 from FrameCounter import FrameCounter
@@ -33,7 +33,7 @@ def main():
 
     if headless:
         min_p, max_p = (2, 2), (18, 16)
-        specs = [knight_spec, monk_spec, priest_spec, ranger_spec, thief_spec,
+        specs = [knight_spec, monk_spec, priest_spec, ranger_spec, rogue_spec,
                  warrior_spec, wizard_spec]
         colors = ["cyan", "yellow"]
         for i in xrange(50):

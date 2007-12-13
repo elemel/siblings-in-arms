@@ -18,13 +18,13 @@ ranger_spec = UnitSpec("ranger")
 ranger_spec.speed = 5.0
 ranger_spec.damage = 0.3
 
+rogue_spec = UnitSpec("rogue")
+rogue_spec.speed = 4.0
+rogue_spec.damage = 0.2
+
 tavern_spec = UnitSpec("tavern")
 tavern_spec.speed = 0.0
 tavern_spec.size = (3, 3)
-
-thief_spec = UnitSpec("thief")
-thief_spec.speed = 4.0
-thief_spec.damage = 0.2
 
 warrior_spec = UnitSpec("warrior")
 warrior_spec.speed = 4.0
@@ -42,7 +42,7 @@ class UnitManager:
         self._units = {}
 
         for spec in (knight_spec, monk_spec, priest_spec, ranger_spec,
-                     tavern_spec, thief_spec, warrior_spec, wizard_spec):
+                     rogue_spec, tavern_spec, warrior_spec, wizard_spec):
             self._specs[spec.name] = spec
 
     def add_unit_spec(self, spec):

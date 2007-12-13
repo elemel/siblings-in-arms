@@ -27,7 +27,7 @@ unit_images = {}
 unit_icons = {}
 
 def load_unit_images():
-    for name in ["knight", "monk", "priest", "ranger", "tavern", "thief",
+    for name in ["knight", "monk", "priest", "ranger", "rogue", "tavern",
                  "warrior", "wizard"]:
         unit_images[name] = load_image(name)
         unit_icons[name] = load_image(name + "-icon")
@@ -166,7 +166,7 @@ def handle_control_event(event, game_engine):
             elif button == 3:
                 game_engine.taskmaster.append_task(unit, BuildTask("knight"))
             elif button == 4:
-                game_engine.taskmaster.append_task(unit, BuildTask("thief"))
+                game_engine.taskmaster.append_task(unit, BuildTask("rogue"))
             elif button == 5:
                 game_engine.taskmaster.append_task(unit, BuildTask("priest"))
             elif button == 6:
@@ -232,6 +232,6 @@ def paint_control_panel(game_engine):
             paint_image(control_panel, unit_icons["warrior"], (75, 25))
             paint_image(control_panel, unit_icons["ranger"], (125, 25))
             paint_image(control_panel, unit_icons["knight"], (175, 25))
-            paint_image(control_panel, unit_icons["thief"], (225, 25))
+            paint_image(control_panel, unit_icons["rogue"], (225, 25))
             paint_image(control_panel, unit_icons["priest"], (275, 25))
             paint_image(control_panel, unit_icons["wizard"], (325, 25))
