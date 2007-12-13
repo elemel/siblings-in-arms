@@ -39,9 +39,6 @@ def main():
         for i in xrange(50):
             unit = Unit(random.choice(specs), random.choice(colors))
             game_engine.add_unit(unit, random_pos(min_p, max_p))
-            for i in xrange(3):
-                task = MoveTask(random_pos(min_p, max_p))
-                # game_engine.taskmaster.append_task(unit, task)
     
     old_time = time.time()
     frame_counter = FrameCounter()
