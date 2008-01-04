@@ -28,6 +28,7 @@ class GameEngine:
         self._remove_dead_units()
 
     def add_unit(self, unit, pos):
+        pos = self.path_grid.find_unlocked_cell(pos)
         self.unit_manager.add_unit(unit)
         self.path_grid.add_unit(unit, pos)
         rect = rectangle_from_center_and_size(unit.pos, unit.size)

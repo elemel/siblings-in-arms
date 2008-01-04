@@ -3,10 +3,7 @@
 import time, sys, random
 from collections import deque
 from GameEngine import GameEngine
-from UnitManager import (knight_spec, monk_spec, priest_spec, ranger_spec,
-                         rogue_spec, tavern_spec, warrior_spec, wizard_spec)
 from Unit import Unit
-from UnitSpec import UnitSpec
 from tasks.MoveTask import MoveTask
 from FrameCounter import FrameCounter
 
@@ -29,16 +26,17 @@ def main():
             sys.exit(1)
         
     game_engine = GameEngine()
-    game_engine.add_unit(Unit(tavern_spec, "cyan"), (5, 14))
-    game_engine.add_unit(Unit(tavern_spec, "yellow"), (15, 5))
+    unit_specs = game_engine.unit_manager._specs
+    game_engine.add_unit(Unit(unit_specs["tavern"], "cyan"), (5, 14))
+    game_engine.add_unit(Unit(unit_specs["tavern"], "yellow"), (15, 5))
 
     if headless:
         min_p, max_p = (2, 2), (18, 16)
-        specs = [knight_spec, monk_spec, priest_spec, ranger_spec, rogue_spec,
-                 warrior_spec, wizard_spec]
         colors = ["cyan", "yellow"]
+        unit_spec_values = unit_specs.values()
+        unit_spec_values.remove(unit_specs["tavern"])
         for i in xrange(50):
-            unit = Unit(random.choice(specs), random.choice(colors))
+            unit = Unit(random.choice(unit_spec_values), random.choice(colors))
             game_engine.add_unit(unit, random_pos(min_p, max_p))
     
     old_time = time.time()

@@ -16,7 +16,7 @@ class PathGrid:
         
     def lock_cell(self, unit, pos):
         if pos in self._locks:
-            raise RuntimeError("cell %s is already locked" % pos)
+            raise RuntimeError("cell %s is already locked" % (pos,))
         self._locks[pos] = unit.key
         if unit.key not in self._lockers:
             self._lockers[unit.key] = set()
