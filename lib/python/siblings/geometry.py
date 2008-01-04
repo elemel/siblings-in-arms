@@ -68,16 +68,16 @@ def vector_mul(a, b):
 def vector_rmul(a, b):
     return vector_mul(b, a)
 
-def pos_to_hex_cell(pos, cell_dist = 1.0):
-    x, y = pos
-    key_x = int(round(x / (cell_dist * COS_30)))
-    key_y = int(round(y / cell_dist - 0.5 * (key_x % 2)))
+def point_to_hex_cell(point, cell_dist = 1.0):
+    x, y = point
+    column = int(round(x / (cell_dist * COS_30)))
+    row = int(round(y / cell_dist - 0.5 * (column % 2)))
     return (key_x, key_y)
 
-def hex_cell_to_pos(cell_key, cell_dist = 1.0):
-    key_x, key_y = cell_key
-    x = key_x * cell_dist * COS_30
-    y = (key_y + 0.5 * (key_x % 2)) * cell_dist
+def hex_cell_to_point(cell_key, cell_dist = 1.0):
+    column, row = cell_key
+    x = column * cell_dist * COS_30
+    y = (row + 0.5 * (column % 2)) * cell_dist
     return (x, y)
 
 def hex_neighbors(cell_key):

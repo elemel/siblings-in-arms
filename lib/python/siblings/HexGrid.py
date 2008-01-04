@@ -11,8 +11,12 @@ class HexGrid:
     def _get_shape(self):
         return self._shape
 
+    def _get_cell_dist(self):
+        return self._cell_dist
+
     shape = property(_get_shape)
-        
+    cell_dist = property(_get_cell_dist)
+
     def lock(self, cell_key):
         assert cell_key in self._locked
         self._locked.add(cell_key)
@@ -37,8 +41,8 @@ class HexGrid:
         return (k for k in hex_neighbors(cell_key)
                 if k not in self._locked and self.contains(k))
 
-    def pos_to_cell(self, pos):
-        return pos_to_hex_cell(pos)
+    def point_to_cell(self, point):
+        return point_to_hex_cell(point)
 
-    def cell_to_pos(self, cell_key):
-        return hex_cell_to_pos(cell_key)
+    def cell_to_point(self, cell_key):
+        return hex_cell_to_point(cell_key)
