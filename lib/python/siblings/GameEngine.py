@@ -6,7 +6,6 @@ from PathGrid import PathGrid
 from TaskFacade import TaskFacade
 from Taskmaster import Taskmaster
 from Unit import Unit
-from UnitSpec import UnitSpec
 from UnitManager import UnitManager
 from Grid import Grid
 from geometry import rectangle_from_center_and_size, squared_distance
