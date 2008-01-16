@@ -15,14 +15,14 @@ class TaskFacade:
     def remove_path_request(self, unit):
         pass    
 
-    def lock_cell(self, unit, pos):
-        return self._game_engine.path_grid.lock_cell(unit, pos)
+    def lock_cell(self, unit, cell_key):
+        return self._game_engine.gridlocker.lock(cell_key, unit)
 
-    def unlock_cell(self, unit, pos):
-        self._game_engine.path_grid.unlock_cell(unit, pos)
+    def unlock_cell(self, unit, cell_key):
+        self._game_engine.gridlocker.unlock(cell_key)
 
-    def is_cell_locked(self, pos):
-        return self._game_engine.path_grid.is_cell_locked(pos)
+    def is_cell_locked(self, cell_key):
+        return self._game_engine.gridlocker.locked(cell_key)
 
     def get_build_time(self, name):
         return self._game_engine.unit_manager.get_build_time(name)
@@ -36,7 +36,7 @@ class TaskFacade:
     def set_pos(self, unit, pos):
         unit.pos = pos
         rect = rectangle_from_center_and_size(unit.pos, unit.size)
-        self._game_engine.grid[unit.key] = rect
+        self._game_engine.proximity_grid[unit.key] = rect
 
     def request_task(self, unit, callback):
         pass
