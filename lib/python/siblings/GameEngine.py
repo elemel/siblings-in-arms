@@ -12,7 +12,7 @@ from Gridlocker import Gridlocker
 from geometry import (rectangle_from_center_and_size, squared_distance,
                       diagonal_distance)
 from tasks.AttackTask import AttackTask
-from config import damage_factors
+from balance import damage_factors
 from shortest_path import shortest_path
 
 class GameEngine:
