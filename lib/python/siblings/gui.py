@@ -2,11 +2,14 @@
 
 import pygame, sys, os, math
 from pygame.locals import *
-import config
 from geometry import *
 from tasks.AttackTask import AttackTask
 from tasks.BuildTask import BuildTask
 from tasks.MoveTask import MoveTask
+
+root = os.path.dirname(__file__)
+while root != "/" and not os.path.isfile(os.path.join(root, "siblings.root")):
+    root = os.path.dirname(root)
 
 pygame.init() 
 
@@ -20,7 +23,7 @@ map_surface = screen.subsurface(map_rect)
 control_panel = screen.subsurface(control_rect)
 
 def load_image(name):
-    path = os.path.join(config.root, "data", name + ".png")
+    path = os.path.join(root, "data", name + ".png")
     return pygame.image.load(path)
 
 unit_images = {}

@@ -1,9 +1,4 @@
-import os
 from UnitSpec import UnitSpec
-
-root = os.path.dirname(__file__)
-while root != "/" and not os.path.isfile(os.path.join(root, "siblings.root")):
-    root = os.path.dirname(root)
 
 monk_spec = UnitSpec("monk")
 monk_spec.speed = 4.0
