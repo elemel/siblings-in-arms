@@ -1,10 +1,10 @@
 # Copyright 2007 Mikael Lind.
 
-from a_star_search import a_star_search
 from collections import deque
 from geometry import grid_neighbors, diagonal_distance
+from shortest_path import shortest_path
 
-A_STAR_SEARCH_LIMIT = 100
+SHORTEST_PATH_LIMIT = 100
 
 class Pathfinder:
     def __init__(self, grid, gridlocker):
@@ -23,21 +23,19 @@ class Pathfinder:
         self._path_requests.append((unit, waypoint, callback))
 
     def _find_path(self, unit, waypoint):
-        def predicate(pos):
+        def goal(pos):
             return pos == waypoint
 
-        def neighbors(cell_key):
-            return (n for n in self._grid.neighbors(cell_key)
+        def neighbors(pos):
+            return (n for n in self._grid.neighbors(pos)
                     if not self._gridlocker.locked(n))
 
         def heuristic(pos):
             return diagonal_distance(pos, waypoint)
 
-        path, nodes = a_star_search(unit.pos, predicate, neighbors,
-                                    diagonal_distance, heuristic,
-                                    A_STAR_SEARCH_LIMIT)
-        print ("%s found a path after searching %d node(s)."
-               % (unit, len(nodes)))
-        d = deque()
-        d.extendleft(node.pos for node in path if node.pos != unit.pos)
-        return d
+        def debug(nodes):
+            print ("%s found a path after searching %d node(s)."
+                   % (unit, len(nodes)))
+            
+        return shortest_path(unit.pos, goal, neighbors, diagonal_distance,
+                             heuristic, limit=SHORTEST_PATH_LIMIT, debug=debug)
