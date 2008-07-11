@@ -7,7 +7,6 @@ from Grid import Grid
 from TaskFacade import TaskFacade
 from Taskmaster import Taskmaster
 from Unit import Unit
-from UnitManager import UnitManager
 from Gridlocker import Gridlocker
 from geometry import (rectangle_from_center_and_size, squared_distance,
                       diagonal_distance)
@@ -22,9 +21,8 @@ class GameEngine:
         self.grid = HexGrid((100, 100))
         self.gridlocker = Gridlocker()
         self.pathfinder = Pathfinder(self.grid, self.gridlocker)
-        self.unit_manager = UnitManager()
+        self.units = {}
         self.proximity_grid = Grid()
-        self.dead_units = []
         
     def update(self, dt):
         self.pathfinder.update()
@@ -33,7 +31,7 @@ class GameEngine:
 
     def add_unit(self, unit, pos):
         pos = self._find_unlocked_cell(pos)
-        self.unit_manager.add_unit(unit)
+        self.units[unit.key] = unit
         self._add_unit_to_grid(unit, pos)
         rect = rectangle_from_center_and_size(unit.pos, unit.size)
         self.proximity_grid[unit.key] = rect
@@ -44,28 +42,23 @@ class GameEngine:
         self.taskmaster.remove_unit(unit)
         del self.proximity_grid[unit.key]
         self._remove_unit_from_grid(unit)
-        self.unit_manager.remove_unit(unit)
+        del self.units[unit.key]
         unit.pos = None
         print "Removed %s." % unit
 
     def get_damage_factor(self, attacker, defender):
-        return damage_factors.get((attacker.spec.name,
-                                   defender.spec.name), 1.0)
+        return damage_factors.get((type(attacker), type(defender)), 1.0)
 
     def _remove_dead_units(self):
-        for unit in self.unit_manager._units.itervalues():
+        for unit in self.units.values():
             if unit.health <= 0:
-                self.dead_units.append(unit)
-        if self.dead_units:
-            for unit in self.dead_units:
                 self.remove_unit(unit)
-            del self.dead_units[:]
 
     def _idle_callback(self, unit):
         if not unit.damage:
             return
         rect = rectangle_from_center_and_size(unit.pos, (10, 10))
-        enemies = [self.unit_manager.find_unit(key)
+        enemies = [self.units.get(key)
                    for key in self.proximity_grid.intersect(rect)
                    if key != unit.key]
         enemies = [enemy for enemy in enemies if enemy.player != unit.player]

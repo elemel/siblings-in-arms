@@ -24,9 +24,6 @@ class TaskFacade:
     def is_cell_locked(self, cell_key):
         return self._game_engine.gridlocker.locked(cell_key)
 
-    def get_build_time(self, name):
-        return self._game_engine.unit_manager.get_build_time(name)
-
     def create_unit(self, name, player):
         return self._game_engine.unit_manager.create_unit(name, player)
 

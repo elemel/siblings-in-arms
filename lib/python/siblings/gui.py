@@ -6,6 +6,7 @@ from geometry import *
 from tasks.AttackTask import AttackTask
 from tasks.BuildTask import BuildTask
 from tasks.MoveTask import MoveTask
+from Unit import Building, Hero, Tavern
 
 root = os.path.dirname(__file__)
 while root != "/" and not os.path.isfile(os.path.join(root, "siblings.root")):
@@ -30,10 +31,10 @@ unit_images = {}
 unit_icons = {}
 
 def load_unit_images():
-    for name in ["knight", "monk", "priest", "ranger", "rogue", "tavern",
-                 "warrior", "wizard"]:
-        unit_images[name] = load_image(name)
-        unit_icons[name] = load_image(name + "-icon")
+    for cls in Hero.__subclasses__() + Building.__subclasses__():
+        name = cls.__name__.lower()
+        unit_images[cls] = load_image(name)
+        unit_icons[cls] = load_image(name + "-icon")
 
 load_unit_images()
 
@@ -55,7 +56,7 @@ def to_world_coords(point, screen_size):
             float(height - y) / PIXELS_PER_METER_Y)
 
 def get_sorted_units(game_engine):
-    units = game_engine.unit_manager._units.values()
+    units = game_engine.units.values()
     units.sort(lambda a, b: cmp(b.pos[1], a.pos[1]))
     return units
 
@@ -100,9 +101,9 @@ def handle_click_event(event, game_engine):
 
 def handle_select_event(event, game_engine):
     clicked_unit = None
-    for unit in game_engine.unit_manager._units.itervalues():
+    for unit in game_engine.units.itervalues():
         screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
-        surface = unit_images[unit.spec.name]
+        surface = unit_images[type(unit)]
         surface_size = surface.get_size()
         rect = rectangle_from_center_and_size(screen_pos, surface_size)
         if (rectangle_contains_point(rect, event.pos)
@@ -124,9 +125,9 @@ def handle_select_event(event, game_engine):
 
 def handle_command_event(event, game_engine):
     clicked_unit = None
-    for unit in game_engine.unit_manager._units.itervalues():
+    for unit in game_engine.units.itervalues():
         screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
-        surface = unit_images[unit.spec.name]
+        surface = unit_images[type(unit)]
         surface_size = surface.get_size()
         rect = rectangle_from_center_and_size(screen_pos, surface_size)
         if (rectangle_contains_point(rect, event.pos)
@@ -159,29 +160,19 @@ def handle_control_event(event, game_engine):
     button = x // 50
     if len(selection) == 1:
         unit = iter(selection).next()
-        if unit.spec.name == "tavern":
-            if button == 0:
-                game_engine.taskmaster.append_task(unit, BuildTask("monk"))
-            elif button == 1:
-                game_engine.taskmaster.append_task(unit, BuildTask("warrior"))
-            elif button == 2:
-                game_engine.taskmaster.append_task(unit, BuildTask("ranger"))
-            elif button == 3:
-                game_engine.taskmaster.append_task(unit, BuildTask("knight"))
-            elif button == 4:
-                game_engine.taskmaster.append_task(unit, BuildTask("rogue"))
-            elif button == 5:
-                game_engine.taskmaster.append_task(unit, BuildTask("priest"))
-            elif button == 6:
-                game_engine.taskmaster.append_task(unit, BuildTask("wizard"))
+        if type(unit) is Tavern:
+            classes = Hero.__subclasses__()
+            if 0 <= button < len(classes):
+                game_engine.taskmaster.append_task(unit,
+                                                   BuildTask(classes[button]))
 
 def handle_rectangle_event(old_pos, event, game_engine):
     global selection
     selection_rect = normalize_rectangle((old_pos, event.pos))
     new_selection = set()
-    for unit in game_engine.unit_manager._units.itervalues():
+    for unit in game_engine.units.itervalues():
         screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
-        surface = unit_images[unit.spec.name]
+        surface = unit_images[type(unit)]
         surface_size = surface.get_size()
         surface_rect = rectangle_from_center_and_size(screen_pos, surface_size)
         if rectangle_intersects_rectangle(selection_rect, surface_rect):
@@ -204,7 +195,7 @@ def paint_map_surface(game_engine):
     map_surface.fill(pygame.color.Color("#886644"))
     for unit in get_sorted_units(game_engine):
         screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
-        image = unit_images[unit.spec.name]
+        image = unit_images[type(unit)]
         width, height = image.get_size()
         radius = max(width, height) // 2
         if unit in selection:
@@ -228,13 +219,6 @@ def paint_selection_rectangle(game_engine):
 
 def paint_control_panel(game_engine):
     control_panel.fill(pygame.color.Color("gray"))
-    if len(selection) == 1:
-        unit = iter(selection).next()
-        if unit.spec.name == "tavern":
-            paint_image(control_panel, unit_icons["monk"], (25, 25))
-            paint_image(control_panel, unit_icons["warrior"], (75, 25))
-            paint_image(control_panel, unit_icons["ranger"], (125, 25))
-            paint_image(control_panel, unit_icons["knight"], (175, 25))
-            paint_image(control_panel, unit_icons["rogue"], (225, 25))
-            paint_image(control_panel, unit_icons["priest"], (275, 25))
-            paint_image(control_panel, unit_icons["wizard"], (325, 25))
+    if len(selection) == 1 and type(list(selection)[0]) is Tavern:
+        for i, cls in enumerate(Hero.__subclasses__()):
+            paint_image(control_panel, unit_icons[cls], (25 + i * 50, 25))

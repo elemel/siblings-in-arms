@@ -1,8 +1,10 @@
+from Unit import *
+
 damage_factors = {
-    ('knight', 'ranger'): 0.5,
-    ('knight', 'warrior'): 1.5,
-    ('ranger', 'knight'): 1.5,
-    ('ranger', 'warrior'): 0.5,
-    ('warrior', 'knight'): 0.5,
-    ('warrior', 'ranger'): 1.5,
+    (Knight, Ranger): 0.5,
+    (Knight, Warrior): 1.5,
+    (Ranger, Knight): 1.5,
+    (Ranger, Warrior): 0.5,
+    (Warrior, Knight): 0.5,
+    (Warrior, Ranger): 1.5,
 }

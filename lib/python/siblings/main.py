@@ -3,7 +3,7 @@
 import time, sys, random
 from collections import deque
 from GameEngine import GameEngine
-from Unit import Unit
+from Unit import Hero, Tavern
 from tasks.MoveTask import MoveTask
 from FrameCounter import FrameCounter
 
@@ -16,28 +16,26 @@ def random_pos(min_p, max_p):
     return (random.randint(min_x, max_x), random.randint(min_y, max_y))
 
 def main():
-    headless = ("-H" in sys.argv or "--headless" in sys.argv)
+    headless = ('-H' in sys.argv or '--headless' in sys.argv)
     if not headless:
         try:
             import gui
         except ImportError, e:
-            print "Error when importing GUI:", e
-            print "Specify the --headless option for a test run in text mode."
+            print 'Error when importing GUI:', e
+            print 'Specify the --headless option for a test run in text mode.'
             sys.exit(1)
         
     game_engine = GameEngine()
-    unit_specs = game_engine.unit_manager._specs
-    game_engine.add_unit(Unit(unit_specs["tavern"], "cyan"), (5, 14))
-    game_engine.add_unit(Unit(unit_specs["tavern"], "yellow"), (15, 5))
+    game_engine.add_unit(Tavern('cyan'), (5, 14))
+    game_engine.add_unit(Tavern('yellow'), (15, 5))
 
     if headless:
         min_p, max_p = (2, 2), (18, 16)
-        colors = ["cyan", "yellow"]
-        unit_spec_values = unit_specs.values()
-        unit_spec_values.remove(unit_specs["tavern"])
+        colors = 'cyan', 'yellow'
+        hero_types = Hero.__subclasses__()
         for i in xrange(50):
-            unit = Unit(random.choice(unit_spec_values), random.choice(colors))
-            game_engine.add_unit(unit, random_pos(min_p, max_p))
+            hero = random.choice(hero_types)(random.choice(colors))
+            game_engine.add_unit(hero, random_pos(min_p, max_p))
     
     old_time = time.time()
     frame_counter = FrameCounter()
@@ -48,7 +46,7 @@ def main():
         if dt >= MIN_TIME_STEP:
             frame_counter.tick(dt)
             if dt > MAX_TIME_STEP:
-                print "Skipping %d frame(s)." % int(dt / MAX_TIME_STEP)
+                print 'Skipping %d frame(s).' % int(dt / MAX_TIME_STEP)
                 dt = MAX_TIME_STEP
             old_time = new_time
             game_engine.update(dt)
@@ -56,12 +54,12 @@ def main():
             if headless:
                 if new_time - last_fps_time >= 1.0:
                     last_fps_time = new_time
-                    print ("Running at %d frame(s) per second."
+                    print ('Running at %d frame(s) per second.'
                            % frame_counter.fps)
             else:
                 gui.update(game_engine, frame_counter.fps)
         else:
             time.sleep(MIN_TIME_STEP - dt)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
