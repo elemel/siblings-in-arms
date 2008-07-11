@@ -2,7 +2,7 @@ import os
 from UnitSpec import UnitSpec
 
 root = os.path.dirname(__file__)
-while root != "/" and not os.path.isfile(os.path.join(root, "Jamroot")):
+while root != "/" and not os.path.isfile(os.path.join(root, "siblings.root")):
     root = os.path.dirname(root)
 
 damage_factors = {
