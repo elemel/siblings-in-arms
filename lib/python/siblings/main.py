@@ -3,8 +3,8 @@
 import time, sys, random
 from collections import deque
 from GameEngine import GameEngine
-from Unit import Hero, Tavern
-from tasks.MoveTask import MoveTask
+from Unit import Hero, Tavern, Warrior
+from Task import MoveTask
 from FrameCounter import FrameCounter
 
 MIN_TIME_STEP = 0.01
@@ -29,10 +29,10 @@ def main():
     game_engine.add_unit(Tavern('cyan'), (5, 14))
     game_engine.add_unit(Tavern('yellow'), (15, 5))
 
-    if headless:
+    if True or headless:
         min_p, max_p = (2, 2), (18, 16)
         colors = 'cyan', 'yellow'
-        hero_types = Hero.__subclasses__()
+        hero_types = [Warrior] # Hero.__subclasses__()
         for i in xrange(50):
             hero = random.choice(hero_types)(random.choice(colors))
             game_engine.add_unit(hero, random_pos(min_p, max_p))

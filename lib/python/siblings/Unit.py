@@ -11,8 +11,7 @@ class Unit(object):
     damage = None
     min_range = 0.0
     max_range = 1.0
-    preattack_time = 0.5
-    postattack_time = 0.5
+    attack_time = 0.5
     max_health = 1.0
     build_time = 0.3
 
@@ -21,6 +20,8 @@ class Unit(object):
         self.player = player
         self.pos = None
         self.health = self.max_health
+        self.task = None
+        self.task_queue = []
 
     def __str__(self):
         return "%s %s #%d" % (self.player.capitalize(), type(self).__name__,
@@ -60,8 +61,7 @@ class Priest(Hero):
 class Wizard(Hero):
     speed = 3.0
     damage = 0.5
-    preattack_time = 1.0
-    postattack_time = 0.5
+    attack_time = 2.0
     max_health = 0.6
 
 class Building(Unit):
