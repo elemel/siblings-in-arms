@@ -1,7 +1,25 @@
-# Copyright 2007 Mikael Lind.
+# Copyright (c) 2007 Mikael Lind
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 
 import time, sys
-from Pathfinder import Pathfinder
 from HexGrid import HexGrid
 from Grid import Grid
 from TaskFacade import TaskFacade
@@ -12,19 +30,46 @@ from geometry import (rectangle_from_center_and_size, squared_distance,
 from balance import damage_factors
 from shortest_path import shortest_path
 
+from collections import deque
+from geometry import diagonal_distance
+
+
+SHORTEST_PATH_LIMIT = 100
+
+
 class GameEngine:
+
     def __init__(self):
         self.task_facade = TaskFacade(self)
         self.grid = HexGrid((100, 100))
         self.gridlocker = Gridlocker()
-        self.pathfinder = Pathfinder(self.grid, self.gridlocker)
+        self.path_queue = deque()
         self.units = {}
         self.proximity_grid = Grid()
         
     def update(self, dt):
-        self.pathfinder.update()
+        self.__update_paths()
         self.__update_tasks(dt)
         self.__remove_dead_units()
+
+    def __update_paths(self):
+        if self.path_queue:
+            unit, waypoint, callback = self.path_queue.popleft()
+            if unit.pos is not None:
+                def goal(pos):
+                    return pos == waypoint
+                def neighbors(pos):
+                    return (n for n in self.grid.neighbors(pos)
+                            if not self.gridlocker.locked(n))
+                def heuristic(pos):
+                    return diagonal_distance(pos, waypoint)
+                def debug(nodes):
+                    print ("%s found a path after searching %d node(s)."
+                           % (unit, len(nodes)))
+                path = shortest_path(unit.pos, goal, neighbors,
+                                     diagonal_distance, heuristic,
+                                     limit=SHORTEST_PATH_LIMIT, debug=debug)
+                callback(path)
 
     def __update_tasks(self, dt):
         for unit in self.units.values():
@@ -52,6 +97,9 @@ class GameEngine:
         del self.units[unit.key]
         unit.pos = None
         print "Removed %s." % unit
+
+    def request_path(self, unit, waypoint, callback):
+        self.path_queue.append((unit, waypoint, callback))
 
     def get_damage_factor(self, attacker, defender):
         return damage_factors.get((type(attacker), type(defender)), 1.0)
