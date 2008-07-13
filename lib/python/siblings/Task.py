@@ -115,9 +115,9 @@ class BuildTask(Task):
 def in_range(attacker, target):
     if target.pos is None:
         return False
-    distance = (diagonal_distance(attacker.pos, target.pos)
-                - attacker.size[0] / 2.0 - target.size[0] / 2.0)
-    return distance >= attacker.min_range and distance <= attacker.max_range
+    distance = abs(diagonal_distance(attacker.pos, target.pos)
+                   - attacker.size[0] / 2.0 - target.size[0] / 2.0)
+    return attacker.min_range <= distance <= attacker.max_range
 
 
 def attack_progress(target):

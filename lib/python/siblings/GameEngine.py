@@ -38,7 +38,7 @@ class GameEngine:
 
     def __init__(self):
         self.task_facade = TaskFacade(self)
-        self.grid = HexGrid((100, 100))
+        self.grid = HexGrid()
         self.__path_queue = deque()
         self.units = {}
         self.proximity_grid = ProximityGrid(3)
@@ -82,9 +82,10 @@ class GameEngine:
                 unit.task_queue = unit.task_queue[1:]
 
     def add_unit(self, unit, pos):
-        pos = self._find_unlocked_cell(pos)
+        cell = self.__find_unlocked_cell(pos)
+        unit.pos = cell
         self.units[unit.key] = unit
-        self._add_unit_to_grid(unit, pos)
+        self.__add_unit_locks(unit, cell)
         rect = rectangle_from_center_and_size(unit.pos, unit.size)
         self.proximity_grid[unit.key] = rect
         print "Added %s at %s." % (unit, unit.pos)
@@ -121,32 +122,18 @@ class GameEngine:
             enemy = min(enemies, key=key_func)
             print "%s found an enemy in %s." % (unit, enemy)
 
-    def _find_unlocked_cell(self, start):
-        width, height = self.grid.size
-
+    def __find_unlocked_cell(self, start):
         def goal(cell):
             return not self.locked_cell(cell)
-
         def debug(nodes):
             print ("Found an unlocked cell after searching %d node(s)."
                    % len(nodes))
-    
         path = shortest_path(start, goal, self.grid.neighbors,
                              diagonal_distance)
         return path[-1] if path else start
 
-    def _add_unit_to_grid(self, unit, pos):
-        pos = self._find_unlocked_cell(pos)
-        unit.pos = pos
-        x, y = unit.pos
-        width, height = unit.size
-        min_x = int(x - (width - 1) / 2)
-        min_y = int(y - (height - 1) / 2)
-        max_x = min_x + (width - 1)
-        max_y = min_y + (height - 1)
-        for x in xrange(min_x, max_x + 1):
-            for y in xrange(min_y, max_y + 1):
-                self.lock_cell(unit, (x, y))
+    def __add_unit_locks(self, unit, cell):
+        self.lock_cell(unit, cell)
 
     def __remove_unit_locks(self, unit):
         if unit in self.__unit_locks:
