@@ -73,7 +73,7 @@ class GameEngine:
         for unit in self.units.values():
             if unit.task is not None:
                 self.task_facade.actor = unit
-                self.task_facade.dt = dt
+                self.task_facade.dt = time_step
                 unit.task.update(self.task_facade)
                 if unit.task.done:
                     unit.task = None
