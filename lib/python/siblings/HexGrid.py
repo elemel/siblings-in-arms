@@ -28,14 +28,14 @@ class HexGrid:
     def __init__(self, cell_size = 1):
         self.cell_size = cell_size
 
-    def neighbors(self, cell_key):
-        return (k for k in hex_neighbors(cell_key))
-
     def pos_to_cell(self, point):
         return pos_to_hex_cell(point, self.cell_size)
 
-    def cell_to_pos(self, cell_key):
-        return hex_cell_to_pos(cell_key, self.cell_size)
+    def cell_to_pos(self, cell):
+        return hex_cell_to_pos(cell, self.cell_size)
 
     def cell_distance(self, from_cell, to_cell):
         return diagonal_distance(from_cell, to_cell)
+
+    def neighbors(self, cell):
+        return hex_neighbors(cell)

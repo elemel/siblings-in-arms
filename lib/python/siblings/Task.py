@@ -40,9 +40,9 @@ class Task(object):
 
 class MoveTask(Task):
 
-    def __init__(self, waypoint):
+    def __init__(self, dest):
         Task.__init__(self)
-        self.waypoint = waypoint
+        self.dest = dest
         self.path_request = None
         self.path = None
         self.path = None
@@ -53,7 +53,7 @@ class MoveTask(Task):
         self.update = self.__request_path
 
     def __request_path(self, facade):
-        self.path_request = facade.request_path(facade.actor, self.waypoint,
+        self.path_request = facade.request_path(facade.actor, self.dest,
                                                 self.__set_path)
         self.update = self.__wait_for_path
         self.update(facade)
@@ -67,7 +67,7 @@ class MoveTask(Task):
                 self.update(facade)
 
     def __follow_path(self, facade):
-        if self.aborting or facade.actor.cell == self.waypoint:
+        if self.aborting or facade.actor.cell == self.dest:
             self.done = True
         elif not self.path:
             self.update = self.__request_path

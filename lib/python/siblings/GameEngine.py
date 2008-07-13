@@ -23,7 +23,7 @@ import time, sys
 from HexGrid import HexGrid
 from ProximityGrid import ProximityGrid
 from TaskFacade import TaskFacade
-from Unit import Unit
+from Unit import Building
 from geometry import rectangle_from_center_and_size, squared_distance
 from balance import damage_factors
 from shortest_path import shortest_path
@@ -89,7 +89,7 @@ class GameEngine:
         self.__add_unit_locks(unit)
         rect = rectangle_from_center_and_size(unit.pos, unit.size)
         self.proximity_grid[unit.key] = rect
-        print "Added %s at %s." % (unit, unit.pos)
+        print "Added %s at %s." % (unit, unit.cell)
 
     def remove_unit(self, unit):
         del self.proximity_grid[unit.key]
@@ -138,6 +138,9 @@ class GameEngine:
 
     def __add_unit_locks(self, unit):
         self.lock_cell(unit, unit.cell)
+        if isinstance(unit, Building):
+            for neighbor in self.grid.neighbors(unit.cell):
+                self.lock_cell(unit, neighbor)
 
     def __remove_unit_locks(self, unit):
         if unit in self.__unit_locks:
