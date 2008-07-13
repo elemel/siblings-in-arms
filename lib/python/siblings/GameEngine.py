@@ -24,12 +24,10 @@ from HexGrid import HexGrid
 from ProximityGrid import ProximityGrid
 from TaskFacade import TaskFacade
 from Unit import Unit
-from Gridlocker import Gridlocker
 from geometry import rectangle_from_center_and_size, squared_distance
 from balance import damage_factors
 from shortest_path import shortest_path
-
-from collections import deque
+from collections import defaultdict, deque
 from geometry import diagonal_distance
 
 
@@ -41,10 +39,11 @@ class GameEngine:
     def __init__(self):
         self.task_facade = TaskFacade(self)
         self.grid = HexGrid((100, 100))
-        self.gridlocker = Gridlocker()
         self.__path_queue = deque()
         self.units = {}
         self.proximity_grid = ProximityGrid(3)
+        self.__cell_locks = {}
+        self.__unit_locks = defaultdict(set)
         
     def update(self, dt):
         self.__update_paths()
@@ -59,7 +58,7 @@ class GameEngine:
                     return pos == waypoint
                 def neighbors(pos):
                     return (n for n in self.grid.neighbors(pos)
-                            if not self.gridlocker.locked(n))
+                            if not self.locked_cell(n))
                 def heuristic(pos):
                     return diagonal_distance(pos, waypoint)
                 def debug(nodes):
@@ -92,7 +91,7 @@ class GameEngine:
 
     def remove_unit(self, unit):
         del self.proximity_grid[unit.key]
-        self._remove_unit_from_grid(unit)
+        self.__remove_unit_locks(unit)
         del self.units[unit.key]
         unit.pos = None
         print "Removed %s." % unit
@@ -125,8 +124,8 @@ class GameEngine:
     def _find_unlocked_cell(self, start):
         width, height = self.grid.size
 
-        def goal(cell_key):
-            return not self.gridlocker.locked(cell_key)
+        def goal(cell):
+            return not self.locked_cell(cell)
 
         def debug(nodes):
             print ("Found an unlocked cell after searching %d node(s)."
@@ -147,9 +146,26 @@ class GameEngine:
         max_y = min_y + (height - 1)
         for x in xrange(min_x, max_x + 1):
             for y in xrange(min_y, max_y + 1):
-                self.gridlocker.lock((x, y), unit)
+                self.lock_cell(unit, (x, y))
 
-    def _remove_unit_from_grid(self, unit):
-        if unit.key in self.gridlocker._units:
-            for cell_key in list(self.gridlocker._units[unit.key]):
-                self.gridlocker.unlock(cell_key)
+    def __remove_unit_locks(self, unit):
+        if unit in self.__unit_locks:
+            for cell in list(self.__unit_locks[unit]):
+                self.unlock_cell(cell)
+
+    def lock_cell(self, unit, cell):
+        if cell in self.__cell_locks:
+            raise RuntimeError("cell %s is already locked" % (cell,))
+        self.__cell_locks[cell] = unit
+        self.__unit_locks[unit].add(cell)
+        print "%s locked cell %s." % (unit, cell)
+
+    def unlock_cell(self, cell):
+        unit = self.__cell_locks.pop(cell)
+        self.__unit_locks[unit].remove(cell)
+        if not self.__unit_locks[unit]:
+            del self.__unit_locks[unit]
+        print "%s unlocked cell %s." % (unit, cell)
+
+    def locked_cell(self, cell):
+        return cell in self.__cell_locks

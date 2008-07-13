@@ -33,14 +33,14 @@ class TaskFacade:
     def request_path(self, unit, waypoint, callback):
         self.__game_engine.request_path(unit, waypoint, callback)
 
-    def lock_cell(self, unit, cell_key):
-        return self.__game_engine.gridlocker.lock(cell_key, unit)
+    def lock_cell(self, unit, cell):
+        return self.__game_engine.lock_cell(unit, cell)
 
-    def unlock_cell(self, unit, cell_key):
-        self.__game_engine.gridlocker.unlock(cell_key)
+    def unlock_cell(self, cell):
+        self.__game_engine.unlock_cell(cell)
 
-    def is_cell_locked(self, cell_key):
-        return self.__game_engine.gridlocker.locked(cell_key)
+    def locked_cell(self, cell):
+        return self.__game_engine.locked_cell(cell)
 
     def create_unit(self, name, player):
         return self.__game_engine.unit_manager.create_unit(name, player)

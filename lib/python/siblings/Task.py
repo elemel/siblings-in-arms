@@ -71,7 +71,7 @@ class MoveTask(Task):
         elif not self.path:
             self.update = self.__request_path
             self.update(facade)
-        elif facade.is_cell_locked(self.path[0]):
+        elif facade.locked_cell(self.path[0]):
             self.done = True
         else:
             facade.lock_cell(facade.actor, self.path[0])
@@ -89,7 +89,7 @@ class MoveTask(Task):
                                            self.subprogress))
         else:
             facade.set_pos(facade.actor, self.path[0])
-            facade.unlock_cell(facade.actor, self.old_pos)
+            facade.unlock_cell(self.old_pos)
             self.path = self.path[1:]
             self.update = self.__follow_path
 
