@@ -31,7 +31,7 @@ def rectangle_from_center_and_size(center, size):
     width, height = size
     min_p = (x - width / 2.0, y - height / 2.0)
     max_p = (x + width / 2.0, y + height / 2.0)
-    return (min_p, max_p)
+    return min_p, max_p
     
 
 def rectangle_contains_point(r, p):
@@ -39,7 +39,7 @@ def rectangle_contains_point(r, p):
     min_x, min_y = min_p
     max_x, max_y = max_p
     x, y = p
-    return x >= min_x and y >= min_y and x <= max_x and y <= max_y
+    return min_x <= x <= max_x and min_y <= y <= max_y
 
 
 def rectangle_intersects_rectangle(a, b):
@@ -55,7 +55,7 @@ def normalize_rectangle(r):
     max_x, max_y = max_p
     min_x, max_x = min(min_x, max_x), max(min_x, max_x)
     min_y, max_y = min(min_y, max_y), max(min_y, max_y)
-    return ((min_x, min_y), (max_x, max_y))
+    return (min_x, min_y), (max_x, max_y)
 
 
 def grid_neighbors(pos):
