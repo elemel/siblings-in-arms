@@ -19,12 +19,13 @@
 # SOFTWARE.
 
 
+from itertools import chain
 from math import floor
 
 
 def intersects(a, b):
 
-    """test two bounding boxes for intersection"""
+    """Test two bounding boxes for intersection."""
     
     a_min, a_max = a
     a_left, a_bottom = a_min
@@ -38,31 +39,26 @@ def intersects(a, b):
             and a_bottom < b_top and b_bottom < a_top)
 
 
-def concat(outer):
-
-    """concatenate all inner iterables of an outer iterable"""
-
-    for inner in outer:
-        for element in inner:
-            yield element
-
-
 class Grid(object):
 
-    """sparse planar grid"""
+    """Sparse planar grid."""
     
     def __init__(self, cell_size = 1):
-        """initialize grid"""
+        """Initialize the grid."""
         self._cell_size = cell_size
         self._cells = {}
         self._entries = {}
 
     def __getitem__(self, key):
-        """return the bounding box for the given key"""
+
+        """Return the bounding box for the given key."""
+
         return self._entries[key].bounds
 
     def __setitem__(self, key, bounds):
-        """insert or update an entry for the given key"""
+
+        """Insert or update an entry for the given key."""
+
         entry = self._entries.get(key)
         if entry is None:
             self._insert(key, bounds)
@@ -70,26 +66,36 @@ class Grid(object):
             self._update(key, bounds, entry)
 
     def __delitem__(self, key):
-        """delete the entry for the given key"""
+
+        """Delete the entry for the given key."""
+
         entry = self._entries.pop(key)
         self._remove_from_cells(key, entry.indices)
 
     def __contains__(self, key):
-        """test if there is an entry for the given key"""
+
+        """Test whether there is an entry for the given key."""
+
         return key in self._entries
 
     def __len__(self):
-        """return the entry count"""
+
+        """Return the number of entries."""
+
         return len(self._entries)
 
     def cell_size(self):
-        """return the cell size"""
+
+        """Return the cell size."""
+
         return self._cell_size
 
     def intersect(self, bounds):
-        """return keys for entries that intersect the given bounding box"""
+
+        """Return keys for entries that intersect the given bounding box."""
+
         cells = (self._cells.get(p, ()) for p in self._indices(bounds))
-        return set(key for key in concat(cells)
+        return set(key for key in chain(*cells)
                    if intersects(self[key], bounds))
 
     def _indices(self, bounds):

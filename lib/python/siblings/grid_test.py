@@ -19,7 +19,7 @@
 # SOFTWARE.
 
 
-from Grid import intersects, concat, Grid
+from Grid import intersects, Grid
 
 
 def test_intersects_when_equal():
@@ -46,11 +46,6 @@ def test_intersects_when_disjoint():
     b = ((5, 6), (7, 8))
     assert not intersects(a, b)
     assert not intersects(b, a)
-
-
-def test_concat():
-    assert (tuple(concat(((1, 2), (), (3,), (4, 5, 6), (7,))))
-            == (1, 2, 3, 4, 5, 6, 7))
 
 
 def test_getitem_when_absent():
@@ -158,9 +153,6 @@ def test():
     test_intersects_when_overlap()
     test_intersects_when_contained()
     test_intersects_when_disjoint()
-    
-    print "Testing concat function..."
-    test_concat()
     
     print "Testing Grid class..."
     test_getitem_when_absent()
