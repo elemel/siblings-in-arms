@@ -20,7 +20,6 @@
 
 
 from itertools import chain
-from math import floor
 
 
 def intersects(a, b):
@@ -44,97 +43,99 @@ class Grid(object):
     """Sparse planar grid."""
     
     def __init__(self, cell_size = 1):
+
         """Initialize the grid."""
-        self._cell_size = cell_size
-        self._cells = {}
-        self._entries = {}
+
+        self.__cell_size = cell_size
+        self.__cells = {}
+        self.__entries = {}
 
     def __getitem__(self, key):
 
         """Return the bounding box for the given key."""
 
-        return self._entries[key].bounds
+        return self.__entries[key].bounds
 
     def __setitem__(self, key, bounds):
 
         """Insert or update an entry for the given key."""
 
-        entry = self._entries.get(key)
+        entry = self.__entries.get(key)
         if entry is None:
-            self._insert(key, bounds)
+            self.__insert(key, bounds)
         else:
-            self._update(key, bounds, entry)
+            self.__update(key, bounds, entry)
 
     def __delitem__(self, key):
 
         """Delete the entry for the given key."""
 
-        entry = self._entries.pop(key)
-        self._remove_from_cells(key, entry.indices)
+        entry = self.__entries.pop(key)
+        self.__remove_from_cells(key, entry.indices)
 
     def __contains__(self, key):
 
         """Test whether there is an entry for the given key."""
 
-        return key in self._entries
+        return key in self.__entries
 
     def __len__(self):
 
         """Return the number of entries."""
 
-        return len(self._entries)
+        return len(self.__entries)
 
     def cell_size(self):
 
         """Return the cell size."""
 
-        return self._cell_size
+        return self.__cell_size
 
     def intersect(self, bounds):
 
         """Return keys for entries that intersect the given bounding box."""
 
-        cells = (self._cells.get(p, ()) for p in self._indices(bounds))
+        cells = (self.__cells.get(p, ()) for p in self.__indices(bounds))
         return set(key for key in chain(*cells)
                    if intersects(self[key], bounds))
 
-    def _indices(self, bounds):
+    def __indices(self, bounds):
         min_p, max_p = bounds
         min_x, min_y = min_p
         max_x, max_y = max_p
 
         def hash(value):
-            return int(value / self._cell_size)
+            return int(value / self.__cell_size)
 
         return ((x, y) for x in xrange(hash(min_x), hash(max_x) + 1)
                 for y in xrange(hash(min_y), hash(max_y) + 1))
 
-    def _insert(self, key, bounds):
-        indices = frozenset(self._indices(bounds))
-        self._add_to_cells(key, indices)
-        self._entries[key] = _GridEntry(bounds, indices)
+    def __insert(self, key, bounds):
+        indices = frozenset(self.__indices(bounds))
+        self.__add_to_cells(key, indices)
+        self.__entries[key] = _GridEntry(bounds, indices)
 
-    def _update(self, key, bounds, entry):
+    def __update(self, key, bounds, entry):
         entry.bounds = bounds
-        indices = frozenset(self._indices(bounds))
+        indices = frozenset(self.__indices(bounds))
         if indices != entry.indices:
-            self._remove_from_cells(key, entry.indices - indices)
-            self._add_to_cells(key, indices - entry.indices)
+            self.__remove_from_cells(key, entry.indices - indices)
+            self.__add_to_cells(key, indices - entry.indices)
             entry.indices = indices
 
-    def _add_to_cells(self, key, indices):
+    def __add_to_cells(self, key, indices):
         for p in indices:
-            cells = self._cells.get(p)
+            cells = self.__cells.get(p)
             if cells is None:
-                cells = self._cells[p] = set()
+                cells = self.__cells[p] = set()
             cells.add(key)
 
-    def _remove_from_cells(self, key, indices):
+    def __remove_from_cells(self, key, indices):
         for p in indices:
-            cells = self._cells[p]
+            cells = self.__cells[p]
             cells.remove(key)
             if not cells:
-                del self._cells[p]
+                del self.__cells[p]
 
 
 class _GridEntry(object):
