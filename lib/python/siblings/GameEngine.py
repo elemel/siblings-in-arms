@@ -41,13 +41,13 @@ class GameEngine:
         self.grid = HexGrid()
         self.__path_queue = deque()
         self.units = {}
-        self.proximity_grid = ProximityGrid(3)
+        self.proximity_grid = ProximityGrid(5)
         self.__cell_locks = {}
         self.__unit_locks = defaultdict(set)
         
-    def update(self, dt):
+    def update(self, time_step):
         self.__update_paths()
-        self.__update_tasks(dt)
+        self.__update_tasks(time_step)
         self.__remove_dead_units()
 
     def __update_paths(self):
@@ -69,7 +69,7 @@ class GameEngine:
                                      limit=SHORTEST_PATH_LIMIT, debug=debug)
                 callback(path)
 
-    def __update_tasks(self, dt):
+    def __update_tasks(self, time_step):
         for unit in self.units.values():
             if unit.task is not None:
                 self.task_facade.actor = unit

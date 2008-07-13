@@ -28,7 +28,6 @@ class TaskFacade:
         self.__game_engine = game_engine
         self.dt = 0.0
         self.actor = None
-        self.aborting = False
 
     def request_path(self, unit, waypoint, callback):
         self.__game_engine.request_path(unit, waypoint, callback)
@@ -42,9 +41,6 @@ class TaskFacade:
     def locked_cell(self, cell):
         return self.__game_engine.locked_cell(cell)
 
-    def create_unit(self, name, player):
-        return self.__game_engine.unit_manager.create_unit(name, player)
-
     def add_unit(self, unit, pos):
         self.__game_engine.add_unit(unit, pos)
 
@@ -52,12 +48,6 @@ class TaskFacade:
         unit.pos = pos
         rect = rectangle_from_center_and_size(unit.pos, unit.size)
         self.__game_engine.proximity_grid[unit.key] = rect
-
-    def request_task(self, unit, callback):
-        pass
-
-    def remove_task_request(self, unit):
-        pass
 
     def get_damage_factor(self, attacker, defender):
         return self.__game_engine.get_damage_factor(attacker, defender)

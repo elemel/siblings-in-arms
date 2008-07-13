@@ -27,13 +27,13 @@ from Unit import Building, Hero, Tavern
 
 
 root = os.path.dirname(__file__)
-while root != "/" and not os.path.isfile(os.path.join(root, "siblings.root")):
+while root != '/' and not os.path.isfile(os.path.join(root, 'siblings.root')):
     root = os.path.dirname(root)
 
 pygame.init() 
 
 window = pygame.display.set_mode((800, 600))
-pygame.display.set_caption("Siblings in Arms")
+pygame.display.set_caption('Siblings in Arms')
 screen = pygame.display.get_surface()
 
 map_rect = pygame.Rect((0, 0), (800, 550))
@@ -42,7 +42,7 @@ map_surface = screen.subsurface(map_rect)
 control_panel = screen.subsurface(control_rect)
 
 def load_image(name):
-    path = os.path.join(root, "data", name + ".png")
+    path = os.path.join(root, 'data', name + '.png')
     image = pygame.image.load(path)
     image.set_colorkey((0, 0, 255))
     return image
@@ -71,7 +71,7 @@ def load_unit_images():
         unit_images[cls] = image = load_image(name)
         for team, team_color in team_colors.iteritems():
             team_images[team, cls] = create_team_image(image, team_color)
-        unit_icons[cls] = load_image(name + "-icon")
+        unit_icons[cls] = load_image(name + '-icon')
 
 load_unit_images()
 
@@ -151,14 +151,14 @@ def handle_select_event(event, game_engine):
         if pygame.key.get_mods() & pygame.KMOD_SHIFT:
             if clicked_unit in selection:
                 selection.remove(clicked_unit)
-                print "Removed unit #%d from selection." % clicked_unit.key
+                print 'Removed %s from selection.' % clicked_unit
             else:
                 selection.add(clicked_unit)
-                print "Added unit #%d to selection." % clicked_unit.key
+                print 'Added %s to selection.' % clicked_unit
         else:
             selection.clear()
             selection.add(clicked_unit)
-            print "Selected unit #%d." % clicked_unit.key
+            print 'Selected %s.' % clicked_unit
 
 def handle_command_event(event, game_engine):
     clicked_unit = None
@@ -180,9 +180,9 @@ def handle_command_event(event, game_engine):
                     if unit.task is not None:
                         unit.task.aborting = True
                     del unit.task_queue[:]
-                    print "Cleared tasks for unit #%d." % unit.key
+                    print '%s aborted all tasks.' % unit
                 unit.task_queue.append(MoveTask(cell))
-                print "Added waypoint %s to unit #%d." % (cell, unit.key)
+                print '%s added waypoint %s.' % (unit, cell)
     else:
         for unit in selection:
             if unit.damage and unit.player != clicked_unit.player:
@@ -190,10 +190,9 @@ def handle_command_event(event, game_engine):
                     if unit.task is not None:
                         unit.task.aborting = True
                     del unit.task_queue[:]
-                    print "Cleared tasks for unit #%d." % unit.key
+                    print '%s aborted all tasks.' % unit
                 unit.task_queue.append(AttackTask(clicked_unit))
-                print ("Added target #%d to unit #%d."
-                       % (clicked_unit.key, unit.key))
+                print ('%s targeted %s.' % (unit, clicked_unit))
 
 def handle_control_event(event, game_engine):
     x, y = event.pos
@@ -220,10 +219,10 @@ def handle_rectangle_event(old_pos, event, game_engine):
     if pygame.key.get_mods() & pygame.KMOD_SHIFT:
         old_size = len(selection)
         selection |= new_selection
-        print "Added %d unit(s) to selection." % (len(selection) - old_size)
+        print 'Added %d unit(s) to selection.' % (len(selection) - old_size)
     else:
         selection = new_selection
-        print "Selected %d unit(s)." % len(selection)
+        print 'Selected %d unit(s).' % len(selection)
 
 def update_screen(game_engine):
     paint_map_surface(game_engine)
@@ -231,16 +230,16 @@ def update_screen(game_engine):
     pygame.display.flip()
 
 def paint_map_surface(game_engine):
-    map_surface.fill(pygame.color.Color("#886644"))
+    map_surface.fill(pygame.color.Color('#886644'))
     for unit in get_sorted_units(game_engine):
         screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
         image = team_images[unit.player, type(unit)]
         width, height = image.get_size()
         radius = max(width, height) // 2
         if unit in selection:
-            pygame.draw.circle(map_surface, pygame.color.Color("black"),
+            pygame.draw.circle(map_surface, pygame.color.Color('black'),
                                screen_pos, radius - 1, 3)
-            pygame.draw.circle(map_surface, pygame.color.Color("green"),
+            pygame.draw.circle(map_surface, pygame.color.Color('green'),
                                screen_pos, radius - 2, 1)
         paint_image(map_surface, image, screen_pos)
     paint_selection_rectangle(game_engine)
@@ -253,11 +252,11 @@ def paint_selection_rectangle(game_engine):
         y = min(old_y, new_y)
         width = abs(old_x - new_x)
         height = abs(old_y - new_y)
-        pygame.draw.rect(map_surface, pygame.color.Color("green"),
+        pygame.draw.rect(map_surface, pygame.color.Color('green'),
                          pygame.Rect(x, y, width, height), 1)
 
 def paint_control_panel(game_engine):
-    control_panel.fill(pygame.color.Color("gray"))
+    control_panel.fill(pygame.color.Color('gray'))
     if len(selection) == 1 and type(list(selection)[0]) is Tavern:
         for i, cls in enumerate(Hero.__subclasses__()):
             paint_image(control_panel, unit_icons[cls], (25 + i * 50, 25))
