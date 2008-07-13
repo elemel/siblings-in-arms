@@ -43,7 +43,7 @@ class GameEngine:
         self.task_facade = TaskFacade(self)
         self.grid = HexGrid((100, 100))
         self.gridlocker = Gridlocker()
-        self.path_queue = deque()
+        self.__path_queue = deque()
         self.units = {}
         self.proximity_grid = Grid()
         
@@ -53,8 +53,8 @@ class GameEngine:
         self.__remove_dead_units()
 
     def __update_paths(self):
-        if self.path_queue:
-            unit, waypoint, callback = self.path_queue.popleft()
+        if self.__path_queue:
+            unit, waypoint, callback = self.__path_queue.popleft()
             if unit.pos is not None:
                 def goal(pos):
                     return pos == waypoint
@@ -99,7 +99,7 @@ class GameEngine:
         print "Removed %s." % unit
 
     def request_path(self, unit, waypoint, callback):
-        self.path_queue.append((unit, waypoint, callback))
+        self.__path_queue.append((unit, waypoint, callback))
 
     def get_damage_factor(self, attacker, defender):
         return damage_factors.get((type(attacker), type(defender)), 1.0)
