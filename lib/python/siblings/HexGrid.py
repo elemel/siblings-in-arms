@@ -19,23 +19,23 @@
 # SOFTWARE.
 
 
-from geometry import (diagonal_distance, hex_neighbors, point_to_hex_cell,
-                      hex_cell_to_point)
+from geometry import (diagonal_distance, hex_neighbors, pos_to_hex_cell,
+                      hex_cell_to_pos)
 
 
 class HexGrid:
 
-    def __init__(self, cell_dist = 1.0):
-        self.cell_dist = cell_dist
+    def __init__(self, cell_size = 1):
+        self.cell_size = cell_size
 
     def neighbors(self, cell_key):
         return (k for k in hex_neighbors(cell_key))
 
-    def point_to_cell(self, point):
-        return point_to_hex_cell(point, self.cell_dist)
+    def pos_to_cell(self, point):
+        return pos_to_hex_cell(point, self.cell_size)
 
-    def cell_to_point(self, cell_key):
-        return hex_cell_to_point(cell_key, self.cell_dist)
+    def cell_to_pos(self, cell_key):
+        return hex_cell_to_pos(cell_key, self.cell_size)
 
-    def distance(self, point_a, point_b):
-        return diagonal_distance(point_a, point_b)
+    def cell_distance(self, from_cell, to_cell):
+        return diagonal_distance(from_cell, to_cell)

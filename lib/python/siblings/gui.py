@@ -172,8 +172,8 @@ def handle_command_event(event, game_engine):
             clicked_unit = unit
 
     if clicked_unit is None:
-        x, y = to_world_coords(event.pos, map_surface.get_size())
-        pos = int(round(x)), int(round(y))
+        pos = to_world_coords(event.pos, map_surface.get_size())
+        cell = game_engine.grid.pos_to_cell(pos)
         for unit in selection:
             if unit.speed is not None:
                 if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
@@ -181,8 +181,8 @@ def handle_command_event(event, game_engine):
                         unit.task.aborting = True
                     del unit.task_queue[:]
                     print "Cleared tasks for unit #%d." % unit.key
-                unit.task_queue.append(MoveTask(pos))
-                print "Added waypoint %s to unit #%d." % (pos, unit.key)
+                unit.task_queue.append(MoveTask(cell))
+                print "Added waypoint %s to unit #%d." % (cell, unit.key)
     else:
         for unit in selection:
             if unit.damage and unit.player != clicked_unit.player:

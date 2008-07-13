@@ -53,18 +53,18 @@ class GameEngine:
     def __update_paths(self):
         if self.__path_queue:
             unit, waypoint, callback = self.__path_queue.popleft()
-            if unit.pos is not None:
-                def goal(pos):
-                    return pos == waypoint
-                def neighbors(pos):
-                    return (n for n in self.grid.neighbors(pos)
+            if unit.cell is not None:
+                def goal(cell):
+                    return cell == waypoint
+                def neighbors(cell):
+                    return (n for n in self.grid.neighbors(cell)
                             if not self.locked_cell(n))
-                def heuristic(pos):
-                    return diagonal_distance(pos, waypoint)
+                def heuristic(cell):
+                    return self.grid.cell_distance(cell, waypoint)
                 def debug(nodes):
                     print ("%s found a path after searching %d node(s)."
                            % (unit, len(nodes)))
-                path = shortest_path(unit.pos, goal, neighbors,
+                path = shortest_path(unit.cell, goal, neighbors,
                                      diagonal_distance, heuristic,
                                      limit=SHORTEST_PATH_LIMIT, debug=debug)
                 callback(path)
@@ -82,10 +82,11 @@ class GameEngine:
                 unit.task_queue = unit.task_queue[1:]
 
     def add_unit(self, unit, pos):
-        cell = self.__find_unlocked_cell(pos)
-        unit.pos = cell
+        start = self.grid.pos_to_cell(pos)
+        unit.cell = self.__find_unlocked_cell(start)
+        unit.pos = self.grid.cell_to_pos(unit.cell)
         self.units[unit.key] = unit
-        self.__add_unit_locks(unit, cell)
+        self.__add_unit_locks(unit)
         rect = rectangle_from_center_and_size(unit.pos, unit.size)
         self.proximity_grid[unit.key] = rect
         print "Added %s at %s." % (unit, unit.pos)
@@ -95,9 +96,12 @@ class GameEngine:
         self.__remove_unit_locks(unit)
         del self.units[unit.key]
         unit.pos = None
+        unit.cell = None
         print "Removed %s." % unit
 
     def request_path(self, unit, waypoint, callback):
+        x, y = waypoint
+        assert type(x) is int and type(y) is int
         self.__path_queue.append((unit, waypoint, callback))
 
     def get_damage_factor(self, attacker, defender):
@@ -132,8 +136,8 @@ class GameEngine:
                              diagonal_distance)
         return path[-1] if path else start
 
-    def __add_unit_locks(self, unit, cell):
-        self.lock_cell(unit, cell)
+    def __add_unit_locks(self, unit):
+        self.lock_cell(unit, unit.cell)
 
     def __remove_unit_locks(self, unit):
         if unit in self.__unit_locks:
@@ -141,6 +145,8 @@ class GameEngine:
                 self.unlock_cell(cell)
 
     def lock_cell(self, unit, cell):
+        x, y = cell
+        assert type(x) is int and type(y) is int
         if cell in self.__cell_locks:
             raise RuntimeError("cell %s is already locked" % (cell,))
         self.__cell_locks[cell] = unit
@@ -148,6 +154,8 @@ class GameEngine:
         print "%s locked cell %s." % (unit, cell)
 
     def unlock_cell(self, cell):
+        x, y = cell
+        assert type(x) is int and type(y) is int
         unit = self.__cell_locks.pop(cell)
         self.__unit_locks[unit].remove(cell)
         if not self.__unit_locks[unit]:
@@ -155,4 +163,6 @@ class GameEngine:
         print "%s unlocked cell %s." % (unit, cell)
 
     def locked_cell(self, cell):
+        x, y = cell
+        assert type(x) is int and type(y) is int
         return cell in self.__cell_locks

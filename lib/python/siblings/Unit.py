@@ -39,6 +39,7 @@ class Unit(object):
         self.key = Unit.next_key()
         self.player = player
         self.pos = None
+        self.cell = None
         self.health = self.max_health
         self.task = None
         self.task_queue = []

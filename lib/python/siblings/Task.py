@@ -47,6 +47,7 @@ class MoveTask(Task):
         self.path = None
         self.path = None
         self.old_pos = None
+        self.new_pos = None
         self.step_dist = None
         self.subprogress = None
         self.update = self.__request_path
@@ -66,7 +67,7 @@ class MoveTask(Task):
                 self.update(facade)
 
     def __follow_path(self, facade):
-        if self.aborting or facade.actor.pos == self.waypoint:
+        if self.aborting or facade.actor.cell == self.waypoint:
             self.done = True
         elif not self.path:
             self.update = self.__request_path
@@ -76,7 +77,8 @@ class MoveTask(Task):
         else:
             facade.lock_cell(facade.actor, self.path[0])
             self.old_pos = facade.actor.pos
-            self.step_dist = diagonal_distance(self.old_pos, self.path[0])
+            self.new_pos = facade.cell_to_pos(self.path[0])
+            self.step_dist = diagonal_distance(self.old_pos, self.new_pos)
             self.subprogress = 0.0
             self.update = self.__step
             self.update(facade)
@@ -85,11 +87,12 @@ class MoveTask(Task):
         self.subprogress += facade.dt * facade.actor.speed / self.step_dist
         if self.subprogress < 1.0:
             facade.set_pos(facade.actor,
-                           interpolate_pos(self.old_pos, self.path[0],
+                           interpolate_pos(self.old_pos, self.new_pos,
                                            self.subprogress))
         else:
-            facade.set_pos(facade.actor, self.path[0])
-            facade.unlock_cell(self.old_pos)
+            facade.set_pos(facade.actor, self.new_pos)
+            facade.unlock_cell(facade.actor.cell)
+            facade.actor.cell = self.path[0]
             self.path = self.path[1:]
             self.update = self.__follow_path
 
@@ -143,7 +146,7 @@ class AttackTask(Task):
             self.update(facade)
         else:
             self.update = self.__move
-            self.subtask = MoveTask(self.target.pos)
+            self.subtask = MoveTask(self.target.cell)
             self.update(facade)
 
     def __before_hit(self, facade):

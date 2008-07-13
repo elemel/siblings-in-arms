@@ -61,3 +61,6 @@ class TaskFacade:
 
     def get_damage_factor(self, attacker, defender):
         return self.__game_engine.get_damage_factor(attacker, defender)
+
+    def cell_to_pos(self, cell):
+        return self.__game_engine.grid.cell_to_pos(cell)

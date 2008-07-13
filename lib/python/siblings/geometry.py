@@ -100,18 +100,18 @@ def vector_rmul(a, b):
     return vector_mul(b, a)
 
 
-def point_to_hex_cell(point, cell_dist = 1.0):
-    x, y = point
+def pos_to_hex_cell(pos, cell_dist = 1.0):
+    x, y = pos
     column = int(round(x / (cell_dist * COS_30)))
     row = int(round(y / cell_dist - 0.5 * (column % 2)))
-    return (key_x, key_y)
+    return column, row
 
 
-def hex_cell_to_point(cell_key, cell_dist = 1.0):
-    column, row = cell_key
+def hex_cell_to_pos(cell, cell_dist = 1.0):
+    column, row = cell
     x = column * cell_dist * COS_30
     y = (row + 0.5 * (column % 2)) * cell_dist
-    return (x, y)
+    return x, y
 
 
 def hex_neighbors(cell_key):
