@@ -60,9 +60,9 @@ def normalize_rectangle(r):
 
 def grid_neighbors(pos):
     x, y = pos
-    yield x - 1, y + 1; yield x + 0, y + 1; yield x + 1, y + 1
-    yield x - 1, y + 0;                     yield x + 1, y + 0
-    yield x - 1, y - 1; yield x + 0, y - 1; yield x + 1, y - 1
+    yield x - 1, y + 1; yield x, y + 1; yield x + 1, y + 1
+    yield x - 1, y; pass; yield x + 1, y
+    yield x - 1, y - 1; yield x, y - 1; yield x + 1, y - 1
 
 
 def squared_distance(a, b):
@@ -82,7 +82,7 @@ def diagonal_distance(a, b):
     bx, by = b
     dx = abs(ax - bx)
     dy = abs(ay - by)
-    return min(dx, dy) * SQRT_2 + abs(dx - dy)
+    return SQRT_2 * min(dx, dy) + abs(dx - dy)
 
 
 def vector_add(a, b):
@@ -100,25 +100,21 @@ def vector_rmul(a, b):
     return vector_mul(b, a)
 
 
-def pos_to_hex_cell(pos, cell_dist = 1.0):
-    x, y = pos
-    column = int(round(x / (cell_dist * COS_30)))
-    row = int(round(y / cell_dist - 0.5 * (column % 2)))
-    return column, row
+def pos_to_hex_cell(pos, cell_size=1):
+    pos_x, pos_y = pos
+    cell_y = int(round(pos_y / (COS_30 * cell_size)))
+    odd_y = cell_y % 2
+    cell_x = odd_y + 2 * int(round(pos_x / cell_size - 0.5 * odd_y))
+    return cell_x, cell_y
 
 
-def hex_cell_to_pos(cell, cell_dist = 1.0):
-    column, row = cell
-    x = column * cell_dist * COS_30
-    y = (row + 0.5 * (column % 2)) * cell_dist
-    return x, y
+def hex_cell_to_pos(cell, cell_size=1):
+    cell_x, cell_y = cell
+    return cell_x * 0.5 * cell_size, cell_y * COS_30 * cell_size
 
 
-def hex_neighbors(cell_key):
-    x, y = cell_key
-    if x % 2:
-        yield x - 1, y + 1; yield x + 0, y + 1; yield x + 1, y + 1
-        yield x - 1, y + 0; yield x + 0, y - 1; yield x + 1, y + 0
-    else:
-        yield x - 1, y + 0; yield x + 0, y + 1; yield x + 1, y + 0
-        yield x - 1, y - 1; yield x + 0, y - 1; yield x + 1, y - 1
+def hex_neighbors(cell):
+    x, y = cell
+    yield x - 1, y + 1; yield x + 1, y + 1
+    yield x - 2, y; pass; yield x + 2, y
+    yield x - 1, y - 1; yield x + 1, y - 1

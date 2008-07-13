@@ -42,7 +42,7 @@ class ProximityGrid(object):
 
     """Sparse planar grid for fast proximity searches."""
     
-    def __init__(self, cell_size = 1):
+    def __init__(self, cell_size=1):
 
         """Initialize the grid."""
 
