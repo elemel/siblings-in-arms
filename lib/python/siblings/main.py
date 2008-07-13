@@ -49,10 +49,10 @@ def main():
         
     game_engine = GameEngine()
     game_engine.add_unit(Tavern('cyan'), (5, 14))
-    game_engine.add_unit(Tavern('yellow'), (15, 5))
+    game_engine.add_unit(Tavern('yellow'), (13, 5))
 
     if True or headless:
-        min_p, max_p = (2, 2), (18, 16)
+        min_p, max_p = (1, 2), (16, 16)
         colors = 'cyan', 'yellow'
         hero_types = [Warrior] # Hero.__subclasses__()
         for i in xrange(50):

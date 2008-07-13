@@ -19,7 +19,8 @@
 # SOFTWARE.
 
 
-from geometry import diagonal_distance, vector_add, vector_mul
+from geometry import (diagonal_distance, vector_add, vector_mul, vector_sub,
+                      vector_abs, vector_div)
 
 
 def interpolate_pos(old_p, new_p, progress):
@@ -152,6 +153,10 @@ class AttackTask(UnitTask):
         if self.target.pos is None:
             self.done = True
         elif in_range(self.unit, self.target):
+            self.old_pos = self.unit.pos
+            offset = vector_sub(self.target.pos, self.unit.pos)
+            self.new_pos = vector_add(self.unit.pos,
+                                      vector_div(offset, vector_abs(offset)))
             self.update = self.__before_hit
             self.subprogress = 0.0
             self.update()
@@ -166,6 +171,10 @@ class AttackTask(UnitTask):
     def __before_hit(self):
         self.subprogress += (self.game_engine.time_step
                              / (self.unit.attack_time))
+        self.game_engine.move_unit(self.unit,
+                                   interpolate_pos(self.old_pos,
+                                                   self.new_pos,
+                                                   self.subprogress))
         if self.subprogress >= 0.5:
             damage_factor = self.game_engine.get_damage_factor(self.unit,
                                                                self.target)
@@ -176,7 +185,13 @@ class AttackTask(UnitTask):
 
     def __after_hit(self):
         self.subprogress += self.game_engine.time_step / self.unit.attack_time
-        if self.subprogress >= 1.0:
+        if self.subprogress < 1.0:
+            self.game_engine.move_unit(self.unit,
+                                       interpolate_pos(self.old_pos,
+                                                       self.new_pos,
+                                                       1 - self.subprogress))
+        else:
+            self.game_engine.move_unit(self.unit, self.old_pos)
             self.update = self.__hit_or_move
 
     def __move(self):
@@ -184,5 +199,3 @@ class AttackTask(UnitTask):
         if self.subtask.done:
             self.update = self.__hit_or_move
         self.progress = attack_progress(self.target)
-        
-        

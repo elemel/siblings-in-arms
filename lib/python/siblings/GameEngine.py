@@ -37,15 +37,17 @@ class GameEngine:
 
     def __init__(self):
         self.time_step = None
-        self.grid = HexGrid()
+        self.time = 0.0
+        self.__grid = HexGrid()
         self.__path_queue = deque()
         self.units = {}
-        self.proximity_grid = ProximityGrid(5)
+        self.__proximity_grid = ProximityGrid(5)
         self.__cell_locks = {}
         self.__unit_locks = defaultdict(set)
         
     def update(self, time_step):
         self.time_step = time_step
+        self.time += time_step
         self.__update_paths()
         self.__update_tasks()
         self.__remove_dead_units()
@@ -57,12 +59,12 @@ class GameEngine:
                 def goal(cell):
                     return cell == waypoint
                 def neighbors(cell):
-                    return (n for n in self.grid.neighbors(cell)
+                    return (n for n in self.__grid.neighbors(cell)
                             if not self.locked_cell(n))
                 def heuristic(cell):
-                    return self.grid.cell_distance(cell, waypoint)
+                    return self.__grid.cell_distance(cell, waypoint)
                 def debug(nodes):
-                    print ("%s found a path after searching %d node(s)."
+                    print ("%s found a path after searching %d cell(s)."
                            % (unit, len(nodes)))
                 path = shortest_path(unit.cell, goal, neighbors,
                                      diagonal_distance, heuristic,
@@ -82,17 +84,17 @@ class GameEngine:
 
 
     def add_unit(self, unit, pos):
-        start = self.grid.pos_to_cell(pos)
+        start = self.__grid.pos_to_cell(pos)
         unit.cell = self.__find_unlocked_cell(start)
-        unit.pos = self.grid.cell_to_pos(unit.cell)
+        unit.pos = self.__grid.cell_to_pos(unit.cell)
         self.units[unit.key] = unit
         self.__add_unit_locks(unit)
         rect = rectangle_from_center_and_size(unit.pos, unit.size)
-        self.proximity_grid[unit.key] = rect
+        self.__proximity_grid[unit.key] = rect
         print "Added %s at %s." % (unit, unit.cell)
 
     def remove_unit(self, unit):
-        del self.proximity_grid[unit.key]
+        del self.__proximity_grid[unit.key]
         self.__remove_unit_locks(unit)
         del self.units[unit.key]
         unit.pos = None
@@ -117,7 +119,7 @@ class GameEngine:
             return
         rect = rectangle_from_center_and_size(unit.pos, (10, 10))
         enemies = [self.units.get(key)
-                   for key in self.proximity_grid.intersect(rect)
+                   for key in self.__proximity_grid.intersect(rect)
                    if key != unit.key]
         enemies = [enemy for enemy in enemies if enemy.player != unit.player]
         if enemies:
@@ -132,14 +134,14 @@ class GameEngine:
         def debug(nodes):
             print ("Found an unlocked cell after searching %d node(s)."
                    % len(nodes))
-        path = shortest_path(start, goal, self.grid.neighbors,
+        path = shortest_path(start, goal, self.__grid.neighbors,
                              diagonal_distance)
         return path[-1] if path else start
 
     def __add_unit_locks(self, unit):
         self.lock_cell(unit, unit.cell)
         if isinstance(unit, Building):
-            for neighbor in self.grid.neighbors(unit.cell):
+            for neighbor in self.__grid.neighbors(unit.cell):
                 self.lock_cell(unit, neighbor)
 
     def __remove_unit_locks(self, unit):
@@ -173,7 +175,10 @@ class GameEngine:
     def move_unit(self, unit, pos):
         unit.pos = pos
         rect = rectangle_from_center_and_size(unit.pos, unit.size)
-        self.proximity_grid[unit.key] = rect
+        self.__proximity_grid[unit.key] = rect
 
     def cell_to_pos(self, cell):
-        return self.grid.cell_to_pos(cell)
+        return self.__grid.cell_to_pos(cell)
+
+    def pos_to_cell(self, pos):
+        return self.__grid.pos_to_cell(pos)

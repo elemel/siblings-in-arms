@@ -19,11 +19,11 @@
 # SOFTWARE.
 
 
-import math
+from math import cos, pi, sqrt
 
 
-SQRT_2 = math.sqrt(2)
-COS_30 = math.cos(math.pi / 6.0)
+SQRT_2 = sqrt(2)
+COS_30 = cos(pi / 6.0)
 
 
 def rectangle_from_center_and_size(center, size):
@@ -88,16 +88,32 @@ def diagonal_distance(a, b):
 def vector_add(a, b):
     ax, ay = a
     bx, by = b
-    return (ax + bx, ay + by)
+    return ax + bx, ay + by
+
+
+def vector_sub(a, b):
+    ax, ay = a
+    bx, by = b
+    return ax - bx, ay - by
 
 
 def vector_mul(a, b):
     ax, ay = a
-    return (ax * b, ay * b)
+    return ax * b, ay * b
 
 
 def vector_rmul(a, b):
     return vector_mul(b, a)
+
+
+def vector_div(a, b):
+    ax, ay = a
+    return ax / b, ay / b
+
+
+def vector_abs(v):
+    x, y = v
+    return sqrt(x ** 2 + y ** 2)
 
 
 def pos_to_hex_cell(pos, cell_size=1):

@@ -75,7 +75,7 @@ def load_unit_images():
 
 load_unit_images()
 
-PIXELS_PER_METER_X = 40
+PIXELS_PER_METER_X = 45
 PIXELS_PER_METER_Y = 30
 
 selection = set()
@@ -173,7 +173,7 @@ def handle_command_event(event, game_engine):
 
     if clicked_unit is None:
         pos = to_world_coords(event.pos, map_surface.get_size())
-        cell = game_engine.grid.pos_to_cell(pos)
+        cell = game_engine.pos_to_cell(pos)
         for unit in selection:
             if unit.speed is not None:
                 if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
