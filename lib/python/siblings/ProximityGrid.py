@@ -38,9 +38,9 @@ def intersects(a, b):
             and a_bottom < b_top and b_bottom < a_top)
 
 
-class Grid(object):
+class ProximityGrid(object):
 
-    """Sparse planar grid."""
+    """Sparse planar grid for fast proximity searches."""
     
     def __init__(self, cell_size = 1):
 

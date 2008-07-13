@@ -19,8 +19,12 @@
 # SOFTWARE.
 
 
-import grid_test
+import proximity_grid_test
 
 
-if __name__ == "__main__":
-    grid_test.test()
+def main():
+    proximity_grid_test.test()
+
+
+if __name__ == '__main__':
+    main()

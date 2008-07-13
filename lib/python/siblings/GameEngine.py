@@ -21,7 +21,7 @@
 
 import time, sys
 from HexGrid import HexGrid
-from Grid import Grid
+from ProximityGrid import ProximityGrid
 from TaskFacade import TaskFacade
 from Unit import Unit
 from Gridlocker import Gridlocker
@@ -44,7 +44,7 @@ class GameEngine:
         self.gridlocker = Gridlocker()
         self.__path_queue = deque()
         self.units = {}
-        self.proximity_grid = Grid()
+        self.proximity_grid = ProximityGrid(3)
         
     def update(self, dt):
         self.__update_paths()

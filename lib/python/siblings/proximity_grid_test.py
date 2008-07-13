@@ -19,7 +19,7 @@
 # SOFTWARE.
 
 
-from Grid import intersects, Grid
+from ProximityGrid import intersects, ProximityGrid
 
 
 def test_intersects_when_equal():
@@ -49,9 +49,9 @@ def test_intersects_when_disjoint():
 
 
 def test_getitem_when_absent():
-    g = Grid()
+    g = ProximityGrid()
     try:
-        g["a"]
+        g['a']
     except KeyError, e:
         pass
     else:
@@ -59,28 +59,28 @@ def test_getitem_when_absent():
 
 
 def test_getitem_when_present():
-    g = Grid()    
-    g["a"] = ((1, 2), (3, 4))
-    assert g["a"] == ((1, 2), (3, 4))
+    g = ProximityGrid()    
+    g['a'] = ((1, 2), (3, 4))
+    assert g['a'] == ((1, 2), (3, 4))
 
 
 def test_setitem_when_absent():
-    g = Grid()
-    g["a"] = ((1, 2), (3, 4))
-    assert g["a"] == ((1, 2), (3, 4))
+    g = ProximityGrid()
+    g['a'] = ((1, 2), (3, 4))
+    assert g['a'] == ((1, 2), (3, 4))
 
 
 def test_setitem_when_present():
-    g = Grid()    
-    g["a"] = ((1, 2), (3, 4))
-    g["a"] = ((5, 6), (7, 8))
-    assert g["a"] == ((5, 6), (7, 8))
+    g = ProximityGrid()    
+    g['a'] = ((1, 2), (3, 4))
+    g['a'] = ((5, 6), (7, 8))
+    assert g['a'] == ((5, 6), (7, 8))
 
 
 def test_delitem_when_absent():
-    g = Grid()
+    g = ProximityGrid()
     try:
-        del g["a"]
+        del g['a']
     except KeyError, e:
         pass
     else:
@@ -88,73 +88,73 @@ def test_delitem_when_absent():
 
 
 def test_delitem_when_present():
-    g = Grid()    
-    g["a"] = ((1, 2), (3, 4))
-    del g["a"]
-    assert "a" not in g
+    g = ProximityGrid()    
+    g['a'] = ((1, 2), (3, 4))
+    del g['a']
+    assert 'a' not in g
     assert not g
 
 
 def test_contains_when_absent():
-    g = Grid()
-    assert "a" not in g
-    g["a"] = ((1, 2), (3, 4))
-    assert "b" not in g
+    g = ProximityGrid()
+    assert 'a' not in g
+    g['a'] = ((1, 2), (3, 4))
+    assert 'b' not in g
 
 
 def test_contains_when_present():
-    g = Grid()
-    g["a"] = ((1, 2), (3, 4))
-    assert "a" in g
+    g = ProximityGrid()
+    g['a'] = ((1, 2), (3, 4))
+    assert 'a' in g
 
 
 def test_len_when_empty():
-    g = Grid()
+    g = ProximityGrid()
     assert not g
     assert len(g) == 0
 
 
 def test_len():
-    g = Grid()
-    g["a"] = ((1, 2), (3, 4))
-    g["b"] = ((5, 6), (7, 8))
-    g["c"] = ((9, 10), (11, 12))
+    g = ProximityGrid()
+    g['a'] = ((1, 2), (3, 4))
+    g['b'] = ((5, 6), (7, 8))
+    g['c'] = ((9, 10), (11, 12))
     assert g
     assert len(g) == 3
 
 
 def test_default_cell_size():
-    g = Grid()
+    g = ProximityGrid()
     assert g.cell_size() == 1
 
 
 def test_cell_size():
-    g = Grid(3)
+    g = ProximityGrid(3)
     assert g.cell_size() == 3
 
 
 def test_intersect():
-    g = Grid()
-    g["a"] = ((1, 2), (3, 4))
-    g["b"] = ((5, 6), (7, 8))
+    g = ProximityGrid()
+    g['a'] = ((1, 2), (3, 4))
+    g['b'] = ((5, 6), (7, 8))
     assert(g.intersect(((1, 5), (2, 6))) == set())
-    assert(g.intersect(((2, 3), (2, 3))) == set(["a"]))
-    assert(g.intersect(((6, 7), (6, 7))) == set(["b"]))
-    assert(g.intersect(((2, 3), (6, 7))) == set(["a", "b"]))
+    assert(g.intersect(((2, 3), (2, 3))) == set(['a']))
+    assert(g.intersect(((6, 7), (6, 7))) == set(['b']))
+    assert(g.intersect(((2, 3), (6, 7))) == set(['a', 'b']))
 
 
 def test():
 
     print
-    print "Running Grid test suite..."
+    print 'Running Grid test suite...'
     
-    print "Testing intersects function..."
+    print 'Testing intersects function...'
     test_intersects_when_equal()
     test_intersects_when_overlap()
     test_intersects_when_contained()
     test_intersects_when_disjoint()
     
-    print "Testing Grid class..."
+    print 'Testing Grid class...'
     test_getitem_when_absent()
     test_getitem_when_present()
     test_setitem_when_absent()
@@ -170,5 +170,5 @@ def test():
     test_intersect()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     test()
