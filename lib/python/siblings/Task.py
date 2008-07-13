@@ -206,7 +206,8 @@ class AttackTask(UnitTask):
             self.update = self.__hit_or_move
 
     def __move(self):
-        if self.aborting or in_range(self.unit, self.target):
+        if (self.aborting or self.target.pos is None
+            or in_range(self.unit, self.target)):
             self.subtask.aborting = True
         self.subtask.update()
         if self.subtask.done:
