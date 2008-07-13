@@ -115,7 +115,9 @@ mouse_button_down_pos = None
 def handle_events(game_engine):
     global mouse_button_down_pos
     for event in pygame.event.get():
-        if event.type == MOUSEBUTTONDOWN:
+        if event.type == KEYDOWN and event.key == K_ESCAPE:
+            sys.exit()
+        elif event.type == MOUSEBUTTONDOWN:
             mouse_button_down_pos = event.pos
         elif event.type == MOUSEBUTTONUP:
             if (mouse_button_down_pos is not None
