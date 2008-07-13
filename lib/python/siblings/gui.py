@@ -43,7 +43,7 @@ control_panel = screen.subsurface(control_rect)
 
 def load_image(name):
     path = os.path.join(root, 'data', name + '.png')
-    image = pygame.image.load(path)
+    image = pygame.image.load(path).convert_alpha()
     image.set_colorkey((0, 0, 255))
     return image
 

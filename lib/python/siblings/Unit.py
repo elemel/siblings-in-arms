@@ -30,7 +30,7 @@ class Unit(object):
     size = 1, 1
     damage = None
     min_range = 0.0
-    max_range = 1.0
+    max_range = 0.5
     attack_time = 0.5
     max_health = 1.0
     build_time = 0.3
@@ -43,6 +43,7 @@ class Unit(object):
         self.health = self.max_health
         self.task = None
         self.task_queue = []
+        self.moving = False
 
     def __str__(self):
         return "%s %s #%d" % (self.player.capitalize(), type(self).__name__,
@@ -74,6 +75,7 @@ class Knight(Hero):
 class Ranger(Hero):
     speed = 5.0
     damage = 0.3
+    max_range = 5.0
 
 
 class Rogue(Hero):

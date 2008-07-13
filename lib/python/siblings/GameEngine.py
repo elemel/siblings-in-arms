@@ -53,23 +53,26 @@ class GameEngine:
         self.__remove_dead_units()
 
     def __update_paths(self):
+        while self.__path_queue and self.__path_queue[0][-1]:
+            self.__path_queue.popleft()
         if self.__path_queue:
-            unit, waypoint, callback = self.__path_queue.popleft()
+            unit, dest, set_path, aborting = self.__path_queue.popleft()
             if unit.cell is not None:
                 def goal(cell):
-                    return cell == waypoint
+                    return cell == dest
                 def neighbors(cell):
                     return (n for n in self.__grid.neighbors(cell)
-                            if not self.locked_cell(n))
+                            if not self.locked_cell(n)
+                            or self.__cell_locks[n].moving)
                 def heuristic(cell):
-                    return self.__grid.cell_distance(cell, waypoint)
+                    return self.__grid.cell_distance(cell, dest)
                 def debug(nodes):
                     print ("%s found a path after searching %d cell(s)."
                            % (unit, len(nodes)))
                 path = shortest_path(unit.cell, goal, neighbors,
                                      diagonal_distance, heuristic,
                                      limit=SHORTEST_PATH_LIMIT, debug=debug)
-                callback(path)
+                set_path(path)
 
     def __update_tasks(self):
         for unit in self.units.values():
@@ -101,10 +104,15 @@ class GameEngine:
         unit.cell = None
         print "Removed %s." % unit
 
-    def request_path(self, unit, waypoint, callback):
-        x, y = waypoint
+    def request_path(self, unit, dest, set_path):
+        x, y = dest
         assert type(x) is int and type(y) is int
-        self.__path_queue.append((unit, waypoint, callback))
+        path_request = [unit, dest, set_path, False]
+        self.__path_queue.append(path_request)
+        return path_request
+
+    def abort_path(self, path_request):
+        path_request[-1] = True
 
     def get_damage_factor(self, attacker, defender):
         return damage_factors.get((type(attacker), type(defender)), 1.0)

@@ -54,36 +54,47 @@ class MoveTask(UnitTask):
         self.dest = dest
         self.path_request = None
         self.path = None
-        self.path = None
         self.old_pos = None
         self.new_pos = None
         self.step_dist = None
         self.subprogress = None
         self.update = self.__request_path
+        self.stuck = False
 
     def __request_path(self):
+        self.path = None
         self.path_request = self.game_engine.request_path(self.unit, self.dest,
                                                           self.__set_path)
         self.update = self.__wait_for_path
         self.update()
 
     def __wait_for_path(self):
-        if self.path is not None:
+        if self.aborting:
+            self.game_engine.abort_path(self.path_request)
+            self.done = True
+        elif self.path is not None:
             if not self.path:
-                self.done = True
+                if self.stuck:
+                    self.done = True
+                else:
+                    self.update = self.__request_path
+                    self.update()
             else:
                 self.update = self.__follow_path
                 self.update()
 
     def __follow_path(self):
         if self.aborting or self.unit.cell == self.dest:
+            self.unit.moving = False
             self.done = True
-        elif not self.path:
+        elif not self.path or self.game_engine.locked_cell(self.path[0]):
+            self.unit.moving = False
+            self.stuck = True
             self.update = self.__request_path
             self.update()
-        elif self.game_engine.locked_cell(self.path[0]):
-            self.done = True
         else:
+            self.unit.moving = True
+            self.stuck = False
             self.game_engine.lock_cell(self.unit, self.path[0])
             self.old_pos = self.unit.pos
             self.new_pos = self.game_engine.cell_to_pos(self.path[0])
@@ -150,7 +161,7 @@ class AttackTask(UnitTask):
         self.subprogress = 0.0
 
     def __hit_or_move(self):
-        if self.target.pos is None:
+        if self.aborting or self.target.pos is None:
             self.done = True
         elif in_range(self.unit, self.target):
             self.old_pos = self.unit.pos
@@ -195,6 +206,8 @@ class AttackTask(UnitTask):
             self.update = self.__hit_or_move
 
     def __move(self):
+        if self.aborting or in_range(self.unit, self.target):
+            self.subtask.aborting = True
         self.subtask.update()
         if self.subtask.done:
             self.update = self.__hit_or_move
