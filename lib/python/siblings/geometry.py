@@ -39,7 +39,7 @@ def rectangle_contains_point(r, p):
     min_x, min_y = min_p
     max_x, max_y = max_p
     x, y = p
-    return min_x <= x <= max_x and min_y <= y <= max_y
+    return min_x <= x < max_x and min_y <= y < max_y
 
 
 def rectangle_intersects_rectangle(a, b):
