@@ -29,19 +29,27 @@ def interpolate_pos(old_p, new_p, progress):
 
 class Task(object):
 
-    def __init__(self):
-        self.progress = None
+    def __init__(self, game_engine):
+        self.game_engine = game_engine
+        self.progress = 0.0
         self.aborting = False
         self.done = False
 
-    def update(self, facade):
+    def update(self):
         pass
 
 
-class MoveTask(Task):
+class UnitTask(Task):
 
-    def __init__(self, dest):
-        Task.__init__(self)
+    def __init__(self, game_engine, unit):
+        Task.__init__(self, game_engine)
+        self.unit = unit
+
+
+class MoveTask(UnitTask):
+
+    def __init__(self, game_engine, unit, dest):
+        UnitTask.__init__(self, game_engine, unit)
         self.dest = dest
         self.path_request = None
         self.path = None
@@ -52,47 +60,49 @@ class MoveTask(Task):
         self.subprogress = None
         self.update = self.__request_path
 
-    def __request_path(self, facade):
-        self.path_request = facade.request_path(facade.actor, self.dest,
-                                                self.__set_path)
+    def __request_path(self):
+        self.path_request = self.game_engine.request_path(self.unit, self.dest,
+                                                          self.__set_path)
         self.update = self.__wait_for_path
-        self.update(facade)
+        self.update()
 
-    def __wait_for_path(self, facade):
+    def __wait_for_path(self):
         if self.path is not None:
             if not self.path:
                 self.done = True
             else:
                 self.update = self.__follow_path
-                self.update(facade)
+                self.update()
 
-    def __follow_path(self, facade):
-        if self.aborting or facade.actor.cell == self.dest:
+    def __follow_path(self):
+        if self.aborting or self.unit.cell == self.dest:
             self.done = True
         elif not self.path:
             self.update = self.__request_path
-            self.update(facade)
-        elif facade.locked_cell(self.path[0]):
+            self.update()
+        elif self.game_engine.locked_cell(self.path[0]):
             self.done = True
         else:
-            facade.lock_cell(facade.actor, self.path[0])
-            self.old_pos = facade.actor.pos
-            self.new_pos = facade.cell_to_pos(self.path[0])
+            self.game_engine.lock_cell(self.unit, self.path[0])
+            self.old_pos = self.unit.pos
+            self.new_pos = self.game_engine.cell_to_pos(self.path[0])
             self.step_dist = diagonal_distance(self.old_pos, self.new_pos)
             self.subprogress = 0.0
             self.update = self.__step
-            self.update(facade)
+            self.update()
 
-    def __step(self, facade):
-        self.subprogress += facade.dt * facade.actor.speed / self.step_dist
+    def __step(self):
+        self.subprogress += (self.game_engine.time_step * self.unit.speed
+                             / self.step_dist)
         if self.subprogress < 1.0:
-            facade.set_pos(facade.actor,
-                           interpolate_pos(self.old_pos, self.new_pos,
-                                           self.subprogress))
+            self.game_engine.move_unit(self.unit,
+                                       interpolate_pos(self.old_pos,
+                                                       self.new_pos,
+                                                       self.subprogress))
         else:
-            facade.set_pos(facade.actor, self.new_pos)
-            facade.unlock_cell(facade.actor.cell)
-            facade.actor.cell = self.path[0]
+            self.game_engine.move_unit(self.unit, self.new_pos)
+            self.game_engine.unlock_cell(self.unit.cell)
+            self.unit.cell = self.path[0]
             self.path = self.path[1:]
             self.update = self.__follow_path
 
@@ -100,27 +110,28 @@ class MoveTask(Task):
         self.path = path
 
 
-class BuildTask(Task):
+class BuildTask(UnitTask):
 
-    def __init__(self, product_cls):        
-        Task.__init__(self)
+    def __init__(self, game_engine, unit, product_cls):        
+        UnitTask.__init__(self, game_engine, unit)
         self.product_cls = product_cls
         self.progress = 0.0
 
-    def update(self, facade):
-        self.progress += facade.dt / self.product_cls.build_time
+    def update(self):
+        self.progress += (self.game_engine.time_step
+                          / self.product_cls.build_time)
         if self.progress >= 1.0:
-            facade.add_unit(self.product_cls(facade.actor.player),
-                            facade.actor.pos)
+            self.game_engine.add_unit(self.product_cls(self.unit.player),
+                                      self.unit.pos)
             self.done = True
 
 
-def in_range(attacker, target):
+def in_range(unit, target):
     if target.pos is None:
         return False
-    distance = abs(diagonal_distance(attacker.pos, target.pos)
-                   - attacker.size[0] / 2.0 - target.size[0] / 2.0)
-    return attacker.min_range <= distance <= attacker.max_range
+    distance = abs(diagonal_distance(unit.pos, target.pos)
+                   - unit.size[0] / 2.0 - target.size[0] / 2.0)
+    return unit.min_range <= distance < unit.max_range
 
 
 def attack_progress(target):
@@ -128,43 +139,48 @@ def attack_progress(target):
     return min(max(progress, 1.0), 0.0)
 
 
-class AttackTask(Task):
+class AttackTask(UnitTask):
 
-    def __init__(self, target):
-        Task.__init__(self)
+    def __init__(self, game_engine, unit, target):
+        UnitTask.__init__(self, game_engine, unit)
         self.target = target
         self.update = self.__hit_or_move
         self.subtask = None
         self.subprogress = 0.0
 
-    def __hit_or_move(self, facade):
+    def __hit_or_move(self):
         if self.target.pos is None:
             self.done = True
-        elif in_range(facade.actor, self.target):
+        elif in_range(self.unit, self.target):
             self.update = self.__before_hit
             self.subprogress = 0.0
-            self.update(facade)
+            self.update()
         else:
             self.update = self.__move
-            self.subtask = MoveTask(self.target.cell)
-            self.update(facade)
+            self.subtask = MoveTask(self.game_engine, self.unit,
+                                    self.target.cell)
+            self.subtask.game_engine = self.game_engine
+            self.subtask.unit = self.unit
+            self.update()
 
-    def __before_hit(self, facade):
-        self.subprogress += facade.dt / (facade.actor.attack_time)
+    def __before_hit(self):
+        self.subprogress += (self.game_engine.time_step
+                             / (self.unit.attack_time))
         if self.subprogress >= 0.5:
-            damage_factor = facade.get_damage_factor(facade.actor, self.target)
-            self.target.health -= facade.actor.damage * damage_factor
-            print "%s hit %s." % (facade.actor, self.target)
+            damage_factor = self.game_engine.get_damage_factor(self.unit,
+                                                               self.target)
+            self.target.health -= self.unit.damage * damage_factor
+            print "%s hit %s." % (self.unit, self.target)
             self.update = self.__after_hit
         self.progress = attack_progress(self.target)
 
-    def __after_hit(self, facade):
-        self.subprogress += facade.dt / (facade.actor.attack_time)
+    def __after_hit(self):
+        self.subprogress += self.game_engine.time_step / self.unit.attack_time
         if self.subprogress >= 1.0:
             self.update = self.__hit_or_move
 
-    def __move(self, facade):
-        self.subtask.update(facade)
+    def __move(self):
+        self.subtask.update()
         if self.subtask.done:
             self.update = self.__hit_or_move
         self.progress = attack_progress(self.target)

@@ -181,7 +181,7 @@ def handle_command_event(event, game_engine):
                         unit.task.aborting = True
                     del unit.task_queue[:]
                     print '%s aborted all tasks.' % unit
-                unit.task_queue.append(MoveTask(cell))
+                unit.task_queue.append(MoveTask(game_engine, unit, cell))
                 print '%s added waypoint %s.' % (unit, cell)
     else:
         for unit in selection:
@@ -191,7 +191,8 @@ def handle_command_event(event, game_engine):
                         unit.task.aborting = True
                     del unit.task_queue[:]
                     print '%s aborted all tasks.' % unit
-                unit.task_queue.append(AttackTask(clicked_unit))
+                unit.task_queue.append(AttackTask(game_engine, unit,
+                                                  clicked_unit))
                 print ('%s targeted %s.' % (unit, clicked_unit))
 
 def handle_control_event(event, game_engine):
@@ -202,7 +203,8 @@ def handle_control_event(event, game_engine):
         if type(unit) is Tavern:
             classes = Hero.__subclasses__()
             if 0 <= button < len(classes):
-                unit.task_queue.append(BuildTask(classes[button]))
+                unit.task_queue.append(BuildTask(game_engine, unit,
+                                                 classes[button]))
 
 def handle_rectangle_event(old_pos, event, game_engine):
     global selection

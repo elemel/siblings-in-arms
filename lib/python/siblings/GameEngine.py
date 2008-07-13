@@ -22,7 +22,6 @@
 import time, sys
 from HexGrid import HexGrid
 from ProximityGrid import ProximityGrid
-from TaskFacade import TaskFacade
 from Unit import Building
 from geometry import rectangle_from_center_and_size, squared_distance
 from balance import damage_factors
@@ -37,7 +36,7 @@ SHORTEST_PATH_LIMIT = 100
 class GameEngine:
 
     def __init__(self):
-        self.task_facade = TaskFacade(self)
+        self.time_step = None
         self.grid = HexGrid()
         self.__path_queue = deque()
         self.units = {}
@@ -46,8 +45,9 @@ class GameEngine:
         self.__unit_locks = defaultdict(set)
         
     def update(self, time_step):
+        self.time_step = time_step
         self.__update_paths()
-        self.__update_tasks(time_step)
+        self.__update_tasks()
         self.__remove_dead_units()
 
     def __update_paths(self):
@@ -69,17 +69,17 @@ class GameEngine:
                                      limit=SHORTEST_PATH_LIMIT, debug=debug)
                 callback(path)
 
-    def __update_tasks(self, time_step):
+    def __update_tasks(self):
         for unit in self.units.values():
             if unit.task is not None:
-                self.task_facade.actor = unit
-                self.task_facade.dt = time_step
-                unit.task.update(self.task_facade)
+                unit.task.update()
                 if unit.task.done:
                     unit.task = None
             if unit.task is None and unit.task_queue:
                 unit.task = unit.task_queue[0]
                 unit.task_queue = unit.task_queue[1:]
+                unit.task.unit = unit
+
 
     def add_unit(self, unit, pos):
         start = self.grid.pos_to_cell(pos)
@@ -169,3 +169,11 @@ class GameEngine:
         x, y = cell
         assert type(x) is int and type(y) is int
         return cell in self.__cell_locks
+
+    def move_unit(self, unit, pos):
+        unit.pos = pos
+        rect = rectangle_from_center_and_size(unit.pos, unit.size)
+        self.proximity_grid[unit.key] = rect
+
+    def cell_to_pos(self, cell):
+        return self.grid.cell_to_pos(cell)
