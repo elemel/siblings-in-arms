@@ -50,48 +50,48 @@ class Unit(object):
                               self.key)
 
 
-class Hero(Unit):
-    speed = 1.0
+class Creature(Unit):
+    speed = 3.0
     damage = 1.0
 
 
+class Hero(Creature):
+    pass
+
+
 class Monk(Hero):
-    speed = 4.0
     damage = 0.1
     attack_time = 0.3
 
 
 class Warrior(Hero):
-    speed = 4.0
     damage = 0.4
     max_health = 1.2
 
 
 class Ranger(Hero):
-    speed = 5.0
+    speed = 4.0
     damage = 0.3
     max_range = 5.0
 
 
 class Knight(Hero):
-    speed = 6.0
+    speed = 5.0
     damage = 0.3
     max_health = 1.5
 
 
 class Rogue(Hero):
-    speed = 4.0
     damage = 0.2
     max_health = 0.8
 
 
 class Priest(Hero):
-    speed = 4.0
     damage = 0.2
 
 
 class Wizard(Hero):
-    speed = 3.0
+    speed = 2.0
     damage = 0.5
     attack_time = 2.0
     max_health = 0.6
@@ -104,3 +104,12 @@ class Building(Unit):
 class Tavern(Building):
     size = (3, 3)
     max_health = 10.0
+
+
+class Minion(Creature):
+    pass
+
+
+class Golem(Minion):
+    damage = 0.5
+    max_health = 5.0

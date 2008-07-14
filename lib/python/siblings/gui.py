@@ -23,7 +23,7 @@ import pygame, pygame.transform, sys, os, math
 from pygame.locals import *
 from geometry import *
 from Task import AttackTask, ConstructTask, MoveTask, ProduceTask
-from Unit import Building, Hero, Tavern, Monk
+from Unit import Building, Hero, Minion, Monk, Tavern
 
 
 root = os.path.dirname(__file__)
@@ -66,7 +66,8 @@ def create_team_image(image, team_color, team_colorkey=(0, 255, 0)):
     return team_image
 
 def load_unit_images():
-    for cls in Hero.__subclasses__() + Building.__subclasses__():
+    for cls in (Hero.__subclasses__() + Building.__subclasses__()
+                + Minion.__subclasses__()):
         name = cls.__name__.lower()
         unit_images[cls] = image = load_image(name)
         for team, team_color in team_colors.iteritems():
@@ -214,7 +215,7 @@ def handle_control_event(event, game_engine):
     if len(selection) == 1:
         unit = iter(selection).next()
         if type(unit) is Tavern:
-            classes = Hero.__subclasses__()
+            classes = Hero.__subclasses__() + Minion.__subclasses__()
             if 0 <= button < len(classes):
                 unit.task_queue.append(ProduceTask(game_engine, unit,
                                                    classes[button]))
@@ -279,7 +280,8 @@ def paint_control_panel(game_engine):
     control_panel.fill(pygame.color.Color('gray'))
     selection_list = list(selection)
     if len(selection_list) == 1 and type(selection_list[0]) is Tavern:
-        for i, cls in enumerate(Hero.__subclasses__()):
+        for i, cls in enumerate(Hero.__subclasses__()
+                                + Minion.__subclasses__()):
             paint_image(control_panel, unit_icons[cls], (25 + i * 50, 25))
     elif len(selection_list) == 1 and type(selection_list[0]) is Monk:
         for i, cls in enumerate(Building.__subclasses__()):
