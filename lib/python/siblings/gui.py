@@ -97,7 +97,7 @@ def to_world_coords(point, screen_size):
 
 def get_sorted_units(game_engine):
     units = game_engine.units.values()
-    units.sort(lambda a, b: cmp(b.pos[1], a.pos[1]))
+    units.sort(lambda a, b: cmp(b.cell[1], a.cell[1]))
     return units
 
 def paint_image(surface, image, pos):

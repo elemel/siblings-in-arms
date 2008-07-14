@@ -22,7 +22,6 @@
 import time, sys
 from HexGrid import HexGrid
 from ProximityGrid import ProximityGrid
-from Unit import Building
 from geometry import rectangle_from_center_and_size, squared_distance
 from balance import damage_factors
 from shortest_path import shortest_path
@@ -33,7 +32,7 @@ from geometry import diagonal_distance
 SHORTEST_PATH_LIMIT = 100
 
 
-class GameEngine:
+class GameEngine(object):
 
     def __init__(self):
         self.time_step = None
@@ -43,7 +42,6 @@ class GameEngine:
         self.units = {}
         self.__proximity_grid = ProximityGrid(5)
         self.__cell_locks = {}
-        self.__unit_locks = defaultdict(set)
         
     def update(self, time_step):
         self.time_step = time_step
@@ -62,8 +60,7 @@ class GameEngine:
                     return cell == dest
                 def neighbors(cell):
                     return (n for n in self.__grid.neighbors(cell)
-                            if not self.locked_cell(n)
-                            or self.__cell_locks[n].moving)
+                            if self.lockable_cell(unit, n, with_moving=True))
                 def heuristic(cell):
                     return self.__grid.cell_distance(cell, dest)
                 def debug(nodes):
@@ -88,20 +85,20 @@ class GameEngine:
 
     def add_unit(self, unit, pos):
         start = self.__grid.pos_to_cell(pos)
-        unit.cell = self.__find_unlocked_cell(start)
+        unit.cell = self.__find_lockable_cell(unit, start)
         unit.pos = self.__grid.cell_to_pos(unit.cell)
         self.units[unit.key] = unit
-        self.__add_unit_locks(unit)
+        self.update_cell_locks(unit)
         rect = rectangle_from_center_and_size(unit.pos, unit.size)
         self.__proximity_grid[unit.key] = rect
         print "Added %s at %s." % (unit, unit.cell)
 
     def remove_unit(self, unit):
         del self.__proximity_grid[unit.key]
-        self.__remove_unit_locks(unit)
         del self.units[unit.key]
         unit.pos = None
         unit.cell = None
+        self.update_cell_locks(unit)
         print "Removed %s." % unit
 
     def request_path(self, unit, dest, set_path):
@@ -114,7 +111,7 @@ class GameEngine:
     def abort_path(self, path_request):
         path_request[-1] = True
 
-    def get_damage_factor(self, attacker, defender):
+    def damage_factor(self, attacker, defender):
         return damage_factors.get((type(attacker), type(defender)), 1.0)
 
     def __remove_dead_units(self):
@@ -136,9 +133,9 @@ class GameEngine:
             enemy = min(enemies, key=key_func)
             print "%s found an enemy in %s." % (unit, enemy)
 
-    def __find_unlocked_cell(self, start):
+    def __find_lockable_cell(self, unit, start):
         def goal(cell):
-            return not self.locked_cell(cell)
+            return self.lockable_cell(unit, cell)
         def debug(nodes):
             print ("Found an unlocked cell after searching %d node(s)."
                    % len(nodes))
@@ -146,36 +143,25 @@ class GameEngine:
                              diagonal_distance)
         return path[-1] if path else start
 
-    def __add_unit_locks(self, unit):
-        self.lock_cell(unit, unit.cell)
-        if False and isinstance(unit, Building):
-            for neighbor in self.__grid.neighbors(unit.cell):
-                self.lock_cell(unit, neighbor)
-
-    def __remove_unit_locks(self, unit):
-        if unit in self.__unit_locks:
-            for cell in list(self.__unit_locks[unit]):
-                self.unlock_cell(cell)
-
-    def lock_cell(self, unit, cell):
-        x, y = cell
-        if cell in self.__cell_locks:
-            raise RuntimeError("cell %s is already locked" % (cell,))
-        self.__cell_locks[cell] = unit
-        self.__unit_locks[unit].add(cell)
-        print "%s locked cell %s." % (unit, cell)
-
-    def unlock_cell(self, cell):
-        x, y = cell
-        unit = self.__cell_locks.pop(cell)
-        self.__unit_locks[unit].remove(cell)
-        if not self.__unit_locks[unit]:
-            del self.__unit_locks[unit]
-        print "%s unlocked cell %s." % (unit, cell)
-
-    def locked_cell(self, cell):
-        x, y = cell
-        return cell in self.__cell_locks
+    def update_cell_locks(self, unit):
+        if unit.cell_locks:
+            for cell in unit.cell_locks:
+                del self.__cell_locks[cell]
+            unit.cell_locks.clear()
+        if unit.cell is not None:
+            unit.cell_locks.add(unit.cell)
+            if unit.large:
+                unit.cell_locks.update(self.__grid.neighbors(unit.cell))
+            for cell in unit.cell_locks:
+                self.__cell_locks[cell] = unit
+            
+    def lockable_cell(self, unit, cell, with_moving=False):
+        def lockable(cell):
+            return (self.__cell_locks.get(cell) in (unit, None)
+                    or with_moving and self.__cell_locks[cell].moving)
+        return (lockable(cell)
+                and (not unit.large
+                     or all(lockable(n) for n in self.__grid.neighbors(cell))))
 
     def move_unit(self, unit, pos):
         unit.pos = pos

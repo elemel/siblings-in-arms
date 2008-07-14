@@ -88,14 +88,16 @@ class MoveTask(UnitTask):
         if self.aborting or self.unit.cell == self.dest:
             self.unit.moving = False
             self.done = True
-        elif not self.path or self.game_engine.locked_cell(self.path[0]):
+        elif (not self.path
+              or not self.game_engine.lockable_cell(self.unit, self.path[0])):
             self.unit.moving = False
             self.update = self.__request_path
             self.update()
         else:
             self.unit.moving = True
             self.stuck = False
-            self.game_engine.lock_cell(self.unit, self.path[0])
+            self.unit.cell = self.path[0]
+            self.game_engine.update_cell_locks(self.unit)
             self.old_pos = self.unit.pos
             self.new_pos = self.game_engine.cell_to_pos(self.path[0])
             self.step_dist = diagonal_distance(self.old_pos, self.new_pos)
@@ -113,8 +115,6 @@ class MoveTask(UnitTask):
                                                        self.subprogress))
         else:
             self.game_engine.move_unit(self.unit, self.new_pos)
-            self.game_engine.unlock_cell(self.unit.cell)
-            self.unit.cell = self.path[0]
             self.path = self.path[1:]
             self.update = self.__follow_path
 
@@ -187,8 +187,8 @@ class AttackTask(UnitTask):
                                                    self.new_pos,
                                                    self.subprogress))
         if self.subprogress >= 0.5:
-            damage_factor = self.game_engine.get_damage_factor(self.unit,
-                                                               self.target)
+            damage_factor = self.game_engine.damage_factor(self.unit,
+                                                           self.target)
             self.target.health -= self.unit.damage * damage_factor
             print "%s hit %s." % (self.unit, self.target)
             self.update = self.__after_hit

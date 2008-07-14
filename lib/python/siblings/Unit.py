@@ -34,16 +34,18 @@ class Unit(object):
     attack_time = 0.5
     max_health = 1.0
     build_time = 0.3
+    large = False
 
     def __init__(self, player=None):
         self.key = Unit.next_key()
         self.player = player
         self.pos = None
-        self.cell = None
         self.health = self.max_health
         self.task = None
         self.task_queue = []
         self.moving = False
+        self.cell = None
+        self.cell_locks = set()
 
     def __str__(self):
         return "%s %s #%d" % (self.player.capitalize(), type(self).__name__,
@@ -98,16 +100,17 @@ class Wizard(Hero):
 
 
 class Building(Unit):
-    pass
+    size = 3, 3
+    large = True
 
 
 class Tavern(Building):
-    size = (3, 3)
     max_health = 10.0
 
 
 class Minion(Creature):
-    pass
+    size = 3, 3
+    large = True
 
 
 class Golem(Minion):
