@@ -77,20 +77,22 @@ load_unit_images()
 
 PIXELS_PER_METER_X = 45
 PIXELS_PER_METER_Y = 30
+SCROLL_X, SCROLL_Y = 50, 50
 
 selection = set()
+screen_x, screen_y = 0, 0
 
 def to_screen_coords(point, screen_size):
     x, y = point
     width, height = screen_size
-    return (int(x * PIXELS_PER_METER_X),
-            int(height - y * PIXELS_PER_METER_Y))
+    return (int(x * PIXELS_PER_METER_X) - screen_x,
+            int(height - y * PIXELS_PER_METER_Y) - screen_y)
 
 def to_world_coords(point, screen_size):
     x, y = point
     width, height = screen_size
-    return (float(x) / PIXELS_PER_METER_X,
-            float(height - y) / PIXELS_PER_METER_Y)
+    return (float(x + screen_x) / PIXELS_PER_METER_X,
+            float(height - y - screen_y) / PIXELS_PER_METER_Y)
 
 def get_sorted_units(game_engine):
     units = game_engine.units.values()
@@ -115,8 +117,18 @@ mouse_button_down_pos = None
 def handle_events(game_engine):
     global mouse_button_down_pos
     for event in pygame.event.get():
-        if event.type == KEYDOWN and event.key == K_ESCAPE:
-            sys.exit()
+        if event.type == KEYDOWN:
+            global screen_x, screen_y
+            if event.key == K_ESCAPE:
+                sys.exit()
+            elif event.key == K_UP:
+                screen_y -= SCROLL_Y
+            elif event.key == K_DOWN:
+                screen_y += SCROLL_Y
+            elif event.key == K_LEFT:
+                screen_x -= SCROLL_X
+            elif event.key == K_RIGHT:
+                screen_x += SCROLL_X
         elif event.type == MOUSEBUTTONDOWN:
             mouse_button_down_pos = event.pos
         elif event.type == MOUSEBUTTONUP:
@@ -231,16 +243,16 @@ def handle_rectangle_event(old_pos, event, game_engine):
 def update_screen(game_engine):
     paint_map_surface(game_engine)
     paint_control_panel(game_engine)
-    pygame.display.flip()
+    pygame.display.update()
 
 def paint_map_surface(game_engine):
     map_surface.fill(pygame.color.Color('#886644'))
     for unit in get_sorted_units(game_engine):
         screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
         image = team_images[unit.player, type(unit)]
-        width, height = image.get_size()
-        radius = max(width, height) // 2
         if unit in selection:
+            width, height = image.get_size()
+            radius = max(width, height) // 2
             pygame.draw.circle(map_surface, pygame.color.Color('black'),
                                screen_pos, radius - 1, 3)
             pygame.draw.circle(map_surface, pygame.color.Color('green'),

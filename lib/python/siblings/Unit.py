@@ -58,6 +58,7 @@ class Hero(Unit):
 class Monk(Hero):
     speed = 4.0
     damage = 0.1
+    attack_time = 0.3
 
 
 class Warrior(Hero):
@@ -66,16 +67,16 @@ class Warrior(Hero):
     max_health = 1.2
 
 
-class Knight(Hero):
-    speed = 6.0
-    damage = 0.3
-    max_health = 1.5
-
-
 class Ranger(Hero):
     speed = 5.0
     damage = 0.3
     max_range = 5.0
+
+
+class Knight(Hero):
+    speed = 6.0
+    damage = 0.3
+    max_health = 1.5
 
 
 class Rogue(Hero):

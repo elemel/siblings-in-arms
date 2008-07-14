@@ -77,6 +77,7 @@ class MoveTask(UnitTask):
                 if self.stuck:
                     self.done = True
                 else:
+                    self.stuck = True
                     self.update = self.__request_path
                     self.update()
             else:
@@ -89,7 +90,6 @@ class MoveTask(UnitTask):
             self.done = True
         elif not self.path or self.game_engine.locked_cell(self.path[0]):
             self.unit.moving = False
-            self.stuck = True
             self.update = self.__request_path
             self.update()
         else:
