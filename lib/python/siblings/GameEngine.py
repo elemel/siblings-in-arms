@@ -148,7 +148,7 @@ class GameEngine:
 
     def __add_unit_locks(self, unit):
         self.lock_cell(unit, unit.cell)
-        if isinstance(unit, Building):
+        if False and isinstance(unit, Building):
             for neighbor in self.__grid.neighbors(unit.cell):
                 self.lock_cell(unit, neighbor)
 
@@ -159,7 +159,6 @@ class GameEngine:
 
     def lock_cell(self, unit, cell):
         x, y = cell
-        assert type(x) is int and type(y) is int
         if cell in self.__cell_locks:
             raise RuntimeError("cell %s is already locked" % (cell,))
         self.__cell_locks[cell] = unit
@@ -168,7 +167,6 @@ class GameEngine:
 
     def unlock_cell(self, cell):
         x, y = cell
-        assert type(x) is int and type(y) is int
         unit = self.__cell_locks.pop(cell)
         self.__unit_locks[unit].remove(cell)
         if not self.__unit_locks[unit]:
@@ -177,7 +175,6 @@ class GameEngine:
 
     def locked_cell(self, cell):
         x, y = cell
-        assert type(x) is int and type(y) is int
         return cell in self.__cell_locks
 
     def move_unit(self, unit, pos):

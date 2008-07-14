@@ -122,7 +122,7 @@ class MoveTask(UnitTask):
         self.path = path
 
 
-class BuildTask(UnitTask):
+class ProduceTask(UnitTask):
 
     def __init__(self, game_engine, unit, product_cls):        
         UnitTask.__init__(self, game_engine, unit)
@@ -213,3 +213,19 @@ class AttackTask(UnitTask):
         if self.subtask.done:
             self.update = self.__hit_or_move
         self.progress = attack_progress(self.target)
+
+
+class ConstructTask(UnitTask):
+
+    def __init__(self, game_engine, unit, building_cls):        
+        UnitTask.__init__(self, game_engine, unit)
+        self.building_cls = building_cls
+        self.progress = 0.0
+
+    def update(self):
+        self.progress += (self.game_engine.time_step
+                          / self.building_cls.build_time)
+        if self.progress >= 1.0:
+            self.game_engine.add_unit(self.building_cls(self.unit.player),
+                                      self.unit.pos)
+            self.done = True

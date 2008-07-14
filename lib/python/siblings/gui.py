@@ -22,8 +22,8 @@
 import pygame, pygame.transform, sys, os, math
 from pygame.locals import *
 from geometry import *
-from Task import AttackTask, BuildTask, MoveTask
-from Unit import Building, Hero, Tavern
+from Task import AttackTask, ConstructTask, MoveTask, ProduceTask
+from Unit import Building, Hero, Tavern, Monk
 
 
 root = os.path.dirname(__file__)
@@ -185,29 +185,28 @@ def handle_command_event(event, game_engine):
             and (clicked_unit is None or unit.pos[1] < clicked_unit.pos[1])):
             clicked_unit = unit
 
-    if clicked_unit is None:
-        pos = to_world_coords(event.pos, map_surface.get_size())
-        cell = game_engine.pos_to_cell(pos)
-        for unit in selection:
-            if unit.speed is not None:
-                if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
-                    if unit.task is not None:
-                        unit.task.aborting = True
-                    del unit.task_queue[:]
-                    print '%s aborted all tasks.' % unit
-                unit.task_queue.append(MoveTask(game_engine, unit, cell))
-                print '%s added waypoint %s.' % (unit, cell)
-    else:
-        for unit in selection:
-            if unit.damage and unit.player != clicked_unit.player:
-                if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
-                    if unit.task is not None:
-                        unit.task.aborting = True
-                    del unit.task_queue[:]
-                    print '%s aborted all tasks.' % unit
-                unit.task_queue.append(AttackTask(game_engine, unit,
-                                                  clicked_unit))
-                print ('%s targeted %s.' % (unit, clicked_unit))
+    pos = to_world_coords(event.pos, map_surface.get_size())
+    cell = game_engine.pos_to_cell(pos)
+    for unit in selection:
+        if (unit.speed is not None
+            and (clicked_unit is None or unit.player == clicked_unit.player)):
+            if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
+                if unit.task is not None:
+                    unit.task.aborting = True
+                del unit.task_queue[:]
+                print '%s aborted all tasks.' % unit
+            unit.task_queue.append(MoveTask(game_engine, unit, cell))
+            print '%s added waypoint %s.' % (unit, cell)
+        elif unit.damage is not None and unit.player != clicked_unit.player:
+            if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
+                if unit.task is not None:
+                    unit.task.aborting = True
+                del unit.task_queue[:]
+                print '%s aborted all tasks.' % unit
+            unit.task_queue.append(AttackTask(game_engine, unit,
+                                              clicked_unit))
+            print ('%s targeted %s.' % (unit, clicked_unit))
+
 
 def handle_control_event(event, game_engine):
     x, y = event.pos
@@ -217,8 +216,13 @@ def handle_control_event(event, game_engine):
         if type(unit) is Tavern:
             classes = Hero.__subclasses__()
             if 0 <= button < len(classes):
-                unit.task_queue.append(BuildTask(game_engine, unit,
-                                                 classes[button]))
+                unit.task_queue.append(ProduceTask(game_engine, unit,
+                                                   classes[button]))
+        elif type(unit) is Monk:
+            classes = Building.__subclasses__()
+            if 0 <= button < len(classes):
+                unit.task_queue.append(ConstructTask(game_engine, unit,
+                                                     classes[button]))
 
 def handle_rectangle_event(old_pos, event, game_engine):
     global selection
@@ -273,6 +277,10 @@ def paint_selection_rectangle(game_engine):
 
 def paint_control_panel(game_engine):
     control_panel.fill(pygame.color.Color('gray'))
-    if len(selection) == 1 and type(list(selection)[0]) is Tavern:
+    selection_list = list(selection)
+    if len(selection_list) == 1 and type(selection_list[0]) is Tavern:
         for i, cls in enumerate(Hero.__subclasses__()):
+            paint_image(control_panel, unit_icons[cls], (25 + i * 50, 25))
+    elif len(selection_list) == 1 and type(selection_list[0]) is Monk:
+        for i, cls in enumerate(Building.__subclasses__()):
             paint_image(control_panel, unit_icons[cls], (25 + i * 50, 25))
