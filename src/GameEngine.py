@@ -63,12 +63,9 @@ class GameEngine(object):
                             if self.lockable_cell(unit, n, with_moving=True))
                 def heuristic(cell):
                     return self.__grid.cell_distance(cell, dest)
-                def debug(nodes):
-                    print ("%s found a path after searching %d cell(s)."
-                           % (unit, len(nodes)))
                 path = shortest_path(unit.cell, goal, neighbors,
                                      diagonal_distance, heuristic,
-                                     limit=SHORTEST_PATH_LIMIT, debug=debug)
+                                     limit=SHORTEST_PATH_LIMIT)
                 set_path(path)
 
     def __update_tasks(self):
@@ -88,7 +85,6 @@ class GameEngine(object):
         self.update_cell_locks(unit)
         rect = rectangle_from_center_and_size(unit.pos, unit.size)
         self.__proximity_grid[unit] = rect
-        print "Added %s at %s." % (unit, unit.cell)
 
     def stop_unit(self, unit):
         for task in unit.task_stack:
@@ -101,7 +97,6 @@ class GameEngine(object):
         unit.pos = None
         unit.cell = None
         self.update_cell_locks(unit)
-        print "Removed %s." % unit
 
     def request_path(self, unit, dest, set_path):
         x, y = dest
@@ -131,14 +126,10 @@ class GameEngine(object):
             def key_func(a):
                 return squared_distance(a.pos, unit.pos)
             enemy = min(enemies, key=key_func)
-            print "%s found an enemy in %s." % (unit, enemy)
 
     def __find_lockable_cell(self, unit, start):
         def goal(cell):
             return self.lockable_cell(unit, cell)
-        def debug(nodes):
-            print ("Found an unlocked cell after searching %d node(s)."
-                   % len(nodes))
         path = shortest_path(start, goal, self.__grid.neighbors,
                              diagonal_distance)
         return path[-1] if path else start

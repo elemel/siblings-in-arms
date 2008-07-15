@@ -36,10 +36,19 @@ window = pygame.display.set_mode((800, 600))
 pygame.display.set_caption('Siblings in Arms')
 screen = pygame.display.get_surface()
 
-map_rect = pygame.Rect((0, 0), (800, 550))
-control_rect = pygame.Rect((0, 550), (800, 50))
+map_rect = pygame.Rect((0, 0), (800, 500))
+control_rect = pygame.Rect((0, 500), (800, 100))
+minimap_rect = pygame.Rect((0, 450), (150, 150))
+button_rect = pygame.Rect((650, 450), (150, 150))
+
 map_panel = screen.subsurface(map_rect)
 control_panel = screen.subsurface(control_rect)
+minimap_panel = screen.subsurface(minimap_rect)
+button_panel = screen.subsurface(button_rect)
+
+control_panel.fill(pygame.color.Color('gray'))
+pygame.draw.line(control_panel, pygame.color.Color('black'), (0, 0), (800, 0))
+
 
 def load_image(name):
     path = os.path.join(root, 'data', name + '.png')
@@ -47,11 +56,13 @@ def load_image(name):
     image.set_colorkey((0, 0, 255))
     return image
 
+
 unit_images = {}
 team_colors = dict(cyan=(0, 255, 255), green=(0, 255, 0), red=(255, 0, 0),
                    yellow=(255, 255, 0))
 team_images = {}
 unit_icons = {}
+
 
 def create_team_image(image, team_color, team_colorkey=(0, 255, 0)):
     team_image = image.copy()
@@ -65,6 +76,7 @@ def create_team_image(image, team_color, team_colorkey=(0, 255, 0)):
     team_image.unlock()
     return team_image
 
+
 def load_unit_images():
     for cls in (Hero.__subclasses__() + Building.__subclasses__()
                 + Minion.__subclasses__()):
@@ -73,6 +85,7 @@ def load_unit_images():
         for team, team_color in team_colors.iteritems():
             team_images[team, cls] = create_team_image(image, team_color)
         unit_icons[cls] = load_image(name + '-icon')
+
 
 load_unit_images()
 
@@ -83,11 +96,13 @@ SCROLL_X, SCROLL_Y = 50, 50
 selection = set()
 screen_x, screen_y = 0, 0
 
+
 def to_screen_coords(point, screen_size):
     x, y = point
     width, height = screen_size
     return (int(x * PIXELS_PER_METER_X) - screen_x,
             int(height - y * PIXELS_PER_METER_Y) - screen_y)
+
 
 def to_world_coords(point, screen_size):
     x, y = point
@@ -95,15 +110,18 @@ def to_world_coords(point, screen_size):
     return (float(x + screen_x) / PIXELS_PER_METER_X,
             float(height - y - screen_y) / PIXELS_PER_METER_Y)
 
+
 def get_sorted_units(game_engine):
     units = list(game_engine.units)
     units.sort(lambda a, b: cmp(b.cell[1], a.cell[1]))
     return units
 
+
 def paint_image(surface, image, pos):
     x, y = pos
     width, height = image.get_size()
     surface.blit(image, (x - width // 2, y - height // 2))
+
 
 def update(game_engine):
     new_selection = set(unit for unit in selection if unit.pos)
@@ -113,7 +131,9 @@ def update(game_engine):
     handle_events(game_engine)
     update_screen(game_engine)
 
+
 mouse_button_down_pos = None
+
 
 def handle_events(game_engine):
     global mouse_button_down_pos
@@ -141,15 +161,19 @@ def handle_events(game_engine):
                                        game_engine)
             mouse_button_down_pos = None
 
+
 def handle_click_event(event, game_engine):
     x, y = event.pos
-    if map_rect.collidepoint(x, y):
+    if minimap_rect.collidepoint(x, y):
+        handle_minimap_event(event, game_engine)
+    if button_rect.collidepoint(x, y):
+        handle_button_event(event, game_engine)
+    elif map_rect.collidepoint(x, y):
         if event.button == 1:
             handle_select_event(event, game_engine)
         else:
             handle_command_event(event, game_engine)
-    else:
-        handle_control_event(event, game_engine)
+
 
 def handle_select_event(event, game_engine):
     clicked_unit = None
@@ -171,6 +195,7 @@ def handle_select_event(event, game_engine):
         else:
             selection.clear()
             selection.add(clicked_unit)
+
 
 def handle_command_event(event, game_engine):
     clicked_unit = None
@@ -198,9 +223,14 @@ def handle_command_event(event, game_engine):
                                               clicked_unit))
 
 
-def handle_control_event(event, game_engine):
+def handle_minimap_event(event, game_engine):
+    pass
+
+def handle_button_event(event, game_engine):
     x, y = event.pos
-    button = x // 50
+    col = (x - button_rect.left) // 50
+    row = (y - button_rect.top) // 50
+    button = col + 3 * row
     if len(selection) == 1:
         unit = iter(selection).next()
         if type(unit) is Tavern:
@@ -231,10 +261,12 @@ def handle_rectangle_event(old_pos, event, game_engine):
     else:
         selection = new_selection
 
+
 def update_screen(game_engine):
     paint_map_panel(game_engine)
     paint_control_panel(game_engine)
     pygame.display.update()
+
 
 def paint_map_panel(game_engine):
     map_panel.fill(pygame.color.Color('#886644'))
@@ -266,14 +298,37 @@ def paint_selection_rectangle(game_engine):
                          pygame.Rect(x, y, width, height), 1)
 
 
+def paint_button(button, image):
+    row, col = divmod(button, 3)
+    paint_image(button_panel, image, (25 + col * 50, 25 + row * 50))
+
+
 def paint_control_panel(game_engine):
-    control_panel.fill(pygame.color.Color('gray'))
+    paint_minimap_panel(game_engine)
+    paint_button_panel(game_engine)
+
+
+def paint_minimap_panel(game_engine):
+    minimap_panel.fill(pygame.color.Color('gray'))
+    pygame.draw.line(minimap_panel, pygame.color.Color('black'), (0, 0),
+                     (minimap_rect.width, 0))
+    pygame.draw.line(minimap_panel, pygame.color.Color('black'),
+                     (minimap_rect.width - 1, 0),
+                     (minimap_rect.width - 1, minimap_rect.height))
+
+
+def paint_button_panel(game_engine):
+    button_panel.fill(pygame.color.Color('gray'))
+    pygame.draw.line(button_panel, pygame.color.Color('black'), (0, 0),
+                     (button_rect.width, 0))
+    pygame.draw.line(button_panel, pygame.color.Color('black'), (0, 0),
+                     (0, button_rect.height))
     if len(selection) == 1:
         unit = iter(selection).next()
         if type(unit) is Tavern:
-            for i, cls in enumerate(Hero.__subclasses__()
-                                    + Minion.__subclasses__()):
-                paint_image(control_panel, unit_icons[cls], (25 + i * 50, 25))
+            for button, cls in enumerate(Hero.__subclasses__()
+                                         + Minion.__subclasses__()):
+                paint_button(button, unit_icons[cls])
         elif type(unit) is Monk:
-            for i, cls in enumerate(Building.__subclasses__()):
-                paint_image(control_panel, unit_icons[cls], (25 + i * 50, 25))
+            for button, cls in enumerate(Building.__subclasses__()):
+                paint_button(button, unit_icons[cls])
