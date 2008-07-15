@@ -19,12 +19,7 @@
 # SOFTWARE.
 
 
-import sys
-
-
 class Unit(object):
-
-    next_key = iter(xrange(1, sys.maxint)).next
 
     speed = None
     size = 1, 1
@@ -37,7 +32,6 @@ class Unit(object):
     large = False
 
     def __init__(self, color):
-        self.key = Unit.next_key()
         self.color = color
         self.pos = None
         self.health = self.max_health
@@ -49,7 +43,7 @@ class Unit(object):
 
     def __str__(self):
         return "%s %s #%d" % (self.color.capitalize(), type(self).__name__,
-                              self.key)
+                              id(self))
 
 
 class Creature(Unit):

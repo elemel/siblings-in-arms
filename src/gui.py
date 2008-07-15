@@ -96,7 +96,7 @@ def to_world_coords(point, screen_size):
             float(height - y - screen_y) / PIXELS_PER_METER_Y)
 
 def get_sorted_units(game_engine):
-    units = game_engine.units.values()
+    units = list(game_engine.units)
     units.sort(lambda a, b: cmp(b.cell[1], a.cell[1]))
     return units
 
@@ -153,7 +153,7 @@ def handle_click_event(event, game_engine):
 
 def handle_select_event(event, game_engine):
     clicked_unit = None
-    for unit in game_engine.units.itervalues():
+    for unit in game_engine.units:
         screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
         surface = unit_images[type(unit)]
         surface_size = surface.get_size()
@@ -177,7 +177,7 @@ def handle_select_event(event, game_engine):
 
 def handle_command_event(event, game_engine):
     clicked_unit = None
-    for unit in game_engine.units.itervalues():
+    for unit in game_engine.units:
         screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
         surface = unit_images[type(unit)]
         surface_size = surface.get_size()
@@ -229,7 +229,7 @@ def handle_rectangle_event(old_pos, event, game_engine):
     global selection
     selection_rect = normalize_rectangle((old_pos, event.pos))
     new_selection = set()
-    for unit in game_engine.units.itervalues():
+    for unit in game_engine.units:
         screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
         surface = unit_images[type(unit)]
         surface_size = surface.get_size()

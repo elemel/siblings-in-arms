@@ -39,7 +39,7 @@ class GameEngine(object):
         self.time = 0.0
         self.__grid = HexGrid()
         self.__path_queue = deque()
-        self.units = {}
+        self.units = set()
         self.__proximity_grid = ProximityGrid(5)
         self.__cell_locks = {}
         
@@ -72,7 +72,7 @@ class GameEngine(object):
                 set_path(path)
 
     def __update_tasks(self):
-        for unit in self.units.values():
+        for unit in list(self.units):
             if unit.task is not None:
                 unit.task.update()
                 if unit.task.done:
@@ -87,15 +87,15 @@ class GameEngine(object):
         start = self.__grid.pos_to_cell(pos)
         unit.cell = self.__find_lockable_cell(unit, start)
         unit.pos = self.__grid.cell_to_pos(unit.cell)
-        self.units[unit.key] = unit
+        self.units.add(unit)
         self.update_cell_locks(unit)
         rect = rectangle_from_center_and_size(unit.pos, unit.size)
-        self.__proximity_grid[unit.key] = rect
+        self.__proximity_grid[unit] = rect
         print "Added %s at %s." % (unit, unit.cell)
 
     def remove_unit(self, unit):
-        del self.__proximity_grid[unit.key]
-        del self.units[unit.key]
+        del self.__proximity_grid[unit]
+        self.units.remove(unit)
         unit.pos = None
         unit.cell = None
         self.update_cell_locks(unit)
@@ -115,7 +115,7 @@ class GameEngine(object):
         return damage_factors.get((type(attacker), type(defender)), 1.0)
 
     def __remove_dead_units(self):
-        dead_units = [u for u in self.units.itervalues() if u.health <= 0.0]
+        dead_units = [u for u in self.units if u.health <= 0.0]
         for unit in dead_units:
             self.remove_unit(unit)
 
@@ -123,10 +123,8 @@ class GameEngine(object):
         if not unit.damage:
             return
         rect = rectangle_from_center_and_size(unit.pos, (10, 10))
-        enemies = [self.units.get(key)
-                   for key in self.__proximity_grid.intersect(rect)
-                   if key != unit.key]
-        enemies = [enemy for enemy in enemies if enemy.color != unit.color]
+        enemies = [enemy for enemy in self.__proximity_grid.intersect(rect)
+                   if enemy.color != unit.color]
         if enemies:
             def key_func(a):
                 return squared_distance(a.pos, unit.pos)
@@ -166,7 +164,7 @@ class GameEngine(object):
     def move_unit(self, unit, pos):
         unit.pos = pos
         rect = rectangle_from_center_and_size(unit.pos, unit.size)
-        self.__proximity_grid[unit.key] = rect
+        self.__proximity_grid[unit] = rect
 
     def cell_to_pos(self, cell):
         return self.__grid.cell_to_pos(cell)
