@@ -190,7 +190,7 @@ def handle_command_event(event, game_engine):
     cell = game_engine.pos_to_cell(pos)
     for unit in selection:
         if (unit.speed is not None
-            and (clicked_unit is None or unit.player == clicked_unit.player)):
+            and (clicked_unit is None or unit.color == clicked_unit.color)):
             if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
                 if unit.task is not None:
                     unit.task.aborting = True
@@ -198,7 +198,7 @@ def handle_command_event(event, game_engine):
                 print '%s aborted all tasks.' % unit
             unit.task_queue.append(MoveTask(game_engine, unit, cell))
             print '%s added waypoint %s.' % (unit, cell)
-        elif unit.damage is not None and unit.player != clicked_unit.player:
+        elif unit.damage is not None and unit.color != clicked_unit.color:
             if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
                 if unit.task is not None:
                     unit.task.aborting = True
@@ -254,7 +254,7 @@ def paint_map_surface(game_engine):
     map_surface.fill(pygame.color.Color('#886644'))
     for unit in get_sorted_units(game_engine):
         screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
-        image = team_images[unit.player, type(unit)]
+        image = team_images[unit.color, type(unit)]
         if unit in selection:
             width, height = image.get_size()
             radius = max(width, height) // 2

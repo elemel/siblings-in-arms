@@ -133,7 +133,7 @@ class ProduceTask(UnitTask):
         self.progress += (self.game_engine.time_step
                           / self.product_cls.build_time)
         if self.progress >= 1.0:
-            self.game_engine.add_unit(self.product_cls(self.unit.player),
+            self.game_engine.add_unit(self.product_cls(self.unit.color),
                                       self.unit.pos)
             self.done = True
 
@@ -226,6 +226,6 @@ class ConstructTask(UnitTask):
         self.progress += (self.game_engine.time_step
                           / self.building_cls.build_time)
         if self.progress >= 1.0:
-            self.game_engine.add_unit(self.building_cls(self.unit.player),
+            self.game_engine.add_unit(self.building_cls(self.unit.color),
                                       self.unit.pos)
             self.done = True

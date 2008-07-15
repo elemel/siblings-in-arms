@@ -36,9 +36,9 @@ class Unit(object):
     build_time = 0.3
     large = False
 
-    def __init__(self, player=None):
+    def __init__(self, color):
         self.key = Unit.next_key()
-        self.player = player
+        self.color = color
         self.pos = None
         self.health = self.max_health
         self.task = None
@@ -48,7 +48,7 @@ class Unit(object):
         self.cell_locks = set()
 
     def __str__(self):
-        return "%s %s #%d" % (self.player.capitalize(), type(self).__name__,
+        return "%s %s #%d" % (self.color.capitalize(), type(self).__name__,
                               self.key)
 
 

@@ -126,7 +126,7 @@ class GameEngine(object):
         enemies = [self.units.get(key)
                    for key in self.__proximity_grid.intersect(rect)
                    if key != unit.key]
-        enemies = [enemy for enemy in enemies if enemy.player != unit.player]
+        enemies = [enemy for enemy in enemies if enemy.color != unit.color]
         if enemies:
             def key_func(a):
                 return squared_distance(a.pos, unit.pos)
