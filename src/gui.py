@@ -166,14 +166,11 @@ def handle_select_event(event, game_engine):
         if pygame.key.get_mods() & pygame.KMOD_SHIFT:
             if clicked_unit in selection:
                 selection.remove(clicked_unit)
-                print 'Removed %s from selection.' % clicked_unit
             else:
                 selection.add(clicked_unit)
-                print 'Added %s to selection.' % clicked_unit
         else:
             selection.clear()
             selection.add(clicked_unit)
-            print 'Selected %s.' % clicked_unit
 
 def handle_command_event(event, game_engine):
     clicked_unit = None
@@ -194,13 +191,11 @@ def handle_command_event(event, game_engine):
             if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
                 game_engine.stop_unit(unit)
             unit.task_queue.append(MoveTask(game_engine, unit, cell))
-            print '%s added waypoint %s.' % (unit, cell)
         elif unit.damage is not None and unit.color != clicked_unit.color:
             if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
                 game_engine.stop_unit(unit)
             unit.task_queue.append(AttackTask(game_engine, unit,
                                               clicked_unit))
-            print '%s targeted %s.' % (unit, clicked_unit)
 
 
 def handle_control_event(event, game_engine):
@@ -232,12 +227,9 @@ def handle_rectangle_event(old_pos, event, game_engine):
             new_selection.add(unit)
 
     if pygame.key.get_mods() & pygame.KMOD_SHIFT:
-        old_size = len(selection)
         selection |= new_selection
-        print 'Added %d unit(s) to selection.' % (len(selection) - old_size)
     else:
         selection = new_selection
-        print 'Selected %d unit(s).' % len(selection)
 
 def update_screen(game_engine):
     paint_map_surface(game_engine)
