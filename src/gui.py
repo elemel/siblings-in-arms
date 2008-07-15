@@ -38,7 +38,7 @@ screen = pygame.display.get_surface()
 
 map_rect = pygame.Rect((0, 0), (800, 550))
 control_rect = pygame.Rect((0, 550), (800, 50))
-map_surface = screen.subsurface(map_rect)
+map_panel = screen.subsurface(map_rect)
 control_panel = screen.subsurface(control_rect)
 
 def load_image(name):
@@ -154,7 +154,7 @@ def handle_click_event(event, game_engine):
 def handle_select_event(event, game_engine):
     clicked_unit = None
     for unit in game_engine.units:
-        screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
+        screen_pos = to_screen_coords(unit.pos, map_panel.get_size())
         surface = unit_images[type(unit)]
         surface_size = surface.get_size()
         rect = rectangle_from_center_and_size(screen_pos, surface_size)
@@ -175,7 +175,7 @@ def handle_select_event(event, game_engine):
 def handle_command_event(event, game_engine):
     clicked_unit = None
     for unit in game_engine.units:
-        screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
+        screen_pos = to_screen_coords(unit.pos, map_panel.get_size())
         surface = unit_images[type(unit)]
         surface_size = surface.get_size()
         rect = rectangle_from_center_and_size(screen_pos, surface_size)
@@ -183,7 +183,7 @@ def handle_command_event(event, game_engine):
             and (clicked_unit is None or unit.pos[1] < clicked_unit.pos[1])):
             clicked_unit = unit
 
-    pos = to_world_coords(event.pos, map_surface.get_size())
+    pos = to_world_coords(event.pos, map_panel.get_size())
     cell = game_engine.pos_to_cell(pos)
     for unit in selection:
         if (unit.speed is not None
@@ -219,7 +219,7 @@ def handle_rectangle_event(old_pos, event, game_engine):
     selection_rect = normalize_rectangle((old_pos, event.pos))
     new_selection = set()
     for unit in game_engine.units:
-        screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
+        screen_pos = to_screen_coords(unit.pos, map_panel.get_size())
         surface = unit_images[type(unit)]
         surface_size = surface.get_size()
         surface_rect = rectangle_from_center_and_size(screen_pos, surface_size)
@@ -232,24 +232,25 @@ def handle_rectangle_event(old_pos, event, game_engine):
         selection = new_selection
 
 def update_screen(game_engine):
-    paint_map_surface(game_engine)
+    paint_map_panel(game_engine)
     paint_control_panel(game_engine)
     pygame.display.update()
 
-def paint_map_surface(game_engine):
-    map_surface.fill(pygame.color.Color('#886644'))
+def paint_map_panel(game_engine):
+    map_panel.fill(pygame.color.Color('#886644'))
     for unit in get_sorted_units(game_engine):
-        screen_pos = to_screen_coords(unit.pos, map_surface.get_size())
+        screen_pos = to_screen_coords(unit.pos, map_panel.get_size())
         image = team_images[unit.color, type(unit)]
         if unit in selection:
             width, height = image.get_size()
             radius = max(width, height) // 2
-            pygame.draw.circle(map_surface, pygame.color.Color('black'),
+            pygame.draw.circle(map_panel, pygame.color.Color('black'),
                                screen_pos, radius - 1, 3)
-            pygame.draw.circle(map_surface, pygame.color.Color('green'),
+            pygame.draw.circle(map_panel, pygame.color.Color('green'),
                                screen_pos, radius - 2, 1)
-        paint_image(map_surface, image, screen_pos)
+        paint_image(map_panel, image, screen_pos)
     paint_selection_rectangle(game_engine)
+
 
 def paint_selection_rectangle(game_engine):
     if mouse_button_down_pos is not None:
@@ -259,8 +260,11 @@ def paint_selection_rectangle(game_engine):
         y = min(old_y, new_y)
         width = abs(old_x - new_x)
         height = abs(old_y - new_y)
-        pygame.draw.rect(map_surface, pygame.color.Color('green'),
+        pygame.draw.rect(map_panel, pygame.color.Color('black'),
+                         pygame.Rect(x, y, width, height), 3)
+        pygame.draw.rect(map_panel, pygame.color.Color('green'),
                          pygame.Rect(x, y, width, height), 1)
+
 
 def paint_control_panel(game_engine):
     control_panel.fill(pygame.color.Color('gray'))
