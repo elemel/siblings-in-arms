@@ -26,8 +26,7 @@ from Unit import Hero, Tavern, Warrior
 from Task import MoveTask
 
 
-MIN_TIME_STEP = 0.01
-MAX_TIME_STEP = 0.1
+TIME_STEP = 0.02
 
 
 def random_pos(min_p, max_p):
@@ -58,21 +57,17 @@ def main():
             hero = random.choice(hero_types)(random.choice(colors))
             game_engine.add_unit(hero, random_pos(min_p, max_p))
     
-    old_time = time.time()
+    next_time = time.time()
     while True:
-        new_time = time.time()
-        dt = new_time - old_time
-        if dt >= MIN_TIME_STEP:
-            if dt > MAX_TIME_STEP:
-                print 'Skipping %d frame(s).' % int(dt / MAX_TIME_STEP)
-                dt = MAX_TIME_STEP
-            old_time = new_time
-            game_engine.update(dt)
-
+        current_time = time.time()
+        if next_time <= current_time:
+            while next_time <= current_time:
+                next_time += TIME_STEP
+                game_engine.update(TIME_STEP)
             if not headless:
                 gui.update(game_engine)
         else:
-            time.sleep(MIN_TIME_STEP - dt)
+            time.sleep(next_time - current_time)
 
 
 if __name__ == '__main__':
