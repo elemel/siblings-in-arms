@@ -32,7 +32,7 @@ TIME_STEP = 0.02
 def random_pos(min_p, max_p):
     min_x, min_y = min_p
     max_x, max_y = max_p
-    return (random.randint(min_x, max_x), random.randint(min_y, max_y))
+    return random.uniform(min_x, max_x), random.uniform(min_y, max_y)
 
 
 def main():
