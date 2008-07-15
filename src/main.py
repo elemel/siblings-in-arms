@@ -24,7 +24,6 @@ from collections import deque
 from GameEngine import GameEngine
 from Unit import Hero, Tavern, Warrior
 from Task import MoveTask
-from FrameCounter import FrameCounter
 
 
 MIN_TIME_STEP = 0.01
@@ -60,26 +59,18 @@ def main():
             game_engine.add_unit(hero, random_pos(min_p, max_p))
     
     old_time = time.time()
-    frame_counter = FrameCounter()
-    last_fps_time = old_time
     while True:
         new_time = time.time()
         dt = new_time - old_time
         if dt >= MIN_TIME_STEP:
-            frame_counter.tick(dt)
             if dt > MAX_TIME_STEP:
                 print 'Skipping %d frame(s).' % int(dt / MAX_TIME_STEP)
                 dt = MAX_TIME_STEP
             old_time = new_time
             game_engine.update(dt)
 
-            if headless:
-                if new_time - last_fps_time >= 1.0:
-                    last_fps_time = new_time
-                    print ('Running at %d frame(s) per second.'
-                           % frame_counter.fps)
-            else:
-                gui.update(game_engine, frame_counter.fps)
+            if not headless:
+                gui.update(game_engine)
         else:
             time.sleep(MIN_TIME_STEP - dt)
 
