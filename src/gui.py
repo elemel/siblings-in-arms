@@ -22,7 +22,7 @@
 import pygame, pygame.transform, sys, os, math
 from pygame.locals import *
 from geometry import *
-from Task import AttackTask, ConstructTask, MoveTask, ProduceTask
+from Task import AttackTask, BuildTask, MoveTask, ProduceTask
 from Unit import Building, Hero, Minion, Monk, Tavern
 
 
@@ -192,21 +192,15 @@ def handle_command_event(event, game_engine):
         if (unit.speed is not None
             and (clicked_unit is None or unit.color == clicked_unit.color)):
             if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
-                if unit.task is not None:
-                    unit.task.aborting = True
-                del unit.task_queue[:]
-                print '%s aborted all tasks.' % unit
+                game_engine.stop_unit(unit)
             unit.task_queue.append(MoveTask(game_engine, unit, cell))
             print '%s added waypoint %s.' % (unit, cell)
         elif unit.damage is not None and unit.color != clicked_unit.color:
             if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
-                if unit.task is not None:
-                    unit.task.aborting = True
-                del unit.task_queue[:]
-                print '%s aborted all tasks.' % unit
+                game_engine.stop_unit(unit)
             unit.task_queue.append(AttackTask(game_engine, unit,
                                               clicked_unit))
-            print ('%s targeted %s.' % (unit, clicked_unit))
+            print '%s targeted %s.' % (unit, clicked_unit)
 
 
 def handle_control_event(event, game_engine):
@@ -222,8 +216,8 @@ def handle_control_event(event, game_engine):
         elif type(unit) is Monk:
             classes = Building.__subclasses__()
             if 0 <= button < len(classes):
-                unit.task_queue.append(ConstructTask(game_engine, unit,
-                                                     classes[button]))
+                unit.task_queue.append(BuildTask(game_engine, unit,
+                                                 classes[button]))
 
 def handle_rectangle_event(old_pos, event, game_engine):
     global selection
@@ -278,11 +272,12 @@ def paint_selection_rectangle(game_engine):
 
 def paint_control_panel(game_engine):
     control_panel.fill(pygame.color.Color('gray'))
-    selection_list = list(selection)
-    if len(selection_list) == 1 and type(selection_list[0]) is Tavern:
-        for i, cls in enumerate(Hero.__subclasses__()
-                                + Minion.__subclasses__()):
-            paint_image(control_panel, unit_icons[cls], (25 + i * 50, 25))
-    elif len(selection_list) == 1 and type(selection_list[0]) is Monk:
-        for i, cls in enumerate(Building.__subclasses__()):
-            paint_image(control_panel, unit_icons[cls], (25 + i * 50, 25))
+    if len(selection) == 1:
+        unit = iter(selection).next()
+        if type(unit) is Tavern:
+            for i, cls in enumerate(Hero.__subclasses__()
+                                    + Minion.__subclasses__()):
+                paint_image(control_panel, unit_icons[cls], (25 + i * 50, 25))
+        elif type(unit) is Monk:
+            for i, cls in enumerate(Building.__subclasses__()):
+                paint_image(control_panel, unit_icons[cls], (25 + i * 50, 25))

@@ -19,6 +19,9 @@
 # SOFTWARE.
 
 
+from collections import deque
+
+
 class Unit(object):
 
     speed = None
@@ -35,8 +38,8 @@ class Unit(object):
         self.color = color
         self.pos = None
         self.health = self.max_health
-        self.task = None
-        self.task_queue = []
+        self.task_stack = []
+        self.task_queue = deque()
         self.moving = False
         self.cell = None
         self.cell_locks = set()

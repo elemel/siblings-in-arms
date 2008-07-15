@@ -215,7 +215,7 @@ class AttackTask(UnitTask):
         self.progress = attack_progress(self.target)
 
 
-class ConstructTask(UnitTask):
+class BuildTask(UnitTask):
 
     def __init__(self, game_engine, unit, building_cls):        
         UnitTask.__init__(self, game_engine, unit)

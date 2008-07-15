@@ -73,15 +73,12 @@ class GameEngine(object):
 
     def __update_tasks(self):
         for unit in list(self.units):
-            if unit.task is not None:
-                unit.task.update()
-                if unit.task.done:
-                    unit.task = None
-            if unit.task is None and unit.task_queue:
-                unit.task = unit.task_queue[0]
-                unit.task_queue = unit.task_queue[1:]
-                unit.task.unit = unit
-
+            if unit.task_stack:
+                unit.task_stack[-1].update()
+                if unit.task_stack[-1].done:
+                    unit.task_stack.pop()
+            if not unit.task_stack and unit.task_queue:
+                unit.task_stack.append(unit.task_queue.popleft())
 
     def add_unit(self, unit, pos):
         start = self.__grid.pos_to_cell(pos)
@@ -92,6 +89,11 @@ class GameEngine(object):
         rect = rectangle_from_center_and_size(unit.pos, unit.size)
         self.__proximity_grid[unit] = rect
         print "Added %s at %s." % (unit, unit.cell)
+
+    def stop_unit(self, unit):
+        for task in unit.task_stack:
+            task.aborting = True
+        unit.task_queue.clear()
 
     def remove_unit(self, unit):
         del self.__proximity_grid[unit]
