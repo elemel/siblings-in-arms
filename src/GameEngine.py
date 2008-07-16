@@ -60,11 +60,10 @@ class GameEngine(object):
                 def neighbors(cell):
                     return (n for n in self.__grid.neighbors(cell)
                             if self.lockable_cell(unit, n, with_moving=True))
-                def cost(from_cell, to_cell):
-                    return self.__grid.neighbor_distance(from_cell, to_cell)
                 def heuristic(cell):
                     return self.__grid.cell_distance(cell, dest)
-                path = shortest_path(unit.cell, goal, neighbors, cost,
+                path = shortest_path(unit.cell, goal, neighbors,
+                                     self.__grid.neighbor_distance,
                                      heuristic, limit=SHORTEST_PATH_LIMIT)
                 set_path(path)
 
@@ -134,9 +133,8 @@ class GameEngine(object):
             cells = list(self.__grid.neighbors(cell))
             random.shuffle(cells)
             return cells
-        def cost(from_cell, to_cell):
-            return self.__grid.neighbor_distance(from_cell, to_cell)
-        path = shortest_path(start, goal, neighbors, cost)
+        path = shortest_path(start, goal, neighbors,
+                             self.__grid.neighbor_distance)
         return path[-1] if path else start
 
     def update_cell_locks(self, unit):
