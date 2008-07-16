@@ -21,8 +21,7 @@
 
 from balance import damage_factors
 from collections import defaultdict, deque
-from geometry import (diagonal_distance, rectangle_from_center_and_size,
-                      squared_distance)
+from geometry import rectangle_from_center_and_size, squared_distance
 from HexGrid import HexGrid
 from ProximityGrid import ProximityGrid
 from shortest_path import shortest_path
@@ -61,11 +60,12 @@ class GameEngine(object):
                 def neighbors(cell):
                     return (n for n in self.__grid.neighbors(cell)
                             if self.lockable_cell(unit, n, with_moving=True))
+                def cost(from_cell, to_cell):
+                    return self.__grid.neighbor_distance(from_cell, to_cell)
                 def heuristic(cell):
                     return self.__grid.cell_distance(cell, dest)
-                path = shortest_path(unit.cell, goal, neighbors,
-                                     diagonal_distance, heuristic,
-                                     limit=SHORTEST_PATH_LIMIT)
+                path = shortest_path(unit.cell, goal, neighbors, cost,
+                                     heuristic, limit=SHORTEST_PATH_LIMIT)
                 set_path(path)
 
     def __update_tasks(self):
@@ -134,7 +134,9 @@ class GameEngine(object):
             cells = list(self.__grid.neighbors(cell))
             random.shuffle(cells)
             return cells
-        path = shortest_path(start, goal, neighbors, diagonal_distance)
+        def cost(from_cell, to_cell):
+            return self.__grid.neighbor_distance(from_cell, to_cell)
+        path = shortest_path(start, goal, neighbors, cost)
         return path[-1] if path else start
 
     def update_cell_locks(self, unit):

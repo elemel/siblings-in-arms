@@ -35,7 +35,11 @@ class HexGrid:
         return hex_cell_to_pos(cell, self.cell_size)
 
     def cell_distance(self, from_cell, to_cell):
-        return diagonal_distance(from_cell, to_cell)
+        return diagonal_distance(hex_cell_to_pos(from_cell),
+                                 hex_cell_to_pos(to_cell))
 
     def neighbors(self, cell):
         return hex_neighbors(cell)
+
+    def neighbor_distance(self, from_cell, to_cell):
+        return self.cell_size
