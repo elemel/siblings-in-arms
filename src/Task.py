@@ -32,12 +32,26 @@ class Task(object):
 
     def __init__(self, game_engine):
         self.game_engine = game_engine
-        self.progress = 0.0
+        self.progress = None
         self.aborting = False
         self.done = False
+        self.result = None
+        self.__next = None
 
     def update(self):
-        pass
+        if not self.done:
+            if self.__next is None:
+                self.__next = iter(self.run()).next
+            try:
+                progress = self.__next()
+                if progress is not None:
+                    self.progress = progress
+            except StopIteration:
+                self.done = True
+
+    def run(self):
+        while False:
+            yield
 
 
 class UnitTask(Task):
@@ -127,15 +141,15 @@ class ProduceTask(UnitTask):
     def __init__(self, game_engine, unit, product_cls):        
         UnitTask.__init__(self, game_engine, unit)
         self.product_cls = product_cls
-        self.progress = 0.0
 
-    def update(self):
-        self.progress += (self.game_engine.time_step
-                          / self.product_cls.build_time)
-        if self.progress >= 1.0:
-            self.game_engine.add_unit(self.product_cls(self.unit.color),
-                                      self.unit.pos)
-            self.done = True
+    def run(self):
+        progress = 0.0
+        while progress < 1.0:
+            progress += (self.game_engine.time_step
+                         / self.product_cls.build_time)
+            yield progress
+        self.game_engine.add_unit(self.product_cls(self.unit.color),
+                                  self.unit.pos)
 
 
 def in_range(unit, target):
