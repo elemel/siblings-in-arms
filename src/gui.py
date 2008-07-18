@@ -23,7 +23,7 @@ import pygame, pygame.transform, sys, os, math
 from pygame.locals import *
 from geometry import *
 from Task import AttackTask, BuildTask, MoveTask, ProduceTask
-from Unit import Building, Hero, Minion, Monk, Tavern
+from Unit import Building, Golem, Hero, Minion, Monk, Priest, Tavern
 
 
 root = os.path.dirname(__file__)
@@ -226,6 +226,7 @@ def handle_command_event(event, game_engine):
 def handle_minimap_event(event, game_engine):
     pass
 
+
 def handle_button_event(event, game_engine):
     x, y = event.pos
     col = (x - button_rect.left) // 50
@@ -234,7 +235,7 @@ def handle_button_event(event, game_engine):
     if len(selection) == 1:
         unit = iter(selection).next()
         if type(unit) is Tavern:
-            classes = Hero.__subclasses__() + Minion.__subclasses__()
+            classes = Hero.__subclasses__()
             if 0 <= button < len(classes):
                 unit.task_queue.append(ProduceTask(game_engine, unit,
                                                    classes[button]))
@@ -243,6 +244,10 @@ def handle_button_event(event, game_engine):
             if 0 <= button < len(classes):
                 unit.task_queue.append(BuildTask(game_engine, unit,
                                                  classes[button]))
+        elif type(unit) is Priest:
+            if button == 0:
+                unit.task_queue.append(ProduceTask(game_engine, unit, Golem))
+
 
 def handle_rectangle_event(old_pos, event, game_engine):
     global selection
@@ -326,9 +331,10 @@ def paint_button_panel(game_engine):
     if len(selection) == 1:
         unit = iter(selection).next()
         if type(unit) is Tavern:
-            for button, cls in enumerate(Hero.__subclasses__()
-                                         + Minion.__subclasses__()):
+            for button, cls in enumerate(Hero.__subclasses__()):
                 paint_button(button, unit_icons[cls])
         elif type(unit) is Monk:
             for button, cls in enumerate(Building.__subclasses__()):
                 paint_button(button, unit_icons[cls])
+        elif type(unit) is Priest:
+            paint_button(0, unit_icons[Golem])

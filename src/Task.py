@@ -214,7 +214,6 @@ class AttackTask(Task):
             damage_factor = self.game_engine.damage_factor(self.unit,
                                                            self.target)
             self.target.health -= self.unit.damage * damage_factor
-            print "%s hit %s." % (self.unit, self.target)
             self.update = self.__after_hit
         self.progress = attack_progress(self.target)
 
