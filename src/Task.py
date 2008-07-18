@@ -30,18 +30,23 @@ def interpolate_pos(old_p, new_p, progress):
 
 class Task(object):
 
-    def __init__(self, game_engine):
+    def __init__(self, game_engine, unit, *args):
         self.game_engine = game_engine
+        self.unit = unit
         self.progress = None
         self.aborting = False
         self.done = False
         self.result = None
         self.__next = None
+        self._init(*args)
+
+    def _init(self, *args):
+        pass
 
     def update(self):
         if not self.done:
             if self.__next is None:
-                self.__next = iter(self.run()).next
+                self.__next = iter(self._run()).next
             try:
                 progress = self.__next()
                 if progress is not None:
@@ -49,22 +54,14 @@ class Task(object):
             except StopIteration:
                 self.done = True
 
-    def run(self):
+    def _run(self):
         while False:
             yield
 
 
-class UnitTask(Task):
+class MoveTask(Task):
 
-    def __init__(self, game_engine, unit):
-        Task.__init__(self, game_engine)
-        self.unit = unit
-
-
-class MoveTask(UnitTask):
-
-    def __init__(self, game_engine, unit, dest):
-        UnitTask.__init__(self, game_engine, unit)
+    def _init(self, dest):
         self.dest = dest
         self.path_request = None
         self.path = None
@@ -136,19 +133,33 @@ class MoveTask(UnitTask):
         self.path = path
 
 
-class ProduceTask(UnitTask):
+class StepTask(Task):
 
-    def __init__(self, game_engine, unit, product_cls):        
-        UnitTask.__init__(self, game_engine, unit)
-        self.product_cls = product_cls
+    def _init(self, from_cell, to_cell):
+        self.from_cell = from_cell
+        self.to_cell = to_cell
 
-    def run(self):
-        progress = 0.0
-        while progress < 1.0:
-            progress += (self.game_engine.time_step
-                         / self.product_cls.build_time)
-            yield progress
-        self.game_engine.add_unit(self.product_cls(self.unit.color),
+    def _run(self):
+        dist = self.game_engine.cell_distance(self.from_cell, self.to_cell)
+        self.progress = 0.0
+        while self.progress < 1.0:
+            self.progress += (self.game_engine.time_step * self.unit.speed
+                              / dist)
+            yield
+
+
+class ProduceTask(Task):
+
+    def _init(self, product_class):
+        self.product_class = product_class
+
+    def _run(self):
+        self.progress = 0.0
+        while self.progress < 1.0:
+            self.progress += (self.game_engine.time_step
+                              / self.product_class.build_time)
+            yield
+        self.game_engine.add_unit(self.product_class(self.unit.color),
                                   self.unit.pos)
 
 
@@ -165,10 +176,9 @@ def attack_progress(target):
     return min(max(progress, 1.0), 0.0)
 
 
-class AttackTask(UnitTask):
+class AttackTask(Task):
 
-    def __init__(self, game_engine, unit, target):
-        UnitTask.__init__(self, game_engine, unit)
+    def _init(self, target):
         self.target = target
         self.update = self.__hit_or_move
         self.subtask = None
@@ -229,17 +239,16 @@ class AttackTask(UnitTask):
         self.progress = attack_progress(self.target)
 
 
-class BuildTask(UnitTask):
+class BuildTask(Task):
 
-    def __init__(self, game_engine, unit, building_cls):        
-        UnitTask.__init__(self, game_engine, unit)
-        self.building_cls = building_cls
+    def _init(self, building_class):
+        self.building_class = building_class
         self.progress = 0.0
 
     def update(self):
         self.progress += (self.game_engine.time_step
-                          / self.building_cls.build_time)
+                          / self.building_class.build_time)
         if self.progress >= 1.0:
-            self.game_engine.add_unit(self.building_cls(self.unit.color),
+            self.game_engine.add_unit(self.building_class(self.unit.color),
                                       self.unit.pos)
             self.done = True
