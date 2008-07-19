@@ -158,10 +158,13 @@ class ProduceTask(Task):
 
     def _run(self):
         self.progress = 0.0
-        while self.progress < 1.0:
+        while True:
             self.progress += (self.game_engine.time_step
                               / self.product_class.build_time)
-            yield
+            if self.progress < 1.0:
+                yield
+            else:
+                break
         self.game_engine.add_unit(self.product_class(self.unit.color),
                                   self.unit.pos)
 
@@ -176,7 +179,7 @@ def in_range(unit, target):
 
 def attack_progress(target):
     progress = 1.0 - target.health
-    return min(max(progress, 1.0), 0.0)
+    return max(0.0, min(progress, 1.0))
 
 
 class AttackTask(Task):
@@ -245,12 +248,15 @@ class BuildTask(Task):
 
     def _init(self, building_class):
         self.building_class = building_class
-        self.progress = 0.0
 
-    def update(self):
-        self.progress += (self.game_engine.time_step
-                          / self.building_class.build_time)
-        if self.progress >= 1.0:
-            self.game_engine.add_unit(self.building_class(self.unit.color),
-                                      self.unit.pos)
-            self.alive = False
+    def _run(self):
+        self.progress = 0.0
+        while True:
+            self.progress += (self.game_engine.time_step
+                              / self.building_class.build_time)
+            if self.progress < 1.0:
+                yield
+            else:
+                break
+        self.game_engine.add_unit(self.building_class(self.unit.color),
+                                  self.unit.pos)

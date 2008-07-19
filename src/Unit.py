@@ -37,6 +37,7 @@ class Unit(object):
     def __init__(self, color):
         self.color = color
         self.pos = None
+        self.alive = True
         self.health = self.max_health
         self.task_stack = []
         self.task_queue = deque()
