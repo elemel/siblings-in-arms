@@ -71,7 +71,7 @@ class GameEngine(object):
         for unit in list(self.units):
             if unit.task_stack:
                 unit.task_stack[-1].update()
-                if unit.task_stack[-1].done:
+                if not unit.task_stack[-1]:
                     unit.task_stack.pop()
             if not unit.task_stack and unit.task_queue:
                 unit.task_stack.append(unit.task_queue.popleft())

@@ -35,7 +35,7 @@ class Task(object):
         self.unit = unit
         self.progress = None
         self.aborting = False
-        self.done = False
+        self.alive = True
         self.result = None
         self.__next = None
         self._init(*args)
@@ -44,7 +44,7 @@ class Task(object):
         pass
 
     def update(self):
-        if not self.done:
+        if self.alive:
             if self.__next is None:
                 self.__next = iter(self._run()).next
             try:
@@ -52,11 +52,14 @@ class Task(object):
                 if progress is not None:
                     self.progress = progress
             except StopIteration:
-                self.done = True
+                self.alive = False
 
     def _run(self):
         while False:
             yield
+
+    def __nonzero__(self):
+        return self.alive
 
 
 class MoveTask(Task):
@@ -82,11 +85,11 @@ class MoveTask(Task):
     def __wait_for_path(self):
         if self.aborting:
             self.game_engine.abort_path(self.path_request)
-            self.done = True
+            self.alive = False
         elif self.path is not None:
             if not self.path:
                 if self.stuck:
-                    self.done = True
+                    self.alive = False
                 else:
                     self.stuck = True
                     self.update = self.__request_path
@@ -98,7 +101,7 @@ class MoveTask(Task):
     def __follow_path(self):
         if self.aborting or self.unit.cell == self.dest:
             self.unit.moving = False
-            self.done = True
+            self.alive = False
         elif (not self.path
               or not self.game_engine.lockable_cell(self.unit, self.path[0])):
             self.unit.moving = False
@@ -186,7 +189,7 @@ class AttackTask(Task):
 
     def __hit_or_move(self):
         if self.aborting or self.target.pos is None:
-            self.done = True
+            self.alive = False
         elif in_range(self.unit, self.target):
             self.old_pos = self.unit.pos
             offset = vector_sub(self.target.pos, self.unit.pos)
@@ -233,7 +236,7 @@ class AttackTask(Task):
             or in_range(self.unit, self.target)):
             self.subtask.aborting = True
         self.subtask.update()
-        if self.subtask.done:
+        if not self.subtask:
             self.update = self.__hit_or_move
         self.progress = attack_progress(self.target)
 
@@ -250,4 +253,4 @@ class BuildTask(Task):
         if self.progress >= 1.0:
             self.game_engine.add_unit(self.building_class(self.unit.color),
                                       self.unit.pos)
-            self.done = True
+            self.alive = False
