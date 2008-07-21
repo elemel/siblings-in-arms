@@ -112,8 +112,11 @@ def to_world_coords(point, screen_size):
 
 
 def get_sorted_units(game_engine):
+    def key(unit):
+        cell_x, cell_y = unit.cell
+        return -cell_y, cell_x
     units = list(game_engine.units)
-    units.sort(lambda a, b: cmp(b.cell[1], a.cell[1]))
+    units.sort(key=key)
     return units
 
 
