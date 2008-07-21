@@ -25,6 +25,7 @@ from geometry import rectangle_from_center_and_size, squared_distance
 from HexGrid import HexGrid
 from ProximityGrid import ProximityGrid
 from shortest_path import shortest_path
+from Task import AttackTask
 import random
 
 
@@ -38,16 +39,24 @@ class GameEngine(object):
         self.time = 0.0
         self.__grid = HexGrid()
         self.__path_queue = deque()
-        self.units = set()
+        self.units = deque()
         self.__proximity_grid = ProximityGrid(5)
         self.__cell_locks = {}
         
     def update(self, time_step):
         self.time_step = time_step
         self.time += time_step
+        self.__update_idle_units()
         self.__update_paths()
         self.__update_tasks()
         self.__remove_dead_units()
+
+    def __update_idle_units(self):
+        if self.units:
+            unit = self.units.popleft()
+            if not unit.task_stack and not unit.task_queue:
+                self.__idle_unit(unit)
+            self.units.append(unit)
 
     def __update_paths(self):
         while self.__path_queue and self.__path_queue[0][-1]:
@@ -73,14 +82,17 @@ class GameEngine(object):
                 unit.task_stack[-1].update()
                 if not unit.task_stack[-1]:
                     unit.task_stack.pop()
-            if not unit.task_stack and unit.task_queue:
-                unit.task_stack.append(unit.task_queue.popleft())
+            if not unit.task_stack:
+                if unit.task_queue:
+                    unit.task_stack.append(unit.task_queue.popleft())
+                else:
+                    self.__idle_unit(unit)
 
     def add_unit(self, unit, pos):
         start = self.__grid.pos_to_cell(pos)
         unit.cell = self.__find_lockable_cell(unit, start)
         unit.pos = self.__grid.cell_to_pos(unit.cell)
-        self.units.add(unit)
+        self.units.append(unit)
         self.update_cell_locks(unit)
         rect = rectangle_from_center_and_size(unit.pos, unit.size)
         self.__proximity_grid[unit] = rect
@@ -99,7 +111,6 @@ class GameEngine(object):
 
     def request_path(self, unit, dest, set_path):
         x, y = dest
-        assert type(x) is int and type(y) is int
         path_request = [unit, dest, set_path, False]
         self.__path_queue.append(path_request)
         return path_request
@@ -115,16 +126,17 @@ class GameEngine(object):
         for unit in dead_units:
             self.remove_unit(unit)
 
-    def _idle_callback(self, unit):
-        if not unit.damage:
+    def __idle_unit(self, unit):
+        if unit.damage is None:
             return
-        rect = rectangle_from_center_and_size(unit.pos, (10, 10))
+        rect = rectangle_from_center_and_size(unit.pos, (5, 5))
         enemies = [enemy for enemy in self.__proximity_grid.intersect(rect)
                    if enemy.color != unit.color]
         if enemies:
-            def key_func(a):
+            def key(a):
                 return squared_distance(a.pos, unit.pos)
-            enemy = min(enemies, key=key_func)
+            target = min(enemies, key=key)
+            unit.task_queue.append(AttackTask(self, unit, target))
 
     def __find_lockable_cell(self, unit, start):
         def goal(cell):
