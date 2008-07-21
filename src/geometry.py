@@ -118,19 +118,18 @@ def vector_abs(v):
 
 def pos_to_hex_cell(pos, cell_size=1):
     pos_x, pos_y = pos
-    cell_y = int(round(pos_y / (COS_30 * cell_size)))
-    odd_y = cell_y % 2
-    cell_x = odd_y + 2 * int(round(pos_x / cell_size - 0.5 * odd_y))
-    return cell_x, cell_y
+    cell_y = pos_y / (COS_30 * cell_size)
+    cell_x = pos_x / cell_size - 0.5 * cell_y
+    return int(round(cell_x)), int(round(cell_y))
 
 
 def hex_cell_to_pos(cell, cell_size=1):
     cell_x, cell_y = cell
-    return cell_x * 0.5 * cell_size, cell_y * COS_30 * cell_size
+    return (cell_x + 0.5 * cell_y) * cell_size, COS_30 * cell_y * cell_size
 
 
 def hex_neighbors(cell):
     x, y = cell
-    yield x - 1, y + 1; yield x + 1, y + 1
-    yield x - 2, y; pass; yield x + 2, y
-    yield x - 1, y - 1; yield x + 1, y - 1
+    yield x - 1, y + 1; yield x, y + 1
+    yield x - 1, y; pass; yield x + 1, y
+    yield x, y - 1; yield x + 1, y - 1
