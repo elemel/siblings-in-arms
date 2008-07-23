@@ -21,7 +21,7 @@
 
 from balance import damage_factors
 from collections import defaultdict, deque
-from geometry import rectangle_from_center_and_size, squared_distance
+from geometry import rect_from_center_and_size, squared_distance
 from HexGrid import HexGrid
 from ProximityGrid import ProximityGrid
 from shortest_path import shortest_path
@@ -94,7 +94,7 @@ class GameEngine(object):
         unit.pos = self.__grid.cell_to_point(unit.cell)
         self.units.append(unit)
         self.update_cell_locks(unit)
-        rect = rectangle_from_center_and_size(unit.pos, unit.size)
+        rect = rect_from_center_and_size(unit.pos, unit.size)
         self.__proximity_grid[unit] = rect
 
     def stop_unit(self, unit):
@@ -129,7 +129,7 @@ class GameEngine(object):
     def __idle_unit(self, unit):
         if unit.damage is None:
             return
-        rect = rectangle_from_center_and_size(unit.pos, (5, 5))
+        rect = rect_from_center_and_size(unit.pos, (5, 5))
         enemies = [enemy for enemy in self.__proximity_grid.intersect(rect)
                    if enemy.color != unit.color]
         if enemies:
@@ -171,7 +171,7 @@ class GameEngine(object):
 
     def move_unit(self, unit, point):
         unit.pos = point
-        rect = rectangle_from_center_and_size(unit.pos, unit.size)
+        rect = rect_from_center_and_size(unit.pos, unit.size)
         self.__proximity_grid[unit] = rect
 
     def cell_to_point(self, cell):

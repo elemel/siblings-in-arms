@@ -160,7 +160,7 @@ def handle_events(game_engine):
                 and manhattan_distance(event.pos, mouse_button_down_pos) <= 6):
                 handle_click_event(event, game_engine)
             else:
-                handle_rectangle_event(mouse_button_down_pos, event,
+                handle_rect_event(mouse_button_down_pos, event,
                                        game_engine)
             mouse_button_down_pos = None
 
@@ -184,8 +184,8 @@ def handle_select_event(event, game_engine):
         screen_pos = to_screen_coords(unit.pos, map_panel.get_size())
         surface = unit_images[type(unit)]
         surface_size = surface.get_size()
-        rect = rectangle_from_center_and_size(screen_pos, surface_size)
-        if (rectangle_contains_point(rect, event.pos)
+        rect = rect_from_center_and_size(screen_pos, surface_size)
+        if (rect_contains_point(rect, event.pos)
             and (clicked_unit is None or unit.pos[1] < clicked_unit.pos[1])):
             clicked_unit = unit
 
@@ -206,8 +206,8 @@ def handle_command_event(event, game_engine):
         screen_pos = to_screen_coords(unit.pos, map_panel.get_size())
         surface = unit_images[type(unit)]
         surface_size = surface.get_size()
-        rect = rectangle_from_center_and_size(screen_pos, surface_size)
-        if (rectangle_contains_point(rect, event.pos)
+        rect = rect_from_center_and_size(screen_pos, surface_size)
+        if (rect_contains_point(rect, event.pos)
             and (clicked_unit is None or unit.pos[1] < clicked_unit.pos[1])):
             clicked_unit = unit
 
@@ -252,16 +252,16 @@ def handle_button_event(event, game_engine):
                 unit.task_queue.append(ProduceTask(game_engine, unit, Golem))
 
 
-def handle_rectangle_event(old_pos, event, game_engine):
+def handle_rect_event(old_pos, event, game_engine):
     global selection
-    selection_rect = normalize_rectangle((old_pos, event.pos))
+    selection_rect = normalize_rect((old_pos, event.pos))
     new_selection = set()
     for unit in game_engine.units:
         screen_pos = to_screen_coords(unit.pos, map_panel.get_size())
         surface = unit_images[type(unit)]
         surface_size = surface.get_size()
-        surface_rect = rectangle_from_center_and_size(screen_pos, surface_size)
-        if rectangle_intersects_rectangle(selection_rect, surface_rect):
+        surface_rect = rect_from_center_and_size(screen_pos, surface_size)
+        if rect_intersects_rect(selection_rect, surface_rect):
             new_selection.add(unit)
 
     if pygame.key.get_mods() & pygame.KMOD_SHIFT:
@@ -289,10 +289,10 @@ def paint_map_panel(game_engine):
             pygame.draw.circle(map_panel, pygame.color.Color('green'),
                                screen_pos, radius - 2, 1)
         paint_image(map_panel, image, screen_pos)
-    paint_selection_rectangle(game_engine)
+    paint_selection_rect(game_engine)
 
 
-def paint_selection_rectangle(game_engine):
+def paint_selection_rect(game_engine):
     if mouse_button_down_pos is not None:
         old_x, old_y = mouse_button_down_pos
         new_x, new_y = pygame.mouse.get_pos()
