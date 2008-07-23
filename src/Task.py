@@ -113,7 +113,7 @@ class MoveTask(Task):
             self.unit.cell = self.path[0]
             self.game_engine.update_cell_locks(self.unit)
             self.old_pos = self.unit.pos
-            self.new_pos = self.game_engine.cell_to_pos(self.path[0])
+            self.new_pos = self.game_engine.cell_to_point(self.path[0])
             self.step_dist = diagonal_distance(self.old_pos, self.new_pos)
             self.subprogress = 0.0
             self.update = self.__step

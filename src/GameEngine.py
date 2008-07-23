@@ -88,10 +88,10 @@ class GameEngine(object):
                 else:
                     self.__idle_unit(unit)
 
-    def add_unit(self, unit, pos):
-        start = self.__grid.pos_to_cell(pos)
+    def add_unit(self, unit, point):
+        start = self.__grid.point_to_cell(point)
         unit.cell = self.__find_lockable_cell(unit, start)
-        unit.pos = self.__grid.cell_to_pos(unit.cell)
+        unit.pos = self.__grid.cell_to_point(unit.cell)
         self.units.append(unit)
         self.update_cell_locks(unit)
         rect = rectangle_from_center_and_size(unit.pos, unit.size)
@@ -169,13 +169,13 @@ class GameEngine(object):
                 and (not unit.large
                      or all(lockable(n) for n in self.__grid.neighbors(cell))))
 
-    def move_unit(self, unit, pos):
-        unit.pos = pos
+    def move_unit(self, unit, point):
+        unit.pos = point
         rect = rectangle_from_center_and_size(unit.pos, unit.size)
         self.__proximity_grid[unit] = rect
 
-    def cell_to_pos(self, cell):
-        return self.__grid.cell_to_pos(cell)
+    def cell_to_point(self, cell):
+        return self.__grid.cell_to_point(cell)
 
-    def pos_to_cell(self, pos):
-        return self.__grid.pos_to_cell(pos)
+    def point_to_cell(self, point):
+        return self.__grid.point_to_cell(point)

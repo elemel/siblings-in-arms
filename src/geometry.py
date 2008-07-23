@@ -19,6 +19,7 @@
 # SOFTWARE.
 
 
+from __future__ import division
 from math import cos, pi, sqrt
 
 
@@ -116,16 +117,16 @@ def vector_abs(v):
     return sqrt(x ** 2 + y ** 2)
 
 
-def pos_to_hex_cell(pos, cell_size=1):
-    pos_x, pos_y = pos
-    cell_y = pos_y / (COS_30 * cell_size)
-    cell_x = pos_x / cell_size - 0.5 * cell_y
-    return int(round(cell_x)), int(round(cell_y))
+def point_to_hex(point, cell_size=1):
+    x, y = point
+    n = y / (COS_30 * cell_size)
+    m = x / cell_size - 0.5 * n
+    return int(round(m)), int(round(n))
 
 
-def hex_cell_to_pos(cell, cell_size=1):
-    cell_x, cell_y = cell
-    return (cell_x + 0.5 * cell_y) * cell_size, COS_30 * cell_y * cell_size
+def hex_to_point(hex, cell_size=1):
+    m, n = hex
+    return (m + 0.5 * n) * cell_size, COS_30 * n * cell_size
 
 
 def hex_neighbors(cell):
@@ -133,3 +134,10 @@ def hex_neighbors(cell):
     yield x - 1, y + 1; yield x, y + 1
     yield x - 1, y; pass; yield x + 1, y
     yield x, y - 1; yield x + 1, y - 1
+
+
+def hex_distance(from_cell, to_cell):
+    from_x, from_y = min(from_cell, to_cell)
+    to_x, to_y = max(from_cell, to_cell)
+    dx, dy = to_x - from_x, to_y - from_y
+    return dx + dy if from_y <= to_y else max(dx, -dy)

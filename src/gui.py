@@ -211,8 +211,8 @@ def handle_command_event(event, game_engine):
             and (clicked_unit is None or unit.pos[1] < clicked_unit.pos[1])):
             clicked_unit = unit
 
-    pos = to_world_coords(event.pos, map_panel.get_size())
-    cell = game_engine.pos_to_cell(pos)
+    point = to_world_coords(event.pos, map_panel.get_size())
+    cell = game_engine.point_to_cell(point)
     for unit in selection:
         if (unit.speed is not None
             and (clicked_unit is None or unit.color == clicked_unit.color)):
