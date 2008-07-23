@@ -24,30 +24,26 @@ from math import cos, pi, sqrt
 
 
 SQRT_2 = sqrt(2)
-COS_30 = cos(pi / 6.0)
+COS_30 = cos(pi / 6)
 
 
 def rect_from_center_and_size(center, size):
     x, y = center
     width, height = size
-    min_p = (x - width / 2.0, y - height / 2.0)
-    max_p = (x + width / 2.0, y + height / 2.0)
-    return min_p, max_p
+    return (x - width / 2, y - height / 2), (x + width / 2, y + height / 2)
     
 
-def rect_contains_point(r, p):
-    min_p, max_p = r
-    min_x, min_y = min_p
-    max_x, max_y = max_p
-    x, y = p
+def rect_contains_point(rect, point):
+    (min_x, min_y), (max_x, max_y) = rect
+    x, y = point
     return min_x <= x < max_x and min_y <= y < max_y
 
 
-def rect_intersects_rect(a, b):
-    a_min_x, a_min_y, a_max_x, a_max_y = a[0][0], a[0][1], a[1][0], a[1][1]
-    b_min_x, b_min_y, b_max_x, b_max_y = b[0][0], b[0][1], b[1][0], b[1][1]
-    return (a_min_x < b_max_x and b_min_x < a_max_x
-            and a_min_y < b_max_y and b_min_y < a_max_y)
+def rect_intersects_rect(rect_a, rect_b):
+    (min_ax, min_ay), (max_ax, max_ay) = rect_a
+    (min_bx, min_by), (max_bx, max_by) = rect_b
+    return (min_ax < max_bx and min_bx < max_ax
+            and min_ay < max_by and min_by < max_ay)
 
 
 def normalize_rect(rect):
@@ -57,57 +53,63 @@ def normalize_rect(rect):
     return (min_x, min_y), (max_x, max_y)
 
 
-def grid_neighbors(pos):
-    x, y = pos
-    yield x - 1, y + 1; yield x, y + 1; yield x + 1, y + 1
-    yield x - 1, y; pass; yield x + 1, y
-    yield x - 1, y - 1; yield x, y - 1; yield x + 1, y - 1
+def square_neighbors(square):
+    m, n = square
+    yield m - 1, n - 1
+    yield m - 1, n
+    yield m - 1, n + 1
+    yield m, n - 1
+    yield m, n + 1
+    yield m + 1, n - 1
+    yield m + 1, n
+    yield m + 1, n + 1
 
 
-def squared_distance(a, b):
-    ax, ay = a
-    bx, by = b
-    return (ax - bx) ** 2 + (ay - by) ** 2
+def squared_distance(p, q):
+    px, py = p
+    qx, qy = q
+    return (qx - px) ** 2 + (qy - py) ** 2
 
 
-def manhattan_distance(a, b):
-    ax, ay = a
-    bx, by = b
-    return abs(ax - bx) + abs(ay - by)
+def manhattan_distance(p, q):
+    px, py = p
+    qx, qy = q
+    return abs(qx - px) + abs(qy - py)
 
 
-def diagonal_distance(a, b):
-    ax, ay = a
-    bx, by = b
-    dx = abs(ax - bx)
-    dy = abs(ay - by)
+def diagonal_distance(p, q):
+    px, py = p
+    qx, qy = q
+    dx = abs(qx - px)
+    dy = abs(qy - py)
     return SQRT_2 * min(dx, dy) + abs(dx - dy)
 
 
-def vector_add(a, b):
-    ax, ay = a
-    bx, by = b
-    return ax + bx, ay + by
+def vector_add(u, v):
+    ux, uy = u
+    vx, vy = v
+    return ux + vx, uy + vy
 
 
-def vector_sub(a, b):
-    ax, ay = a
-    bx, by = b
-    return ax - bx, ay - by
+def vector_sub(u, v):
+    ux, uy = u
+    vx, vy = v
+    return ux - vx, uy - vy
 
 
-def vector_mul(a, b):
-    ax, ay = a
-    return ax * b, ay * b
+def vector_mul(v, a):
+    x, y = v
+    return x * a, y * a
 
 
-def vector_rmul(a, b):
-    return vector_mul(b, a)
+def vector_rmul(a, v):
+    x, y = v
+    return a * x, a * y
 
 
-def vector_div(a, b):
-    ax, ay = a
-    return ax / b, ay / b
+def vector_div(v, a):
+    x, y = v
+    return x / a, y / a
 
 
 def vector_abs(v):
@@ -118,24 +120,27 @@ def vector_abs(v):
 def point_to_hex(point, hex_size=1):
     x, y = point
     n = y / (COS_30 * hex_size)
-    m = x / hex_size - 0.5 * n
+    m = x / hex_size - n / 2
     return int(round(m)), int(round(n))
 
 
 def hex_to_point(hex, hex_size=1):
     m, n = hex
-    return (m + 0.5 * n) * hex_size, COS_30 * n * hex_size
+    return (m + n / 2) * hex_size, COS_30 * n * hex_size
 
 
 def hex_neighbors(hex):
     m, n = hex
-    yield m - 1, n + 1; yield m, n + 1
-    yield m - 1, n; pass; yield m + 1, n
-    yield m, n - 1; yield m + 1, n - 1
+    yield m - 1, n
+    yield m - 1, n + 1
+    yield m, n - 1
+    yield m, n + 1
+    yield m + 1, n - 1
+    yield m + 1, n
 
 
-def hex_distance(start_hex, goal_hex):
-    start_m, start_n = min(start_hex, goal_hex)
-    goal_m, goal_n = max(start_hex, goal_hex)
+def hex_distance(start, goal):
+    start_m, start_n = min(start, goal)
+    goal_m, goal_n = max(start, goal)
     diff_m, diff_n = goal_m - start_m, goal_n - start_n
     return diff_m + diff_n if start_n <= goal_n else max(diff_m, -diff_n)
