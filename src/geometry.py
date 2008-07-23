@@ -117,27 +117,27 @@ def vector_abs(v):
     return sqrt(x ** 2 + y ** 2)
 
 
-def point_to_hex(point, cell_size=1):
+def point_to_hex(point, hex_size=1):
     x, y = point
-    n = y / (COS_30 * cell_size)
-    m = x / cell_size - 0.5 * n
+    n = y / (COS_30 * hex_size)
+    m = x / hex_size - 0.5 * n
     return int(round(m)), int(round(n))
 
 
-def hex_to_point(hex, cell_size=1):
+def hex_to_point(hex, hex_size=1):
     m, n = hex
-    return (m + 0.5 * n) * cell_size, COS_30 * n * cell_size
+    return (m + 0.5 * n) * hex_size, COS_30 * n * hex_size
 
 
-def hex_neighbors(cell):
-    x, y = cell
-    yield x - 1, y + 1; yield x, y + 1
-    yield x - 1, y; pass; yield x + 1, y
-    yield x, y - 1; yield x + 1, y - 1
+def hex_neighbors(hex):
+    m, n = hex
+    yield m - 1, n + 1; yield m, n + 1
+    yield m - 1, n; pass; yield m + 1, n
+    yield m, n - 1; yield m + 1, n - 1
 
 
-def hex_distance(from_cell, to_cell):
-    from_x, from_y = min(from_cell, to_cell)
-    to_x, to_y = max(from_cell, to_cell)
-    dx, dy = to_x - from_x, to_y - from_y
-    return dx + dy if from_y <= to_y else max(dx, -dy)
+def hex_distance(start_hex, goal_hex):
+    start_m, start_n = min(start_hex, goal_hex)
+    goal_m, goal_n = max(start_hex, goal_hex)
+    diff_m, diff_n = goal_m - start_m, goal_n - start_n
+    return diff_m + diff_n if start_n <= goal_n else max(diff_m, -diff_n)
