@@ -19,7 +19,7 @@
 # SOFTWARE.
 
 
-from geometry import hex_distance, hex_neighbors, point_to_hex, hex_to_point
+from geometry import hex_dist, hex_neighbors, point_to_hex, hex_to_point
 
 
 class HexGrid:
@@ -33,11 +33,11 @@ class HexGrid:
     def cell_to_point(self, cell):
         return hex_to_point(cell, self.cell_size)
 
-    def cell_distance(self, from_cell, to_cell):
-        return hex_distance(from_cell, to_cell) * self.cell_size
+    def cell_dist(self, start, goal):
+        return self.cell_size * hex_dist(start, goal)
 
     def neighbors(self, cell):
         return hex_neighbors(cell)
 
-    def neighbor_distance(self, from_cell, to_cell):
+    def neighbor_dist(self, start, goal):
         return self.cell_size

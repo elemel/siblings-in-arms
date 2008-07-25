@@ -21,11 +21,11 @@
 
 from balance import damage_factors
 from collections import defaultdict, deque
-from geometry import rect_from_center_and_size, squared_distance
+from geometry import rect_from_center_and_size, squared_dist
+from heapq import heappop, heappush
 from HexGrid import HexGrid
 from ProximityGrid import ProximityGrid
 from shortest_path import shortest_path
-from Task import AttackTask
 import random
 
 
@@ -39,104 +39,95 @@ class GameEngine(object):
         self.time = 0.0
         self.__grid = HexGrid()
         self.__path_queue = deque()
-        self.units = deque()
+        self.__task_queue = []
+        self.units = set()
         self.__proximity_grid = ProximityGrid(5)
         self.__cell_locks = {}
         
     def update(self, time_step):
         self.time_step = time_step
         self.time += time_step
-        self.__update_idle_units()
         self.__update_paths()
         self.__update_tasks()
-        self.__remove_dead_units()
-
-    def __update_idle_units(self):
-        if self.units:
-            unit = self.units.popleft()
-            if not unit.task_stack and not unit.task_queue:
-                self.__idle_unit(unit)
-            self.units.append(unit)
 
     def __update_paths(self):
         while self.__path_queue and self.__path_queue[0][-1]:
             self.__path_queue.popleft()
         if self.__path_queue:
-            unit, dest, set_path, aborting = self.__path_queue.popleft()
-            if unit.cell is not None:
-                def goal(cell):
-                    return cell == dest
+            unit, goal, set_path, removed = self.__path_queue.popleft()
+            if not removed and unit:
+                def goal_func(cell):
+                    return cell == goal
                 def neighbors(cell):
                     return (n for n in self.__grid.neighbors(cell)
                             if self.lockable_cell(unit, n, with_moving=True))
                 def heuristic(cell):
-                    return self.__grid.cell_distance(cell, dest)
-                path = shortest_path(unit.cell, goal, neighbors,
-                                     self.__grid.neighbor_distance,
+                    return self.__grid.cell_dist(cell, goal)
+                path = shortest_path(unit.cell, goal_func, neighbors,
+                                     self.__grid.neighbor_dist,
                                      heuristic, limit=SHORTEST_PATH_LIMIT)
                 set_path(path)
 
     def __update_tasks(self):
-        for unit in list(self.units):
-            if unit.task_stack:
-                unit.task_stack[-1].update()
-                if not unit.task_stack[-1]:
-                    unit.task_stack.pop()
-            if not unit.task_stack:
-                if unit.task_queue:
-                    unit.task_stack.append(unit.task_queue.popleft())
-                else:
-                    self.__idle_unit(unit)
+        while self.__task_queue and self.__task_queue[0][0] <= self.time:
+            task = heappop(self.__task_queue)[-1]
+            unit = task.unit
+            if (unit in self.units and unit.task_stack and
+                task is unit.task_stack[-1]):
+                task.update()
 
-    def add_unit(self, unit, point):
-        start = self.__grid.point_to_cell(point)
-        unit.cell = self.__find_lockable_cell(unit, start)
-        unit.pos = self.__grid.cell_to_point(unit.cell)
-        self.units.append(unit)
-        self.update_cell_locks(unit)
-        rect = rect_from_center_and_size(unit.pos, unit.size)
+    def add_unit(self, unit, cell):
+        self.units.add(unit)
+        unit.cell = self.__find_lockable_cell(unit, cell)
+        self.normalize_cell_locks(unit)
+        point = self.cell_to_point(unit.cell)
+        rect = rect_from_center_and_size(point, unit.size)
         self.__proximity_grid[unit] = rect
 
     def stop_unit(self, unit):
         for task in unit.task_stack:
-            task.aborting = True
+            task.abort()
         unit.task_queue.clear()
+
+    def add_task(self, unit, task):
+        if not unit.task_stack:
+            self.call_task(unit, task)
+        else:
+            unit.task_queue.append(task)
+
+    def call_task(self, unit, task):
+        unit.task_stack.append(task)
+        task.init(self, unit)
+        self.schedule_task(task)
+
+    def schedule_task(self, task, delay=0):
+        heappush(self.__task_queue, (self.time + delay, task))
+
+    def remove_task(self, task):
+        unit = task.unit
+        assert unit.task_stack and unit.task_stack[-1] is task
+        unit.task_stack.pop()
+        if unit.task_stack:
+            self.schedule_task(unit.task_stack[-1])
+        elif unit.task_queue:
+            self.call_task(unit, unit.task_queue.popleft())
 
     def remove_unit(self, unit):
         del self.__proximity_grid[unit]
-        self.units.remove(unit)
-        unit.pos = None
         unit.cell = None
-        self.update_cell_locks(unit)
+        self.normalize_cell_locks(unit)
+        self.units.remove(unit)
 
-    def request_path(self, unit, dest, set_path):
-        x, y = dest
-        path_request = [unit, dest, set_path, False]
+    def request_path(self, unit, goal, set_path):
+        path_request = [unit, goal, set_path, False]
         self.__path_queue.append(path_request)
         return path_request
 
-    def abort_path(self, path_request):
+    def remove_path_request(self, path_request):
         path_request[-1] = True
 
     def damage_factor(self, attacker, defender):
         return damage_factors.get((type(attacker), type(defender)), 1.0)
-
-    def __remove_dead_units(self):
-        dead_units = [u for u in self.units if u.health <= 0.0]
-        for unit in dead_units:
-            self.remove_unit(unit)
-
-    def __idle_unit(self, unit):
-        if unit.damage is None:
-            return
-        rect = rect_from_center_and_size(unit.pos, (5, 5))
-        enemies = [enemy for enemy in self.__proximity_grid.intersect(rect)
-                   if enemy.color != unit.color]
-        if enemies:
-            def key(a):
-                return squared_distance(a.pos, unit.pos)
-            target = min(enemies, key=key)
-            unit.task_queue.append(AttackTask(self, unit, target))
 
     def __find_lockable_cell(self, unit, start):
         def goal(cell):
@@ -146,10 +137,17 @@ class GameEngine(object):
             random.shuffle(cells)
             return cells
         path = shortest_path(start, goal, neighbors,
-                             self.__grid.neighbor_distance)
+                             self.__grid.neighbor_dist)
         return path[-1] if path else start
 
-    def update_cell_locks(self, unit):
+    def add_cell_locks(self, unit, dest):
+        unit.cell_locks.add(dest)
+        if unit.large:
+            unit.cell_locks.update(self.__grid.neighbors(dest))
+        for cell in unit.cell_locks:
+            self.__cell_locks[cell] = unit
+
+    def normalize_cell_locks(self, unit):
         if unit.cell_locks:
             for cell in unit.cell_locks:
                 del self.__cell_locks[cell]
@@ -158,8 +156,8 @@ class GameEngine(object):
             unit.cell_locks.add(unit.cell)
             if unit.large:
                 unit.cell_locks.update(self.__grid.neighbors(unit.cell))
-            for cell in unit.cell_locks:
-                self.__cell_locks[cell] = unit
+        for cell in unit.cell_locks:
+            self.__cell_locks[cell] = unit
             
     def lockable_cell(self, unit, cell, with_moving=False):
         def lockable(cell):
@@ -169,9 +167,10 @@ class GameEngine(object):
                 and (not unit.large
                      or all(lockable(n) for n in self.__grid.neighbors(cell))))
 
-    def move_unit(self, unit, point):
-        unit.pos = point
-        rect = rect_from_center_and_size(unit.pos, unit.size)
+    def move_unit(self, unit, cell):
+        unit.cell = cell
+        point = self.cell_to_point(cell)
+        rect = rect_from_center_and_size(point, unit.size)
         self.__proximity_grid[unit] = rect
 
     def cell_to_point(self, cell):
@@ -179,3 +178,9 @@ class GameEngine(object):
 
     def point_to_cell(self, point):
         return self.__grid.point_to_cell(point)
+
+    def cell_dist(self, start, goal):
+        return self.__grid.cell_dist(start, goal)
+
+    def neighbor_dist(self, start, goal):
+        return self.__grid.neighbor_dist(start, goal)

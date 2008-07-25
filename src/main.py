@@ -30,8 +30,8 @@ TIME_STEP = 0.02
 
 def main():
     game_engine = GameEngine()
-    game_engine.add_unit(Tavern('cyan'), (5, 12))
-    game_engine.add_unit(Tavern('yellow'), (12, 5))
+    game_engine.add_unit(Tavern('cyan'), game_engine.point_to_cell((4, 10)))
+    game_engine.add_unit(Tavern('yellow'), game_engine.point_to_cell((12, 6)))
 
     next_time = time.time()
     while True:

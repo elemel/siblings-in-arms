@@ -65,19 +65,19 @@ def square_neighbors(square):
     yield m + 1, n + 1
 
 
-def squared_distance(p, q):
+def squared_dist(p, q):
     px, py = p
     qx, qy = q
     return (qx - px) ** 2 + (qy - py) ** 2
 
 
-def manhattan_distance(p, q):
+def manhattan_dist(p, q):
     px, py = p
     qx, qy = q
     return abs(qx - px) + abs(qy - py)
 
 
-def diagonal_distance(p, q):
+def diagonal_dist(p, q):
     px, py = p
     qx, qy = q
     dx = abs(qx - px)
@@ -139,7 +139,7 @@ def hex_neighbors(hex):
     yield m + 1, n
 
 
-def hex_distance(start, goal):
+def hex_dist(start, goal):
     start_m, start_n = min(start, goal)
     goal_m, goal_n = max(start, goal)
     diff_m, diff_n = goal_m - start_m, goal_n - start_n

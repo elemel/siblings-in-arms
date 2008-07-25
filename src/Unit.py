@@ -36,7 +36,6 @@ class Unit(object):
 
     def __init__(self, color):
         self.color = color
-        self.pos = None
         self.alive = True
         self.health = self.max_health
         self.task_stack = []
@@ -48,6 +47,9 @@ class Unit(object):
     def __str__(self):
         return "%s %s #%d" % (self.color.capitalize(), type(self).__name__,
                               id(self))
+
+    def __nonzero__(self):
+        return self.alive
 
 
 class Creature(Unit):
