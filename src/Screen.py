@@ -19,7 +19,7 @@
 # SOFTWARE.
 
 
-import pygame, pygame.transform, sys, os, math
+import pygame, sys, os, math
 from pygame.locals import *
 from geometry import (manhattan_dist, normalize_rect, rect_contains_point,
                       rect_from_center_and_size, rect_intersects_rect,

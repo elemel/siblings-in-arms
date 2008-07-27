@@ -54,8 +54,7 @@ class MoveTask(Task):
         if self.goal is None:
             self.game.remove_task(self)
         else:
-            self.path_request = self.game.request_path(self.unit,
-                                                       self.goal,
+            self.path_request = self.game.request_path(self.unit, self.goal,
                                                        self.__set_path)
 
     def __set_path(self, path):
@@ -74,8 +73,7 @@ class MoveTask(Task):
             self.game.schedule_task(self)
 
     def __follow_path(self):
-        if self.path and self.game.lockable_cell(self.unit,
-                                                 self.path[0]):
+        if self.path and self.game.lockable_cell(self.unit, self.path[0]):
             self.stuck = False
             dest = self.path.popleft()
             self.game.add_cell_locks(self.unit, dest)
@@ -131,8 +129,7 @@ class ProduceTask(Task):
         self.game.schedule_task(self, self.product_class.build_time)
 
     def __finish(self):
-        self.game.add_unit(self.product_class(self.unit.color),
-                           self.unit.cell)
+        self.game.add_unit(self.product_class(self.unit.color), self.unit.cell)
         self.game.remove_task(self)
 
 
@@ -169,8 +166,7 @@ class AttackTask(Task):
             if target_dist <= self.unit.max_range:
                 self.game.call_task(self.unit, HitTask(self.target))
             else:
-                self.game.call_task(self.unit,
-                                    MoveTask(self.target.cell))
+                self.game.call_task(self.unit, MoveTask(self.target.cell))
 
     def abort(self):
         self.target = None
@@ -189,8 +185,7 @@ class HitTask(Task):
 
     def __fire(self):
         if self.target in self.game.units:
-            damage_factor = self.game.damage_factor(self.unit,
-                                                    self.target)
+            damage_factor = self.game.damage_factor(self.unit, self.target)
             self.target.health -= self.unit.damage * damage_factor
             if self.target.health <= 0:
                 self.game.remove_unit(self.target)
