@@ -21,7 +21,7 @@
 
 import time
 from GameEngine import GameEngine
-import gui
+import Screen
 from Unit import Tavern
 
 
@@ -40,7 +40,7 @@ def main():
             while next_time <= current_time:
                 next_time += TIME_STEP
                 game_engine.update(TIME_STEP)
-            gui.update(game_engine)
+            Screen.update(game_engine)
         else:
             time.sleep(next_time - current_time)
 
