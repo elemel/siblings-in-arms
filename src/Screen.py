@@ -22,8 +22,9 @@
 import pygame, pygame.transform, sys, os, math
 from pygame.locals import *
 from geometry import (manhattan_dist, normalize_rect, rect_contains_point,
-                      rect_from_center_and_size, rect_intersects_rect)
-from Task import AttackTask, BuildTask, MoveTask, ProduceTask
+                      rect_from_center_and_size, rect_intersects_rect,
+                      vector_add, vector_mul)
+from Task import AttackTask, BuildTask, MoveTask, ProduceTask, StepTask
 from Unit import Building, Golem, Hero, Minion, Monk, Priest, Tavern
 
 
@@ -113,12 +114,29 @@ class Screen(object):
         return (float(x + self.screen_x) / self.PIXELS_PER_METER_X,
                 float(height - y - self.screen_y) / self.PIXELS_PER_METER_Y)
 
-    def get_sorted_units(self, game_engine):
-        def key(unit):
-            cell_x, cell_y = unit.cell
-            return -cell_y, cell_x
-        units = list(game_engine.units)
-        units.sort(key=key)
+    def interpolate_pos(self, game_engine, unit):
+        if (unit.task_stack and type(unit.task_stack[-1]) is StepTask
+            and unit.task_stack[-1].step_time):
+            task = unit.task_stack[-1]
+            origin_point = game_engine.cell_to_point(task.origin)
+            dest_point = game_engine.cell_to_point(task.dest)
+            progress = ((game_engine.time - task.departure_time)
+                        / task.step_time)
+            progress = max(0, min(1, progress))
+            return vector_add(vector_mul(origin_point, 1 - progress),
+                              vector_mul(dest_point, progress))
+        else:
+            return game_engine.cell_to_point(unit.cell)
+
+    def sorted_units(self, game_engine):
+        units = []
+        for unit in game_engine.units:
+            unit_pos = self.interpolate_pos(game_engine, unit)
+            screen_pos = self.to_screen_coords(unit_pos,
+                                               self.map_panel.get_size())
+            screen_x, screen_y = screen_pos
+            units.append((screen_y, screen_x, unit))
+        units.sort()
         return units
 
     def paint_image(self, surface, image, pos):
@@ -267,10 +285,8 @@ class Screen(object):
 
     def paint_map_panel(self, game_engine):
         self.map_panel.fill(pygame.color.Color('#886644'))
-        for unit in self.get_sorted_units(game_engine):
-            unit_pos = game_engine.cell_to_point(unit.cell)
-            screen_pos = self.to_screen_coords(unit_pos,
-                                               self.map_panel.get_size())
+        for screen_y, screen_x, unit in self.sorted_units(game_engine):
+            screen_pos = screen_x, screen_y
             image = self.team_images[unit.color, type(unit)]
             if unit in self.selection:
                 width, height = image.get_size()

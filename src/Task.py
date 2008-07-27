@@ -98,21 +98,23 @@ class MoveTask(Task):
 class StepTask(Task):
 
     def __init__(self, dest):
+        self.origin = None
         self.dest = dest
         self.dist = None
+        self.step_time = 0
+        self.departure_time = None
         self.update = self.__depart
 
     def __depart(self):
+        self.origin = self.unit.cell
         self.dist = self.game_engine.neighbor_dist(self.unit.cell, self.dest)
-        self.update = self.__step
-        self.game_engine.schedule_task(self, self.dist / self.unit.speed / 2)
-
-    def __step(self):
-        self.unit.cell = self.dest
+        self.step_time = self.dist / self.unit.speed
+        self.departure_time = self.game_engine.time
         self.update = self.__arrive
-        self.game_engine.schedule_task(self, self.dist / self.unit.speed / 2)
+        self.game_engine.schedule_task(self, self.step_time)
 
     def __arrive(self):
+        self.unit.cell = self.dest
         self.game_engine.normalize_cell_locks(self.unit)
         self.game_engine.remove_task(self)
 
