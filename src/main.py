@@ -21,7 +21,7 @@
 
 import time
 from GameEngine import GameEngine
-import Screen
+from Screen import Screen
 from Unit import Tavern
 
 
@@ -33,6 +33,8 @@ def main():
     game_engine.add_unit(Tavern('cyan'), game_engine.point_to_cell((4, 10)))
     game_engine.add_unit(Tavern('yellow'), game_engine.point_to_cell((12, 6)))
 
+    screen = Screen()
+
     next_time = time.time()
     while True:
         current_time = time.time()
@@ -40,7 +42,7 @@ def main():
             while next_time <= current_time:
                 next_time += TIME_STEP
                 game_engine.update(TIME_STEP)
-            Screen.update(game_engine)
+            screen.update(game_engine)
         else:
             time.sleep(next_time - current_time)
 
