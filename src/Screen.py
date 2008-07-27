@@ -114,24 +114,24 @@ class Screen(object):
         return (float(x + self.screen_x) / self.PIXELS_PER_METER_X,
                 float(height - y - self.screen_y) / self.PIXELS_PER_METER_Y)
 
-    def interpolate_pos(self, game_engine, unit):
+    def interpolate_pos(self, game, unit):
         if (unit.task_stack and type(unit.task_stack[-1]) is StepTask
             and unit.task_stack[-1].step_time):
             task = unit.task_stack[-1]
-            origin_point = game_engine.cell_to_point(task.origin)
-            dest_point = game_engine.cell_to_point(task.dest)
-            progress = ((game_engine.time - task.departure_time)
+            origin_point = game.cell_to_point(task.origin)
+            dest_point = game.cell_to_point(task.dest)
+            progress = ((game.time - task.departure_time)
                         / task.step_time)
             progress = max(0, min(1, progress))
             return vector_add(vector_mul(origin_point, 1 - progress),
                               vector_mul(dest_point, progress))
         else:
-            return game_engine.cell_to_point(unit.cell)
+            return game.cell_to_point(unit.cell)
 
-    def sorted_units(self, game_engine):
+    def sorted_units(self, game):
         units = []
-        for unit in game_engine.units:
-            unit_pos = self.interpolate_pos(game_engine, unit)
+        for unit in game.units:
+            unit_pos = self.interpolate_pos(game, unit)
             screen_pos = self.to_screen_coords(unit_pos,
                                                self.map_panel.get_size())
             screen_x, screen_y = screen_pos
@@ -144,12 +144,12 @@ class Screen(object):
         width, height = image.get_size()
         surface.blit(image, (x - width // 2, y - height // 2))
 
-    def update(self, game_engine):
-        self.selection &= game_engine.units
-        self.handle_events(game_engine)
-        self.update_screen(game_engine)
+    def update(self, game):
+        self.selection &= game.units
+        self.handle_events(game)
+        self.update_screen(game)
 
-    def handle_events(self, game_engine):
+    def handle_events(self, game):
         for event in pygame.event.get():
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
@@ -168,29 +168,29 @@ class Screen(object):
                 if (self.mouse_button_down_pos is not None
                     and manhattan_dist(event.pos, self.mouse_button_down_pos)
                     <= 6):
-                    self.handle_click_event(event, game_engine)
+                    self.handle_click_event(event, game)
                 else:
                     self.handle_rect_event(self.mouse_button_down_pos, event,
-                                           game_engine)
+                                           game)
                 self.mouse_button_down_pos = None
 
-    def handle_click_event(self, event, game_engine):
+    def handle_click_event(self, event, game):
         x, y = event.pos
         if self.minimap_rect.collidepoint(x, y):
-            self.handle_minimap_event(event, game_engine)
+            self.handle_minimap_event(event, game)
         if self.button_rect.collidepoint(x, y):
-            self.handle_button_event(event, game_engine)
+            self.handle_button_event(event, game)
         elif self.map_rect.collidepoint(x, y):
             if event.button == 1:
-                self.handle_select_event(event, game_engine)
+                self.handle_select_event(event, game)
             else:
-                self.handle_command_event(event, game_engine)
+                self.handle_command_event(event, game)
 
-    def handle_select_event(self, event, game_engine):
+    def handle_select_event(self, event, game):
         clicked_unit = None
         clicked_unit_pos = None
-        for unit in game_engine.units:
-            unit_pos = game_engine.cell_to_point(unit.cell)
+        for unit in game.units:
+            unit_pos = game.cell_to_point(unit.cell)
             screen_pos = self.to_screen_coords(unit_pos,
                                                self.map_panel.get_size())
             surface = self.unit_images[type(unit)]
@@ -212,11 +212,11 @@ class Screen(object):
                 self.selection.clear()
                 self.selection.add(clicked_unit)
 
-    def handle_command_event(self, event, game_engine):
+    def handle_command_event(self, event, game):
         clicked_unit = None
         clicked_unit_pos = None
-        for unit in game_engine.units:
-            unit_pos = game_engine.cell_to_point(unit.cell)
+        for unit in game.units:
+            unit_pos = game.cell_to_point(unit.cell)
             screen_pos = self.to_screen_coords(unit_pos,
                                                self.map_panel.get_size())
             surface = self.unit_images[type(unit)]
@@ -229,23 +229,23 @@ class Screen(object):
                 clicked_unit_pos = unit_pos
 
         point = self.to_world_coords(event.pos, self.map_panel.get_size())
-        cell = game_engine.point_to_cell(point)
+        cell = game.point_to_cell(point)
         for unit in self.selection:
             if (unit.speed is not None
                 and (clicked_unit is None
                      or unit.color == clicked_unit.color)):
                 if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
-                    game_engine.stop_unit(unit)
-                game_engine.add_task(unit, MoveTask(cell))
+                    game.stop_unit(unit)
+                game.add_task(unit, MoveTask(cell))
             elif unit.damage is not None and unit.color != clicked_unit.color:
                 if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
-                    game_engine.stop_unit(unit)
-                game_engine.add_task(unit, AttackTask(clicked_unit))
+                    game.stop_unit(unit)
+                game.add_task(unit, AttackTask(clicked_unit))
 
-    def handle_minimap_event(self, event, game_engine):
+    def handle_minimap_event(self, event, game):
         pass
 
-    def handle_button_event(self, event, game_engine):
+    def handle_button_event(self, event, game):
         x, y = event.pos
         col = (x - self.button_rect.left) // 50
         row = (y - self.button_rect.top) // 50
@@ -255,21 +255,21 @@ class Screen(object):
             if type(unit) is Tavern:
                 classes = Hero.__subclasses__()
                 if 0 <= button < len(classes):
-                    game_engine.add_task(unit, ProduceTask(classes[button]))
+                    game.add_task(unit, ProduceTask(classes[button]))
             elif type(unit) is Monk:
                 classes = Building.__subclasses__()
                 if 0 <= button < len(classes):
-                    game_engine.add_task(unit, BuildTask(classes[button]))
+                    game.add_task(unit, BuildTask(classes[button]))
             elif type(unit) is Priest:
                 if button == 0:
-                    game_engine.add_task(unit, ProduceTask(Golem))
+                    game.add_task(unit, ProduceTask(Golem))
 
-    def handle_rect_event(self, old_pos, event, game_engine):
+    def handle_rect_event(self, old_pos, event, game):
         if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
             self.selection.clear()
         selection_rect = normalize_rect((old_pos, event.pos))
-        for unit in game_engine.units:
-            unit_pos = game_engine.cell_to_point(unit.cell)
+        for unit in game.units:
+            unit_pos = game.cell_to_point(unit.cell)
             screen_pos = self.to_screen_coords(unit_pos,
                                                self.map_panel.get_size())
             surface = self.unit_images[type(unit)]
@@ -278,14 +278,14 @@ class Screen(object):
             if rect_intersects_rect(selection_rect, surface_rect):
                 self.selection.add(unit)
 
-    def update_screen(self, game_engine):
-        self.paint_map_panel(game_engine)
-        self.paint_control_panel(game_engine)
+    def update_screen(self, game):
+        self.paint_map_panel(game)
+        self.paint_control_panel(game)
         pygame.display.update()
 
-    def paint_map_panel(self, game_engine):
+    def paint_map_panel(self, game):
         self.map_panel.fill(pygame.color.Color('#886644'))
-        for screen_y, screen_x, unit in self.sorted_units(game_engine):
+        for screen_y, screen_x, unit in self.sorted_units(game):
             screen_pos = screen_x, screen_y
             image = self.team_images[unit.color, type(unit)]
             if unit in self.selection:
@@ -296,9 +296,9 @@ class Screen(object):
                 pygame.draw.circle(self.map_panel, pygame.color.Color('green'),
                                    screen_pos, radius - 2, 1)
             self.paint_image(self.map_panel, image, screen_pos)
-        self.paint_selection_rect(game_engine)
+        self.paint_selection_rect(game)
 
-    def paint_selection_rect(self, game_engine):
+    def paint_selection_rect(self, game):
         if self.mouse_button_down_pos is not None:
             old_x, old_y = self.mouse_button_down_pos
             new_x, new_y = pygame.mouse.get_pos()
@@ -316,11 +316,11 @@ class Screen(object):
         self.paint_image(self.button_panel, image,
                          (25 + col * 50, 25 + row * 50))
 
-    def paint_control_panel(self, game_engine):
-        self.paint_minimap_panel(game_engine)
-        self.paint_button_panel(game_engine)
+    def paint_control_panel(self, game):
+        self.paint_minimap_panel(game)
+        self.paint_button_panel(game)
 
-    def paint_minimap_panel(self, game_engine):
+    def paint_minimap_panel(self, game):
         self.minimap_panel.fill(pygame.color.Color('gray'))
         pygame.draw.line(self.minimap_panel, pygame.color.Color('black'),
                          (0, 0), (self.minimap_rect.width, 0))
@@ -329,7 +329,7 @@ class Screen(object):
                          (self.minimap_rect.width - 1,
                           self.minimap_rect.height))
 
-    def paint_button_panel(self, game_engine):
+    def paint_button_panel(self, game):
         self.button_panel.fill(pygame.color.Color('gray'))
         pygame.draw.line(self.button_panel, pygame.color.Color('black'),
                          (0, 0), (self.button_rect.width, 0))

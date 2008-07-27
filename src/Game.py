@@ -32,7 +32,7 @@ import random
 SHORTEST_PATH_LIMIT = 100
 
 
-class GameEngine(object):
+class Game(object):
 
     def __init__(self):
         self.time_step = None

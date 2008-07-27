@@ -26,11 +26,11 @@ from collections import deque
 class Task(object):
 
     def __init__(self):
-        self.game_engine = None
+        self.game = None
         self.unit = None
 
-    def init(self, game_engine, unit):
-        self.game_engine = game_engine
+    def init(self, game, unit):
+        self.game = game
         self.unit = unit
 
     def update(self):
@@ -52,11 +52,11 @@ class MoveTask(Task):
 
     def __request_path(self):
         if self.goal is None:
-            self.game_engine.remove_task(self)
+            self.game.remove_task(self)
         else:
-            self.path_request = self.game_engine.request_path(self.unit,
-                                                              self.goal,
-                                                              self.__set_path)
+            self.path_request = self.game.request_path(self.unit,
+                                                       self.goal,
+                                                       self.__set_path)
 
     def __set_path(self, path):
         self.path_request = None
@@ -65,31 +65,31 @@ class MoveTask(Task):
         if self.path:
             self.unit.moving = True
             self.update = self.__follow_path
-            self.game_engine.schedule_task(self)
+            self.game.schedule_task(self)
         elif self.stuck:
-            self.game_engine.remove_task(self)
+            self.game.remove_task(self)
         else:
             self.stuck = True
             self.update = self.__request_path
-            self.game_engine.schedule_task(self)
+            self.game.schedule_task(self)
 
     def __follow_path(self):
-        if self.path and self.game_engine.lockable_cell(self.unit,
-                                                        self.path[0]):
+        if self.path and self.game.lockable_cell(self.unit,
+                                                 self.path[0]):
             self.stuck = False
             dest = self.path.popleft()
-            self.game_engine.add_cell_locks(self.unit, dest)
-            self.game_engine.call_task(self.unit, StepTask(dest))
+            self.game.add_cell_locks(self.unit, dest)
+            self.game.call_task(self.unit, StepTask(dest))
         else:
             self.unit.moving = False
             self.update = self.__request_path
-            self.game_engine.schedule_task(self)
+            self.game.schedule_task(self)
 
     def abort(self):
         if self.path_request is not None:
-            self.game_engine.remove_path_request(self.path_request)
+            self.game.remove_path_request(self.path_request)
             self.path_request = None
-            self.game_engine.remove_task(self)
+            self.game.remove_task(self)
         else:
             self.path.clear()
             self.goal = None
@@ -107,16 +107,16 @@ class StepTask(Task):
 
     def __depart(self):
         self.origin = self.unit.cell
-        self.dist = self.game_engine.neighbor_dist(self.unit.cell, self.dest)
+        self.dist = self.game.neighbor_dist(self.unit.cell, self.dest)
         self.step_time = self.dist / self.unit.speed
-        self.departure_time = self.game_engine.time
+        self.departure_time = self.game.time
         self.update = self.__arrive
-        self.game_engine.schedule_task(self, self.step_time)
+        self.game.schedule_task(self, self.step_time)
 
     def __arrive(self):
         self.unit.cell = self.dest
-        self.game_engine.normalize_cell_locks(self.unit)
-        self.game_engine.remove_task(self)
+        self.game.normalize_cell_locks(self.unit)
+        self.game.remove_task(self)
 
 
 class ProduceTask(Task):
@@ -128,12 +128,12 @@ class ProduceTask(Task):
 
     def __start(self):
         self.update = self.__finish
-        self.game_engine.schedule_task(self, self.product_class.build_time)
+        self.game.schedule_task(self, self.product_class.build_time)
 
     def __finish(self):
-        self.game_engine.add_unit(self.product_class(self.unit.color),
-                                  self.unit.cell)
-        self.game_engine.remove_task(self)
+        self.game.add_unit(self.product_class(self.unit.color),
+                           self.unit.cell)
+        self.game.remove_task(self)
 
 
 class BuildTask(Task):
@@ -145,12 +145,12 @@ class BuildTask(Task):
 
     def __start(self):
         self.update = self.__finish
-        self.game_engine.schedule_task(self, self.building_class.build_time)
+        self.game.schedule_task(self, self.building_class.build_time)
 
     def __finish(self):
-        self.game_engine.add_unit(self.building_class(self.unit.color),
-                                  self.unit.cell)
-        self.game_engine.remove_task(self)
+        self.game.add_unit(self.building_class(self.unit.color),
+                           self.unit.cell)
+        self.game.remove_task(self)
 
 
 class AttackTask(Task):
@@ -160,17 +160,17 @@ class AttackTask(Task):
         self.target = target
 
     def update(self):
-        if self.target not in self.game_engine.units:
-            self.game_engine.remove_task(self)
+        if self.target not in self.game.units:
+            self.game.remove_task(self)
         else:
-            target_dist = (self.game_engine.cell_dist(self.unit.cell,
-                                                      self.target.cell)
+            target_dist = (self.game.cell_dist(self.unit.cell,
+                                               self.target.cell)
                            - 1 - self.unit.large - self.target.large)
             if target_dist <= self.unit.max_range:
-                self.game_engine.call_task(self.unit, HitTask(self.target))
+                self.game.call_task(self.unit, HitTask(self.target))
             else:
-                self.game_engine.call_task(self.unit,
-                                           MoveTask(self.target.cell))
+                self.game.call_task(self.unit,
+                                    MoveTask(self.target.cell))
 
     def abort(self):
         self.target = None
@@ -185,17 +185,17 @@ class HitTask(Task):
 
     def __aim(self):
         self.update = self.__fire
-        self.game_engine.schedule_task(self, self.unit.attack_time / 2)
+        self.game.schedule_task(self, self.unit.attack_time / 2)
 
     def __fire(self):
-        if self.target in self.game_engine.units:
-            damage_factor = self.game_engine.damage_factor(self.unit,
-                                                           self.target)
+        if self.target in self.game.units:
+            damage_factor = self.game.damage_factor(self.unit,
+                                                    self.target)
             self.target.health -= self.unit.damage * damage_factor
             if self.target.health <= 0:
-                self.game_engine.remove_unit(self.target)
+                self.game.remove_unit(self.target)
         self.update = self.__reload
-        self.game_engine.schedule_task(self, self.unit.attack_time / 2)
+        self.game.schedule_task(self, self.unit.attack_time / 2)
 
     def __reload(self):
-        self.game_engine.remove_task(self)
+        self.game.remove_task(self)
