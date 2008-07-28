@@ -35,6 +35,9 @@ class Vector(object):
     def __getitem__(self, i):
         return self.__comps[i]
 
+    def __neg__(self):
+        return Vector(-x for x in self.__comps)
+
     def __add__(self, other):
         return Vector(x + y for x, y in izip(self.__comps, other))
 
