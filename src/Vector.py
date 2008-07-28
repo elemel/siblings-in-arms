@@ -32,6 +32,9 @@ class Vector(object):
     def __iter__(self):
         return iter(self.__comps)
 
+    def __len__(self):
+        return len(self.__comps)
+
     def __getitem__(self, i):
         return self.__comps[i]
 
