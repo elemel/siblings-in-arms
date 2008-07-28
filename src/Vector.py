@@ -52,6 +52,11 @@ class Vector(object):
     def __div__(self, other):
         return Vector(x / other for x in self.__comps)
 
+    __truediv__ = __div__
+
+    def __floordiv__(self, other):
+        return Vector(x // other for x in self.__comps)
+
     def __abs__(self):
         return sqrt(sum(x ** 2 for x in self.__comps))
 
@@ -60,3 +65,9 @@ class Vector(object):
 
     def __cmp__(self, other):
         return -cmp(other, self.__comps)
+
+    def __repr__(self):
+        return 'Vector(%s)' % repr(list(self.__comps))
+
+    def __str__(self):
+        return str(list(self))
