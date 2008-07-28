@@ -20,11 +20,10 @@
 
 
 from __future__ import division
-from math import cos, pi, sqrt
+from math import sqrt
 
 
 SQRT_2 = sqrt(2)
-COS_30 = cos(pi / 6)
 
 
 def rect_from_center_and_size(center, size):
@@ -115,32 +114,3 @@ def vector_div(v, a):
 def vector_abs(v):
     x, y = v
     return sqrt(x ** 2 + y ** 2)
-
-
-def point_to_hex(point, hex_size=1):
-    x, y = point
-    m = x / (COS_30 * hex_size)
-    n = y / hex_size - m / 2
-    return int(round(m)), int(round(n))
-
-
-def hex_to_point(hex, hex_size=1):
-    m, n = hex
-    return COS_30 * m * hex_size, (n + m / 2) * hex_size
-
-
-def hex_neighbors(hex):
-    m, n = hex
-    yield m - 1, n
-    yield m - 1, n + 1
-    yield m, n - 1
-    yield m, n + 1
-    yield m + 1, n - 1
-    yield m + 1, n
-
-
-def hex_dist(start, goal):
-    start_m, start_n = min(start, goal)
-    goal_m, goal_n = max(start, goal)
-    diff_m, diff_n = goal_m - start_m, goal_n - start_n
-    return diff_m + diff_n if start_n <= goal_n else max(diff_m, -diff_n)

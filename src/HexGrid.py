@@ -19,7 +19,11 @@
 # SOFTWARE.
 
 
-from geometry import hex_dist, hex_neighbors, point_to_hex, hex_to_point
+from __future__ import division
+from math import cos, pi
+
+
+COS_30 = cos(pi / 6)
 
 
 class HexGrid:
@@ -28,16 +32,30 @@ class HexGrid:
         self.cell_size = cell_size
 
     def point_to_cell(self, point):
-        return point_to_hex(point, self.cell_size)
+        x, y = point
+        m = x / (COS_30 * self.cell_size)
+        n = y / self.cell_size - m / 2
+        return int(round(m)), int(round(n))
 
     def cell_to_point(self, cell):
-        return hex_to_point(cell, self.cell_size)
+        m, n = cell
+        return COS_30 * m * self.cell_size, (n + m / 2) * self.cell_size
 
     def cell_dist(self, start, goal):
-        return self.cell_size * hex_dist(start, goal)
+        start_m, start_n = min(start, goal)
+        goal_m, goal_n = max(start, goal)
+        diff_m, diff_n = goal_m - start_m, goal_n - start_n
+        return self.cell_size * (diff_m + diff_n if start_n <= goal_n
+                                 else max(diff_m, -diff_n))
 
     def neighbors(self, cell):
-        return hex_neighbors(cell)
+        m, n = cell
+        yield m - 1, n
+        yield m - 1, n + 1
+        yield m, n - 1
+        yield m, n + 1
+        yield m + 1, n - 1
+        yield m + 1, n
 
     def neighbor_dist(self, start, goal):
         return self.cell_size
