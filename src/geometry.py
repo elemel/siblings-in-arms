@@ -119,14 +119,14 @@ def vector_abs(v):
 
 def point_to_hex(point, hex_size=1):
     x, y = point
-    n = y / (COS_30 * hex_size)
-    m = x / hex_size - n / 2
+    m = x / (COS_30 * hex_size)
+    n = y / hex_size - m / 2
     return int(round(m)), int(round(n))
 
 
 def hex_to_point(hex, hex_size=1):
     m, n = hex
-    return (m + n / 2) * hex_size, COS_30 * n * hex_size
+    return COS_30 * m * hex_size, (n + m / 2) * hex_size
 
 
 def hex_neighbors(hex):
