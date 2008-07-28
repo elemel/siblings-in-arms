@@ -20,7 +20,7 @@
 
 
 from balance import damage_factors
-from collections import defaultdict, deque
+from collections import deque
 from geometry import rect_from_center_and_size, squared_dist
 from heapq import heappop, heappush
 from HexGrid import HexGrid
@@ -59,8 +59,10 @@ class Game(object):
                 def goal_func(cell):
                     return cell == goal
                 def neighbors(cell):
-                    return (n for n in self.__grid.neighbors(cell)
-                            if self.lockable_cell(unit, n, with_moving=True))
+                    result = [n for n in self.__grid.neighbors(cell)
+                              if self.lockable_cell(unit, n, with_moving=True)]
+                    random.shuffle(result)
+                    return result
                 def heuristic(cell):
                     return self.__grid.cell_dist(cell, goal)
                 path = shortest_path(unit.cell, goal_func, neighbors,
