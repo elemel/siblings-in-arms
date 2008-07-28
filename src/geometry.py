@@ -82,35 +82,3 @@ def diagonal_dist(p, q):
     dx = abs(qx - px)
     dy = abs(qy - py)
     return SQRT_2 * min(dx, dy) + abs(dx - dy)
-
-
-def vector_add(u, v):
-    ux, uy = u
-    vx, vy = v
-    return ux + vx, uy + vy
-
-
-def vector_sub(u, v):
-    ux, uy = u
-    vx, vy = v
-    return ux - vx, uy - vy
-
-
-def vector_mul(v, a):
-    x, y = v
-    return x * a, y * a
-
-
-def vector_rmul(a, v):
-    x, y = v
-    return a * x, a * y
-
-
-def vector_div(v, a):
-    x, y = v
-    return x / a, y / a
-
-
-def vector_abs(v):
-    x, y = v
-    return sqrt(x ** 2 + y ** 2)

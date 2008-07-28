@@ -22,10 +22,10 @@
 import pygame, sys, os, math
 from pygame.locals import *
 from geometry import (manhattan_dist, normalize_rect, rect_contains_point,
-                      rect_from_center_and_size, rect_intersects_rect,
-                      vector_add, vector_mul)
+                      rect_from_center_and_size, rect_intersects_rect)
 from Task import AttackTask, BuildTask, MoveTask, ProduceTask, StepTask
 from Unit import Building, Golem, Hero, Minion, Monk, Priest, Tavern
+from Vector import Vector
 
 
 class Screen(object):
@@ -118,13 +118,11 @@ class Screen(object):
         if (unit.task_stack and type(unit.task_stack[-1]) is StepTask
             and unit.task_stack[-1].step_time):
             task = unit.task_stack[-1]
-            origin_point = game.cell_to_point(task.origin)
-            dest_point = game.cell_to_point(task.dest)
-            progress = ((game.time - task.departure_time)
-                        / task.step_time)
-            progress = max(0, min(1, progress))
-            return vector_add(vector_mul(origin_point, 1 - progress),
-                              vector_mul(dest_point, progress))
+            origin = Vector(game.cell_to_point(task.origin))
+            dest = Vector(game.cell_to_point(task.dest))
+            progress = (game.time - task.departure_time) / task.step_time
+            progress = max(0, min(progress, 1))
+            return origin * (1 - progress) + dest * progress
         else:
             return game.cell_to_point(unit.cell)
 
