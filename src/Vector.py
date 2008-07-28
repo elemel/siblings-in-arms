@@ -26,6 +26,8 @@ from math import sqrt
 
 class Vector(object):
 
+    __slots__ = '__comps'
+
     def __init__(self, *args):
         self.__comps = tuple(args[0] if len(args) == 1 else args)
 
