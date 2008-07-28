@@ -70,4 +70,12 @@ class Vector(object):
         return 'Vector(%s)' % repr(list(self.__comps))
 
     def __str__(self):
-        return str(list(self))
+        return str(list(self.__comps))
+
+    def dot(self, other):
+        return sum(x * y for x, y in izip(self.__comps, other))
+
+    def cross(self, other):
+        x1, x2, x3 = self.__comps
+        y1, y2, y3 = other
+        return Vector(x2 * y3 - x3 * y2, x3 * y1 - x1 * y3, x1 * y2 - x2 * y1)
