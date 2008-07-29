@@ -1,0 +1,14 @@
+Building       Symbol
+--------------------------
+Tavern         Cup
+Monastery      Hand
+Farm           Sickle
+Archery range  Target
+Tower          Shield
+Barracks       Helmet
+Stables        Horse shoe
+Inn            Two cups
+Gambling den   Card
+Temple         Eye
+Laboratory     Alchemy bottle
+Hall           Three cups

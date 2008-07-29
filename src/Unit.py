@@ -100,12 +100,17 @@ class Wizard(Hero):
 
 
 class Building(Unit):
+    max_health = 10.0
     size = 3, 3
     large = True
 
 
 class Tavern(Building):
-    max_health = 10.0
+    pass
+
+
+class Barracks(Building):
+    pass
 
 
 class Minion(Creature):
