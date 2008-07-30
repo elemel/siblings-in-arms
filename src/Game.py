@@ -20,16 +20,50 @@
 
 
 from balance import damage_factors
-from collections import deque
+from collections import defaultdict, deque
+from Force import Force
 from geometry import rect_from_center_and_size, squared_dist
 from heapq import heappop, heappush
 from HexGrid import HexGrid
 from ProximityGrid import ProximityGrid
 from shortest_path import shortest_path
+from TechTree import TechTree
+from Unit import *
 import random
 
 
 SHORTEST_PATH_LIMIT = 100
+
+
+def create_tech_tree():
+
+    tech_tree = TechTree()
+
+    # Building dependencies.
+    for cls, deps in [(Tavern, []),
+                      (Farm, [Tavern]),
+                      (ArcheryRange, [Tavern]),
+                      (Tower, [ArcheryRange]),
+                      (Barracks, [Tavern]),
+                      (Temple, [Tavern]),
+                      (Inn, [Barracks, Temple]),
+                      (GamblingDen, [Inn]),
+                      (Laboratory, [Inn]),
+                      (Stables, [Inn]),
+                      (Hall, [Laboratory, Stables])]:
+        tech_tree.depends(cls, deps)
+
+    # Unit dependencies.
+    for cls, deps in [(Monk, []),
+                      (Ranger, [ArcheryRange]),
+                      (Warrior, [Barracks]),
+                      (Priest, [Temple]),
+                      (Rogue, [GamblingDen]),
+                      (Knight, [Stables]),
+                      (Wizard, [Laboratory])]:
+        tech_tree.depends(cls, deps)
+
+    return tech_tree
 
 
 class Game(object):
@@ -43,6 +77,8 @@ class Game(object):
         self.units = set()
         self.__proximity_grid = ProximityGrid(5)
         self.__cell_locks = {}
+        self.tech_tree = create_tech_tree()
+        self.forces = defaultdict(Force)
         
     def update(self, time_step):
         self.time_step = time_step
@@ -85,6 +121,7 @@ class Game(object):
         point = self.cell_to_point(unit.cell)
         rect = rect_from_center_and_size(point, unit.size)
         self.__proximity_grid[unit] = rect
+        self.forces[unit.color].add_unit(unit)
 
     def stop_unit(self, unit):
         for task in unit.task_stack:
@@ -115,6 +152,7 @@ class Game(object):
             self.call_task(unit, unit.task_queue.popleft())
 
     def remove_unit(self, unit):
+        self.forces[unit.color].remove_unit(unit)
         del self.__proximity_grid[unit]
         unit.cell = None
         self.normalize_cell_locks(unit)

@@ -66,15 +66,24 @@ class Monk(Hero):
     attack_time = 0.3
 
 
+class Ranger(Hero):
+    speed = 4.0
+    damage = 0.3
+    max_range = 5.0
+
+
 class Warrior(Hero):
     damage = 0.4
     max_health = 1.2
 
 
-class Ranger(Hero):
-    speed = 4.0
-    damage = 0.3
-    max_range = 5.0
+class Priest(Hero):
+    damage = 0.2
+
+
+class Rogue(Hero):
+    damage = 0.2
+    max_health = 0.8
 
 
 class Knight(Hero):
@@ -83,34 +92,11 @@ class Knight(Hero):
     max_health = 1.5
 
 
-class Rogue(Hero):
-    damage = 0.2
-    max_health = 0.8
-
-
-class Priest(Hero):
-    damage = 0.2
-
-
 class Wizard(Hero):
     speed = 2.0
     damage = 0.5
     attack_time = 2.0
     max_health = 0.6
-
-
-class Building(Unit):
-    max_health = 10.0
-    size = 3, 3
-    large = True
-
-
-class Tavern(Building):
-    pass
-
-
-class Barracks(Building):
-    pass
 
 
 class Minion(Creature):
@@ -121,3 +107,61 @@ class Minion(Creature):
 class Golem(Minion):
     damage = 0.5
     max_health = 5.0
+
+
+class Building(Unit):
+    max_health = 10.0
+    size = 3, 3
+    large = True
+
+
+class Factory(Building):
+    pass
+
+
+class Support(Building):
+    pass
+
+
+class Tavern(Factory):
+    pass
+
+
+class Farm(Building):
+    pass
+
+
+class ArcheryRange(Support):
+    pass
+
+
+class Tower(Building):
+    pass
+
+
+class Barracks(Support):
+    pass
+
+
+class Temple(Support):
+    pass
+
+
+class Inn(Factory):
+    pass
+
+
+class GamblingDen(Support):
+    pass
+
+
+class Laboratory(Support):
+    pass
+
+
+class Stables(Support):
+    pass
+
+
+class Hall(Factory):
+    pass

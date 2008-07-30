@@ -24,7 +24,7 @@ from pygame.locals import *
 from geometry import (manhattan_dist, normalize_rect, rect_contains_point,
                       rect_from_center_and_size, rect_intersects_rect)
 from Task import AttackTask, BuildTask, MoveTask, ProduceTask, StepTask
-from Unit import Building, Golem, Hero, Minion, Monk, Priest, Tavern
+from Unit import Barracks, Building, Golem, Hero, Minion, Monk, Priest, Tavern
 from Vector import Vector
 
 
@@ -93,7 +93,7 @@ class Screen(object):
         return team_image
 
     def load_unit_images(self):
-        for cls in (Hero.__subclasses__() + Building.__subclasses__()
+        for cls in (Hero.__subclasses__() + [Tavern, Barracks]
                     + Minion.__subclasses__()):
             name = cls.__name__.lower()
             self.unit_images[cls] = image = self.load_image(name)
@@ -252,11 +252,15 @@ class Screen(object):
             unit = list(self.selection)[0]
             if type(unit) is Tavern:
                 classes = Hero.__subclasses__()
-                if 0 <= button < len(classes):
+                if (0 <= button < len(classes)
+                    and not game.tech_tree.veto(classes[button],
+                                                game.forces[unit.color])):
                     game.add_task(unit, ProduceTask(classes[button]))
             elif type(unit) is Monk:
-                classes = Building.__subclasses__()
-                if 0 <= button < len(classes):
+                classes = [Tavern, Barracks]
+                if (0 <= button < len(classes)
+                    and not game.tech_tree.veto(classes[button],
+                                                game.forces[unit.color])):
                     game.add_task(unit, BuildTask(classes[button]))
             elif type(unit) is Priest:
                 if button == 0:
@@ -337,9 +341,11 @@ class Screen(object):
             unit = list(self.selection)[0]
             if type(unit) is Tavern:
                 for button, cls in enumerate(Hero.__subclasses__()):
-                    self.paint_button(button, self.unit_icons[cls])
+                    if not game.tech_tree.veto(cls, game.forces[unit.color]):
+                        self.paint_button(button, self.unit_icons[cls])
             elif type(unit) is Monk:
-                for button, cls in enumerate(Building.__subclasses__()):
-                    self.paint_button(button, self.unit_icons[cls])
+                for button, cls in enumerate([Tavern, Barracks]):
+                    if not game.tech_tree.veto(cls, game.forces[unit.color]):
+                        self.paint_button(button, self.unit_icons[cls])
             elif type(unit) is Priest:
                 self.paint_button(0, self.unit_icons[Golem])
