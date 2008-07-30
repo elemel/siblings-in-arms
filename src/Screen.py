@@ -202,7 +202,7 @@ class Screen(object):
                 clicked_unit_pos = unit_pos
 
         if clicked_unit is not None:
-            if pygame.key.get_mods() & pygame.KMOD_SHIFT:
+            if pygame.key.get_mods() & KMOD_SHIFT:
                 if clicked_unit in self.selection:
                     self.selection.remove(clicked_unit)
                 else:
@@ -233,11 +233,11 @@ class Screen(object):
             if (unit.speed is not None
                 and (clicked_unit is None
                      or unit.color == clicked_unit.color)):
-                if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
+                if not pygame.key.get_mods() & KMOD_SHIFT:
                     game.stop_unit(unit)
                 game.add_task(unit, Move(cell))
             elif unit.damage is not None and unit.color != clicked_unit.color:
-                if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
+                if not pygame.key.get_mods() & KMOD_SHIFT:
                     game.stop_unit(unit)
                 game.add_task(unit, Attack(clicked_unit))
 
@@ -268,7 +268,7 @@ class Screen(object):
                     game.add_task(unit, Produce(Golem))
 
     def handle_rect_event(self, old_pos, event, game):
-        if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
+        if not pygame.key.get_mods() & KMOD_SHIFT:
             self.selection.clear()
         selection_rect = normalize_rect((old_pos, event.pos))
         for unit in game.units:
