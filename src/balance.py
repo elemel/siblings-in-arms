@@ -19,7 +19,7 @@
 # SOFTWARE.
 
 
-from Unit import *
+from config.units import *
 
 
 damage_factors = {

@@ -24,7 +24,7 @@ from pygame.locals import *
 from geometry import (manhattan_dist, normalize_rect, rect_contains_point,
                       rect_from_center_and_size, rect_intersects_rect)
 from Task import AttackTask, BuildTask, MoveTask, ProduceTask, StepTask
-from Unit import Barracks, Building, Golem, Hero, Minion, Monk, Priest, Tavern
+from config.units import *
 from Vector import Vector
 
 

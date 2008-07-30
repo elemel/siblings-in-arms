@@ -20,9 +20,9 @@
 
 
 import time
+from config.units import Tavern
 from Game import Game
 from Screen import Screen
-from Unit import Tavern
 
 
 TIME_STEP = 0.02

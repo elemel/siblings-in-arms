@@ -20,6 +20,7 @@
 
 
 from balance import damage_factors
+from config.units import *
 from collections import defaultdict, deque
 from Force import Force
 from geometry import rect_from_center_and_size, squared_dist
@@ -28,7 +29,6 @@ from HexGrid import HexGrid
 from ProximityGrid import ProximityGrid
 from shortest_path import shortest_path
 from TechTree import TechTree
-from Unit import *
 import random
 
 
