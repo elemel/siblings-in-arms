@@ -58,7 +58,7 @@ def create_tech_tree():
                       (Ranger, [ArcheryRange]),
                       (Warrior, [Barracks]),
                       (Priest, [Temple]),
-                      (Rogue, [GamblingDen]),
+                      (Thief, [GamblingDen]),
                       (Knight, [Stables]),
                       (Wizard, [Laboratory])]:
         tech_tree.depends(cls, deps)

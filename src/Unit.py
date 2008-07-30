@@ -81,7 +81,7 @@ class Priest(Hero):
     damage = 0.2
 
 
-class Rogue(Hero):
+class Thief(Hero):
     damage = 0.2
     max_health = 0.8
 
