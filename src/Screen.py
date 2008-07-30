@@ -21,10 +21,11 @@
 
 import pygame, sys, os, math
 from pygame.locals import *
+
+from config.tasks import *
+from config.units import *
 from geometry import (manhattan_dist, normalize_rect, rect_contains_point,
                       rect_from_center_and_size, rect_intersects_rect)
-from Task import AttackTask, BuildTask, MoveTask, ProduceTask, StepTask
-from config.units import *
 from Vector import Vector
 
 
