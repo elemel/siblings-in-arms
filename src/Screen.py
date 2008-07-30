@@ -95,12 +95,12 @@ class Screen(object):
     def load_unit_images(self):
         for cls in (Hero.__subclasses__() + [Tavern, Barracks]
                     + Minion.__subclasses__()):
-            name = cls.__name__.lower()
+            name = cls.__name__
             self.unit_images[cls] = image = self.load_image(name)
             for team, team_color in self.team_colors.iteritems():
                 team_image = self.create_team_image(image, team_color)
                 self.team_images[team, cls] = team_image
-            self.unit_icons[cls] = self.load_image(name + '-icon')
+            self.unit_icons[cls] = self.load_image(name + 'Icon')
 
     def to_screen_coords(self, point, screen_size):
         x, y = point
