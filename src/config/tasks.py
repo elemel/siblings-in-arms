@@ -25,7 +25,7 @@ from collections import deque
 from Task import Task
 
 
-class MoveTask(Task):
+class Move(Task):
 
     def __init__(self, goal):
         Task.__init__(self)
@@ -62,7 +62,7 @@ class MoveTask(Task):
             self.stuck = False
             dest = self.path.popleft()
             self.game.add_cell_locks(self.unit, dest)
-            self.game.call_task(self.unit, StepTask(dest))
+            self.game.call_task(self.unit, Step(dest))
         else:
             self.unit.moving = False
             self.update = self.__request_path
@@ -78,7 +78,7 @@ class MoveTask(Task):
             self.goal = None
 
 
-class StepTask(Task):
+class Step(Task):
 
     def __init__(self, dest):
         self.origin = None
@@ -102,7 +102,7 @@ class StepTask(Task):
         self.game.remove_task(self)
 
 
-class ProduceTask(Task):
+class Produce(Task):
 
     def __init__(self, product_class):
         Task.__init__(self)
@@ -118,7 +118,7 @@ class ProduceTask(Task):
         self.game.remove_task(self)
 
 
-class BuildTask(Task):
+class Build(Task):
 
     def __init__(self, building_class):
         Task.__init__(self)
@@ -135,7 +135,7 @@ class BuildTask(Task):
         self.game.remove_task(self)
 
 
-class AttackTask(Task):
+class Attack(Task):
 
     def __init__(self, target):
         Task.__init__(self)
@@ -149,15 +149,15 @@ class AttackTask(Task):
                                                self.target.cell)
                            - 1 - self.unit.large - self.target.large)
             if target_dist <= self.unit.max_range:
-                self.game.call_task(self.unit, HitTask(self.target))
+                self.game.call_task(self.unit, Hit(self.target))
             else:
-                self.game.call_task(self.unit, MoveTask(self.target.cell))
+                self.game.call_task(self.unit, Move(self.target.cell))
 
     def abort(self):
         self.target = None
 
 
-class HitTask(Task):
+class Hit(Task):
 
     def __init__(self, target):
         Task.__init__(self)

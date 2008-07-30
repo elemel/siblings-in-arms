@@ -116,7 +116,7 @@ class Screen(object):
                 float(height - y - self.screen_y) / self.PIXELS_PER_METER_Y)
 
     def interpolate_pos(self, game, unit):
-        if (unit.task_stack and type(unit.task_stack[-1]) is StepTask
+        if (unit.task_stack and type(unit.task_stack[-1]) is Step
             and unit.task_stack[-1].step_time):
             task = unit.task_stack[-1]
             origin = Vector(game.cell_to_point(task.origin))
@@ -235,11 +235,11 @@ class Screen(object):
                      or unit.color == clicked_unit.color)):
                 if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
                     game.stop_unit(unit)
-                game.add_task(unit, MoveTask(cell))
+                game.add_task(unit, Move(cell))
             elif unit.damage is not None and unit.color != clicked_unit.color:
                 if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
                     game.stop_unit(unit)
-                game.add_task(unit, AttackTask(clicked_unit))
+                game.add_task(unit, Attack(clicked_unit))
 
     def handle_minimap_event(self, event, game):
         pass
@@ -256,16 +256,16 @@ class Screen(object):
                 if (0 <= button < len(classes)
                     and not game.tech_tree.veto(classes[button],
                                                 game.forces[unit.color])):
-                    game.add_task(unit, ProduceTask(classes[button]))
+                    game.add_task(unit, Produce(classes[button]))
             elif type(unit) is Monk:
                 classes = [Tavern, Barracks]
                 if (0 <= button < len(classes)
                     and not game.tech_tree.veto(classes[button],
                                                 game.forces[unit.color])):
-                    game.add_task(unit, BuildTask(classes[button]))
+                    game.add_task(unit, Build(classes[button]))
             elif type(unit) is Priest:
                 if button == 0:
-                    game.add_task(unit, ProduceTask(Golem))
+                    game.add_task(unit, Produce(Golem))
 
     def handle_rect_event(self, old_pos, event, game):
         if not pygame.key.get_mods() & pygame.KMOD_SHIFT:
