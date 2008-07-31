@@ -19,7 +19,7 @@
 # SOFTWARE.
 
 
-from balance import damage_factors
+from config.balance import damage_factors
 from config.tech_tree import tech_tree
 from config.units import *
 from collections import defaultdict, deque
