@@ -97,6 +97,10 @@ class Tavern(Factory):
     pass
 
 
+class Monastery(Support):
+    pass
+
+
 class Farm(Building):
     pass
 

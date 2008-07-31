@@ -41,7 +41,8 @@ def create_tech_tree():
 
     # Building dependencies.
     for cls, deps in [(Tavern, []),
-                      (Farm, [Tavern]),
+                      (Monastery, [Tavern]),
+                      (Farm, [Monastery]),
                       (ArcheryRange, [Tavern]),
                       (Tower, [ArcheryRange]),
                       (Barracks, [Tavern]),
