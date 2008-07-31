@@ -20,6 +20,7 @@
 
 
 from balance import damage_factors
+from config.tech_tree import tech_tree
 from config.units import *
 from collections import defaultdict, deque
 from Force import Force
@@ -35,38 +36,6 @@ import random
 SHORTEST_PATH_LIMIT = 100
 
 
-def create_tech_tree():
-
-    tech_tree = TechTree()
-
-    # Building dependencies.
-    for cls, deps in [(Tavern, []),
-                      (Monastery, [Tavern]),
-                      (Farm, [Monastery]),
-                      (ArcheryRange, [Tavern]),
-                      (Tower, [ArcheryRange]),
-                      (Barracks, [Tavern]),
-                      (Temple, [Tavern]),
-                      (Inn, [Barracks, Temple]),
-                      (GamblingDen, [Inn]),
-                      (Laboratory, [Inn]),
-                      (Stables, [Inn]),
-                      (Hall, [Laboratory, Stables])]:
-        tech_tree.depends(cls, deps)
-
-    # Unit dependencies.
-    for cls, deps in [(Monk, []),
-                      (Ranger, [ArcheryRange]),
-                      (Warrior, [Barracks]),
-                      (Priest, [Temple]),
-                      (Thief, [GamblingDen]),
-                      (Knight, [Stables]),
-                      (Wizard, [Laboratory])]:
-        tech_tree.depends(cls, deps)
-
-    return tech_tree
-
-
 class Game(object):
 
     def __init__(self):
@@ -78,7 +47,7 @@ class Game(object):
         self.units = set()
         self.__proximity_grid = ProximityGrid(5)
         self.__cell_locks = {}
-        self.tech_tree = create_tech_tree()
+        self.tech_tree = tech_tree
         self.forces = defaultdict(Force)
         
     def update(self, time_step):
