@@ -94,7 +94,7 @@ class Screen(object):
         return team_image
 
     def load_unit_images(self):
-        for cls in (Hero.__subclasses__() + [Tavern, Monastery, Barracks]
+        for cls in (Hero.__subclasses__() + [Tavern, Barracks, Temple]
                     + Minion.__subclasses__()):
             name = cls.__name__
             self.unit_images[cls] = image = self.load_image(name)
@@ -258,7 +258,7 @@ class Screen(object):
                                                 game.forces[unit.color])):
                     game.add_task(unit, Produce(classes[button]))
             elif type(unit) is Monk:
-                classes = [Tavern, Monastery, Barracks]
+                classes = [Tavern, Barracks, Temple]
                 if (0 <= button < len(classes)
                     and not game.tech_tree.veto(classes[button],
                                                 game.forces[unit.color])):
@@ -345,7 +345,7 @@ class Screen(object):
                     if not game.tech_tree.veto(cls, game.forces[unit.color]):
                         self.paint_button(button, self.unit_icons[cls])
             elif type(unit) is Monk:
-                for button, cls in enumerate([Tavern, Monastery, Barracks]):
+                for button, cls in enumerate([Tavern, Barracks, Temple]):
                     if not game.tech_tree.veto(cls, game.forces[unit.color]):
                         self.paint_button(button, self.unit_icons[cls])
             elif type(unit) is Priest:

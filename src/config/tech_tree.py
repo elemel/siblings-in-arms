@@ -6,8 +6,7 @@ tech_tree = TechTree()
  
 # Building dependencies.
 for cls, deps in [(Tavern, []),
-                  (Monastery, [Tavern]),
-                  (Farm, [Monastery]),
+                  (Farm, [Tavern]),
                   (ArcheryRange, [Tavern]),
                   (Tower, [ArcheryRange]),
                   (Barracks, [Tavern]),
