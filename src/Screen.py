@@ -164,8 +164,8 @@ class Screen(object):
             elif event.type == MOUSEBUTTONDOWN:
                 self.mouse_button_down_pos = event.pos
             elif event.type == MOUSEBUTTONUP:
-                if (self.mouse_button_down_pos is not None
-                    and manhattan_dist(event.pos, self.mouse_button_down_pos)
+                if (self.mouse_button_down_pos is None
+                    or manhattan_dist(event.pos, self.mouse_button_down_pos)
                     <= 6):
                     self.handle_click_event(event, game)
                 else:
