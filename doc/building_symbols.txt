@@ -2,12 +2,12 @@ Building       Symbol
 --------------------------
 Tavern         Cup
 Farm           Sickle
-Archery range  Target
 Tower          Shield
+Archery range  Target
 Barracks       Helmet
-Temple         Heart
 Inn            Two cups
 Gambling den   Card
 Stables        Horse shoe
+Temple         Heart
 Laboratory     Alchemy bottle
 Hall           Three cups

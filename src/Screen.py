@@ -29,7 +29,7 @@ from geometry import (manhattan_dist, normalize_rect, rect_contains_point,
 from Vector import Vector
 
 
-BUILDINGS = (Tavern, Farm, ArcheryRange, Tower, Barracks, Temple)
+BUILDINGS = (Tavern, Farm, Tower, ArcheryRange, Barracks, Temple)
 
 
 class Screen(object):

@@ -47,10 +47,6 @@ class Warrior(Hero):
     max_health = 1.2
 
 
-class Priest(Hero):
-    damage = 0.2
-
-
 class Thief(Hero):
     damage = 0.2
     max_health = 0.8
@@ -60,6 +56,10 @@ class Knight(Hero):
     speed = 5.0
     damage = 0.3
     max_health = 1.5
+
+
+class Priest(Hero):
+    damage = 0.2
 
 
 class Wizard(Hero):
@@ -97,19 +97,15 @@ class Tavern(Factory):
     pass
 
 
-class Monastery(Support):
-    pass
-
-
 class Farm(Building):
     pass
 
 
-class ArcheryRange(Support):
+class Tower(Building):
     pass
 
 
-class Tower(Building):
+class ArcheryRange(Support):
     pass
 
 

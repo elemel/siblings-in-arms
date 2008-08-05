@@ -6,25 +6,25 @@ tech_tree = TechTree()
  
 # Building dependencies.
 for cls, deps in [(Tavern, []),
-                  (Farm, [Tavern]),
-                  (ArcheryRange, [Tavern]),
-                  (Tower, [ArcheryRange]),
-                  (Barracks, [Tavern]),
-                  (Temple, [Tavern]),
-                  (Inn, [Barracks, Temple]),
-                  (GamblingDen, [Inn]),
-                  (Laboratory, [Inn]),
-                  (Stables, [Inn]),
-                  (Hall, [Laboratory, Stables])]:
+                  (Farm, [Tavern, Inn, Hall]),
+                  (Tower, [Tavern, Inn, Hall]),
+                  (ArcheryRange, [Tavern, Inn, Hall]),
+                  (Barracks, [Tavern, Inn, Hall]),
+                  (Inn, [ArcheryRange, Barracks]),
+                  (GamblingDen, [Inn, Hall]),
+                  (Stables, [Inn, Hall]),
+                  (Temple, [Inn, Hall]),
+                  (Hall, [GamblingDen, Stables, Temple]),
+                  (Laboratory, [Hall])]:
     tech_tree.depends(cls, deps)
 
 # Unit dependencies.
 for cls, deps in [(Monk, []),
                   (Ranger, [ArcheryRange]),
                   (Warrior, [Barracks]),
-                  (Priest, [Temple]),
                   (Thief, [GamblingDen]),
                   (Knight, [Stables]),
+                  (Priest, [Temple]),
                   (Wizard, [Laboratory])]:
     tech_tree.depends(cls, deps)
  
