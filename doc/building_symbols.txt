@@ -1,14 +1,13 @@
 Building       Symbol
 --------------------------
 Tavern         Cup
-Monastery      Hand
 Farm           Sickle
 Archery range  Target
 Tower          Shield
 Barracks       Helmet
-Stables        Horse shoe
+Temple         Heart
 Inn            Two cups
 Gambling den   Card
-Temple         Eye
+Stables        Horse shoe
 Laboratory     Alchemy bottle
 Hall           Three cups

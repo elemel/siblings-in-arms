@@ -29,6 +29,9 @@ from geometry import (manhattan_dist, normalize_rect, rect_contains_point,
 from Vector import Vector
 
 
+BUILDINGS = (Tavern, Farm, ArcheryRange, Tower, Barracks, Temple)
+
+
 class Screen(object):
 
     def __init__(self):
@@ -94,7 +97,7 @@ class Screen(object):
         return team_image
 
     def load_unit_images(self):
-        for cls in (Hero.__subclasses__() + [Tavern, Barracks, Temple]
+        for cls in (Hero.__subclasses__() + list(BUILDINGS)
                     + Minion.__subclasses__()):
             name = cls.__name__
             self.unit_images[cls] = image = self.load_image(name)
@@ -258,7 +261,7 @@ class Screen(object):
                                                 game.forces[unit.color])):
                     game.add_task(unit, Produce(classes[button]))
             elif type(unit) is Monk:
-                classes = [Tavern, Barracks, Temple]
+                classes = BUILDINGS
                 if (0 <= button < len(classes)
                     and not game.tech_tree.veto(classes[button],
                                                 game.forces[unit.color])):
@@ -345,7 +348,7 @@ class Screen(object):
                     if not game.tech_tree.veto(cls, game.forces[unit.color]):
                         self.paint_button(button, self.unit_icons[cls])
             elif type(unit) is Monk:
-                for button, cls in enumerate([Tavern, Barracks, Temple]):
+                for button, cls in enumerate(BUILDINGS):
                     if not game.tech_tree.veto(cls, game.forces[unit.color]):
                         self.paint_button(button, self.unit_icons[cls])
             elif type(unit) is Priest:
