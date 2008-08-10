@@ -42,6 +42,7 @@ class Screen(object):
             root = os.path.dirname(root)
         self.root = root
 
+        pygame.mixer.pre_init(44100, -16, 2, 1024 * 3)
         pygame.init()
 
         self.PIXELS_PER_METER_X = 45
@@ -77,10 +78,11 @@ class Screen(object):
         self.unit_icons = {}
 
         self.load_unit_images()
+        self.play_background_music()
 
     def load_image(self, name):
-        path = os.path.join(self.root, 'data', name + '.png')
-        image = pygame.image.load(path).convert_alpha()
+        file_name = os.path.join(self.root, 'data', name + '.png')
+        image = pygame.image.load(file_name).convert_alpha()
         image.set_colorkey((0, 0, 255))
         return image
 
@@ -105,6 +107,11 @@ class Screen(object):
                 team_image = self.create_team_image(image, team_color)
                 self.team_images[team, cls] = team_image
             self.unit_icons[cls] = self.load_image(name + 'Icon')
+
+    def play_background_music(self):
+        file_name = os.path.join(self.root, 'data', 'siblings1.ogg')
+        pygame.mixer.music.load(file_name)
+        pygame.mixer.music.play(-1)
 
     def to_screen_coords(self, point, screen_size):
         x, y = point
