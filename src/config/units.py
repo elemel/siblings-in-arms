@@ -113,10 +113,6 @@ class Barracks(Support):
     pass
 
 
-class Temple(Support):
-    pass
-
-
 class Inn(Factory):
     pass
 
@@ -125,13 +121,17 @@ class GamblingDen(Support):
     pass
 
 
-class Laboratory(Support):
-    pass
-
-
 class Stables(Support):
     pass
 
 
+class Temple(Support):
+    pass
+
+
 class Hall(Factory):
+    pass
+
+
+class Laboratory(Support):
     pass
